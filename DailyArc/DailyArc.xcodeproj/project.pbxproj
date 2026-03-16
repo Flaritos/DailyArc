@@ -1,0 +1,620 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0923C195AC09DE12CD643D68 /* CelebrationOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3993100A49F177ECC2210465 /* CelebrationOverlay.swift */; };
+		0A5A18799F2A15B0A59BB3C9 /* HabitManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE651E9DC69F50BA2672916A /* HabitManagementView.swift */; };
+		0B9566CE74816CBDAEA9FEF2 /* SmallStreakWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69904F3AB52932615A5DE5A9 /* SmallStreakWidget.swift */; };
+		10A7C4610AD46960BAECC1BF /* BadgesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B86BCD074FB23B1EDF1887B /* BadgesView.swift */; };
+		16194B4850096C6852032088 /* CorrelationCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAE9B9DB49647538B9B15175 /* CorrelationCardView.swift */; };
+		265B14DA1C303DA76A231ED8 /* DateHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90BD50B25908A8A6EE510C3D /* DateHelpers.swift */; };
+		2BAA057304A5CF1B4589F080 /* CorrelationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE0668EC138F1EC40A82255D /* CorrelationEngine.swift */; };
+		47D7CE249933A72401FBBDA7 /* RuleEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EFD5B662DB2161ACF87A6E /* RuleEngine.swift */; };
+		4A3F0D3E065B9D0B49E0CE6F /* DailyArcWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189BDD9114632576EB6E325D /* DailyArcWidgetBundle.swift */; };
+		4CC81C7A04DA08138BCA890B /* HeatMapCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F562D383EF547EB2D26BBD59 /* HeatMapCanvasView.swift */; };
+		4D926B344C1C358F7CB5151D /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4ECE583455A6C55F529C0F /* OnboardingView.swift */; };
+		534A456181538634AE068A58 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95C1932757B71344153F48C9 /* EmptyStateView.swift */; };
+		5935D8F4AC1777B3C4F6A49C /* PerHabitDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD9F5F41DC70F13A090D772A /* PerHabitDetailView.swift */; };
+		59436ADA430C9BF93F915015 /* MediumTodayWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B52C09743E537F3867D3183 /* MediumTodayWidget.swift */; };
+		7252FB978A68304B228A5637 /* DebouncedSave.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4AF6C9EF0BC7368B830C2D4 /* DebouncedSave.swift */; };
+		7F5402F81D8B196F17FA9388 /* InsightNudgeBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A08057FF34110A251A2E4E /* InsightNudgeBannerView.swift */; };
+		814E4B88C3614D3D8A4733BA /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 627D595038369F57098F52A1 /* NotificationService.swift */; };
+		826FFDB90112DE59349D20C6 /* SuggestionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7663B877DFC156E7E400AD6 /* SuggestionCardView.swift */; };
+		8D90971B9BA7D352FA1ABB8D /* DaySnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74FF1A00F947EF3732774C5C /* DaySnapshot.swift */; };
+		93225FF3A2BECF96CD467DF7 /* WidgetDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4637BFC3CCB8FD2BBCAC1A6 /* WidgetDataService.swift */; };
+		98E438332CD04CEBD2357998 /* HabitFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 427FADD223B6094C9D0D13FC /* HabitFormView.swift */; };
+		9C7722E04597DF969D422FEA /* MoodTrendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D491627ADD8A175FC993F8F2 /* MoodTrendView.swift */; };
+		9E0CCC6530860A7159A9D663 /* StatsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 343A47EA0036BD1D4575990C /* StatsViewModel.swift */; };
+		9F8671D12D20F75D5BB60A38 /* BadgeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CE8EDAB0612835C9E4FAF92 /* BadgeEngine.swift */; };
+		A01061DEB4AC88AA702E85A6 /* BadgeCeremonyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57580F01A5D4747F8AA5FD30 /* BadgeCeremonyView.swift */; };
+		A0C59FDA96E5D6B45C5EB4D7 /* StoreKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9EE3C52F9F4CFC12B60A938 /* StoreKitManager.swift */; };
+		A3B7E7BD8A853BD05D328F08 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD781EE9097A44286011CD7D /* StatsView.swift */; };
+		A3BB065F82BFC0A3F14F2DFE /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B44EEC6D7CED6B64B567F5 /* PaywallView.swift */; };
+		AAA8A5EDA875196676E198F5 /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76393F0777026D7823497C12 /* ShareCardView.swift */; };
+		B194A5F00D83DC754A97E4B7 /* CompletionCircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9458E518BEB532283AB0E914 /* CompletionCircleView.swift */; };
+		BC79DDDC1CD98D83D4E25646 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = "TEMP_484A1173-B8E8-4F5B-8765-13843B3CBFC0" /* ContentView.swift */; };
+		C04E102E3FEC8FAFD1E5FFC7 /* DailyArcSchemaV1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A77ECB5ABC63CFE5434F02F /* DailyArcSchemaV1.swift */; };
+		C4FBE5430BC2F975EB8C09BC /* StreakEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9FA3DA276AF1856FA899A7A /* StreakEngine.swift */; };
+		C64C95AF9177DB96E77A2347 /* ActivityTagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DFDF5E5D95988920C62330F /* ActivityTagsView.swift */; };
+		C791B40F0C65AF21E7E4E383 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 572684923F60E35048E058A7 /* TodayView.swift */; };
+		CFD5E2764412D514A574D47E /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A35C52E58BAF9C775DC384 /* ExportService.swift */; };
+		D19AAF21E9CCC54D04650FEC /* TodayViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FE336A8DAAC23B4507CE8D4 /* TodayViewModel.swift */; };
+		D2C2060DC0E404B425D006DC /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80571F8B6983E8F8215A6152 /* HapticManager.swift */; };
+		D7E0EB061EBEC144F24DA4EB /* DailyArcApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = "TEMP_DA6ABA6B-F260-44ED-A62A-DDE253EB8F89" /* DailyArcApp.swift */; };
+		DBAF0C6E19836ECE23E76CA5 /* HabitRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93DAAF7DD9DD6FD869422D36 /* HabitRowView.swift */; };
+		DBBBDD1FE70D9E9F26C5F7BA /* HabitColorPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00E4C2BA05918DBA309FA6F3 /* HabitColorPalette.swift */; };
+		DD5096A92FB74E592B7E6BA4 /* EnergyPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4E66382766912952729375 /* EnergyPickerView.swift */; };
+		E109BCA2304097A00C0A5520 /* DailyArc.xcodeproj in Resources */ = {isa = PBXBuildFile; fileRef = "TEMP_38EF22FD-113F-487F-809A-F8689DD89723" /* DailyArc.xcodeproj */; };
+		E430DC7E02A0AFFED9741083 /* DebugDataGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F725519755B9359B715E854A /* DebugDataGenerator.swift */; };
+		E685F961858A1B940FEB34D7 /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBC3F283BD857C4F79F8CEB1 /* ColorExtensions.swift */; };
+		EC129420023092EA1712E13D /* PerHabitCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B778F6950FA553DF1C6DBB8 /* PerHabitCardView.swift */; };
+		ED23615BCFB9169BB50AE5FF /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F325BD5E22116DEB03AC7145 /* SettingsView.swift */; };
+		FA4F19249920E551133B30BE /* DailyArcTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98893F5E39150983A8494EBB /* DailyArcTokens.swift */; };
+		FB1D635CFF29FE4C7A25CA39 /* DateNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD727D091437B648C8A34E41 /* DateNavigationBar.swift */; };
+		FB76019ECE27375BF4409FEE /* MoodCheckInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B968BFE5D31762CA7D63959 /* MoodCheckInView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		00E4C2BA05918DBA309FA6F3 /* HabitColorPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitColorPalette.swift; sourceTree = "<group>"; };
+		189BDD9114632576EB6E325D /* DailyArcWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyArcWidgetBundle.swift; sourceTree = "<group>"; };
+		1B86BCD074FB23B1EDF1887B /* BadgesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgesView.swift; sourceTree = "<group>"; };
+		2B778F6950FA553DF1C6DBB8 /* PerHabitCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerHabitCardView.swift; sourceTree = "<group>"; };
+		343A47EA0036BD1D4575990C /* StatsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsViewModel.swift; sourceTree = "<group>"; };
+		3993100A49F177ECC2210465 /* CelebrationOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelebrationOverlay.swift; sourceTree = "<group>"; };
+		3A77ECB5ABC63CFE5434F02F /* DailyArcSchemaV1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyArcSchemaV1.swift; sourceTree = "<group>"; };
+		427FADD223B6094C9D0D13FC /* HabitFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitFormView.swift; sourceTree = "<group>"; };
+		4DFDF5E5D95988920C62330F /* ActivityTagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityTagsView.swift; sourceTree = "<group>"; };
+		572684923F60E35048E058A7 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+		57580F01A5D4747F8AA5FD30 /* BadgeCeremonyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeCeremonyView.swift; sourceTree = "<group>"; };
+		57A08057FF34110A251A2E4E /* InsightNudgeBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightNudgeBannerView.swift; sourceTree = "<group>"; };
+		5CE8EDAB0612835C9E4FAF92 /* BadgeEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeEngine.swift; sourceTree = "<group>"; };
+		627D595038369F57098F52A1 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		69904F3AB52932615A5DE5A9 /* SmallStreakWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallStreakWidget.swift; sourceTree = "<group>"; };
+		74FF1A00F947EF3732774C5C /* DaySnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaySnapshot.swift; sourceTree = "<group>"; };
+		76393F0777026D7823497C12 /* ShareCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardView.swift; sourceTree = "<group>"; };
+		80571F8B6983E8F8215A6152 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
+		84EFD5B662DB2161ACF87A6E /* RuleEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleEngine.swift; sourceTree = "<group>"; };
+		8B52C09743E537F3867D3183 /* MediumTodayWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediumTodayWidget.swift; sourceTree = "<group>"; };
+		90BD50B25908A8A6EE510C3D /* DateHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateHelpers.swift; sourceTree = "<group>"; };
+		93DAAF7DD9DD6FD869422D36 /* HabitRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitRowView.swift; sourceTree = "<group>"; };
+		9458E518BEB532283AB0E914 /* CompletionCircleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletionCircleView.swift; sourceTree = "<group>"; };
+		95C1932757B71344153F48C9 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
+		98893F5E39150983A8494EBB /* DailyArcTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyArcTokens.swift; sourceTree = "<group>"; };
+		9B4ECE583455A6C55F529C0F /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		9B968BFE5D31762CA7D63959 /* MoodCheckInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoodCheckInView.swift; sourceTree = "<group>"; };
+		9FE336A8DAAC23B4507CE8D4 /* TodayViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayViewModel.swift; sourceTree = "<group>"; };
+		B6A35C52E58BAF9C775DC384 /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
+		BAE9B9DB49647538B9B15175 /* CorrelationCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CorrelationCardView.swift; sourceTree = "<group>"; };
+		BD727D091437B648C8A34E41 /* DateNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateNavigationBar.swift; sourceTree = "<group>"; };
+		BE0668EC138F1EC40A82255D /* CorrelationEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CorrelationEngine.swift; sourceTree = "<group>"; };
+		C4AF6C9EF0BC7368B830C2D4 /* DebouncedSave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebouncedSave.swift; sourceTree = "<group>"; };
+		C9EE3C52F9F4CFC12B60A938 /* StoreKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitManager.swift; sourceTree = "<group>"; };
+		CA4E66382766912952729375 /* EnergyPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnergyPickerView.swift; sourceTree = "<group>"; };
+		D491627ADD8A175FC993F8F2 /* MoodTrendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoodTrendView.swift; sourceTree = "<group>"; };
+		D9FA3DA276AF1856FA899A7A /* StreakEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakEngine.swift; sourceTree = "<group>"; };
+		DCB69FBC90C37CCBA87D5F79 /* DailyArc.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DailyArc.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E7663B877DFC156E7E400AD6 /* SuggestionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionCardView.swift; sourceTree = "<group>"; };
+		EBC3F283BD857C4F79F8CEB1 /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
+		EE651E9DC69F50BA2672916A /* HabitManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitManagementView.swift; sourceTree = "<group>"; };
+		F325BD5E22116DEB03AC7145 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F4637BFC3CCB8FD2BBCAC1A6 /* WidgetDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetDataService.swift; sourceTree = "<group>"; };
+		F562D383EF547EB2D26BBD59 /* HeatMapCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeatMapCanvasView.swift; sourceTree = "<group>"; };
+		F725519755B9359B715E854A /* DebugDataGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugDataGenerator.swift; sourceTree = "<group>"; };
+		F9B44EEC6D7CED6B64B567F5 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		FD781EE9097A44286011CD7D /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
+		FD9F5F41DC70F13A090D772A /* PerHabitDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerHabitDetailView.swift; sourceTree = "<group>"; };
+		"TEMP_38EF22FD-113F-487F-809A-F8689DD89723" /* DailyArc.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = DailyArc.xcodeproj; sourceTree = "<group>"; };
+		"TEMP_484A1173-B8E8-4F5B-8765-13843B3CBFC0" /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		"TEMP_DA6ABA6B-F260-44ED-A62A-DDE253EB8F89" /* DailyArcApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyArcApp.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0A6D14F8D9A0ADF2529BCE28 /* Schema */ = {
+			isa = PBXGroup;
+			children = (
+				3A77ECB5ABC63CFE5434F02F /* DailyArcSchemaV1.swift */,
+			);
+			path = Schema;
+			sourceTree = "<group>";
+		};
+		18A048BB13C8F8B3173BB34D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DCB69FBC90C37CCBA87D5F79 /* DailyArc.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1A57D92EDEE8BD3929712EBC /* Habits */ = {
+			isa = PBXGroup;
+			children = (
+				427FADD223B6094C9D0D13FC /* HabitFormView.swift */,
+				EE651E9DC69F50BA2672916A /* HabitManagementView.swift */,
+			);
+			path = Habits;
+			sourceTree = "<group>";
+		};
+		320C3BE7A8AC60B932DFCC9E /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				F725519755B9359B715E854A /* DebugDataGenerator.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		3FB34A49437B477406C024CD /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				EBC3F283BD857C4F79F8CEB1 /* ColorExtensions.swift */,
+				98893F5E39150983A8494EBB /* DailyArcTokens.swift */,
+				90BD50B25908A8A6EE510C3D /* DateHelpers.swift */,
+				C4AF6C9EF0BC7368B830C2D4 /* DebouncedSave.swift */,
+				00E4C2BA05918DBA309FA6F3 /* HabitColorPalette.swift */,
+				80571F8B6983E8F8215A6152 /* HapticManager.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		64B529A4FB13CF793EC7E34D = {
+			isa = PBXGroup;
+			children = (
+				9ADA097D11D8CF452F293835 /* Models */,
+				0A6D14F8D9A0ADF2529BCE28 /* Schema */,
+				FA1EE128E26150E72335165B /* Services */,
+				320C3BE7A8AC60B932DFCC9E /* Tests */,
+				3FB34A49437B477406C024CD /* Utilities */,
+				F79E1F60F2DEE24DB4CAC5B8 /* ViewModels */,
+				D040EE2CC76AF38E7CFA2DE9 /* Views */,
+				18A048BB13C8F8B3173BB34D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		799CC5272FF7AA6D666168DD /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				57580F01A5D4747F8AA5FD30 /* BadgeCeremonyView.swift */,
+				9458E518BEB532283AB0E914 /* CompletionCircleView.swift */,
+				95C1932757B71344153F48C9 /* EmptyStateView.swift */,
+				76393F0777026D7823497C12 /* ShareCardView.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		9A88120EC9C7B347B74AAB54 /* Stats */ = {
+			isa = PBXGroup;
+			children = (
+				1B86BCD074FB23B1EDF1887B /* BadgesView.swift */,
+				BAE9B9DB49647538B9B15175 /* CorrelationCardView.swift */,
+				F562D383EF547EB2D26BBD59 /* HeatMapCanvasView.swift */,
+				57A08057FF34110A251A2E4E /* InsightNudgeBannerView.swift */,
+				D491627ADD8A175FC993F8F2 /* MoodTrendView.swift */,
+				2B778F6950FA553DF1C6DBB8 /* PerHabitCardView.swift */,
+				FD9F5F41DC70F13A090D772A /* PerHabitDetailView.swift */,
+				FD781EE9097A44286011CD7D /* StatsView.swift */,
+				E7663B877DFC156E7E400AD6 /* SuggestionCardView.swift */,
+			);
+			path = Stats;
+			sourceTree = "<group>";
+		};
+		9ADA097D11D8CF452F293835 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				74FF1A00F947EF3732774C5C /* DaySnapshot.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		B5D5BE4D6CAE1E42D1BD6AEB /* Widgets */ = {
+			isa = PBXGroup;
+			children = (
+				189BDD9114632576EB6E325D /* DailyArcWidgetBundle.swift */,
+				8B52C09743E537F3867D3183 /* MediumTodayWidget.swift */,
+				69904F3AB52932615A5DE5A9 /* SmallStreakWidget.swift */,
+			);
+			path = Widgets;
+			sourceTree = "<group>";
+		};
+		C4B5232D3FC9E05BF9E72D79 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				9B4ECE583455A6C55F529C0F /* OnboardingView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		CD1B555DB5D1FED849A9D22C /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				F9B44EEC6D7CED6B64B567F5 /* PaywallView.swift */,
+				F325BD5E22116DEB03AC7145 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		D040EE2CC76AF38E7CFA2DE9 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				1A57D92EDEE8BD3929712EBC /* Habits */,
+				C4B5232D3FC9E05BF9E72D79 /* Onboarding */,
+				CD1B555DB5D1FED849A9D22C /* Settings */,
+				799CC5272FF7AA6D666168DD /* Shared */,
+				9A88120EC9C7B347B74AAB54 /* Stats */,
+				FFAAECEA5417D074978EAF6A /* Today */,
+				B5D5BE4D6CAE1E42D1BD6AEB /* Widgets */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		F79E1F60F2DEE24DB4CAC5B8 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				343A47EA0036BD1D4575990C /* StatsViewModel.swift */,
+				9FE336A8DAAC23B4507CE8D4 /* TodayViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		FA1EE128E26150E72335165B /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				5CE8EDAB0612835C9E4FAF92 /* BadgeEngine.swift */,
+				BE0668EC138F1EC40A82255D /* CorrelationEngine.swift */,
+				B6A35C52E58BAF9C775DC384 /* ExportService.swift */,
+				627D595038369F57098F52A1 /* NotificationService.swift */,
+				84EFD5B662DB2161ACF87A6E /* RuleEngine.swift */,
+				C9EE3C52F9F4CFC12B60A938 /* StoreKitManager.swift */,
+				D9FA3DA276AF1856FA899A7A /* StreakEngine.swift */,
+				F4637BFC3CCB8FD2BBCAC1A6 /* WidgetDataService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		FFAAECEA5417D074978EAF6A /* Today */ = {
+			isa = PBXGroup;
+			children = (
+				4DFDF5E5D95988920C62330F /* ActivityTagsView.swift */,
+				3993100A49F177ECC2210465 /* CelebrationOverlay.swift */,
+				BD727D091437B648C8A34E41 /* DateNavigationBar.swift */,
+				CA4E66382766912952729375 /* EnergyPickerView.swift */,
+				93DAAF7DD9DD6FD869422D36 /* HabitRowView.swift */,
+				9B968BFE5D31762CA7D63959 /* MoodCheckInView.swift */,
+				572684923F60E35048E058A7 /* TodayView.swift */,
+			);
+			path = Today;
+			sourceTree = "<group>";
+		};
+		"TEMP_FA369264-C1BA-4F35-A760-69E8E056A729" /* . */ = {
+			isa = PBXGroup;
+			children = (
+				"TEMP_38EF22FD-113F-487F-809A-F8689DD89723" /* DailyArc.xcodeproj */,
+				"TEMP_DA6ABA6B-F260-44ED-A62A-DDE253EB8F89" /* DailyArcApp.swift */,
+				"TEMP_484A1173-B8E8-4F5B-8765-13843B3CBFC0" /* ContentView.swift */,
+				F79E1F60F2DEE24DB4CAC5B8 /* ViewModels */,
+				320C3BE7A8AC60B932DFCC9E /* Tests */,
+				9ADA097D11D8CF452F293835 /* Models */,
+				3FB34A49437B477406C024CD /* Utilities */,
+				0A6D14F8D9A0ADF2529BCE28 /* Schema */,
+				D040EE2CC76AF38E7CFA2DE9 /* Views */,
+				FA1EE128E26150E72335165B /* Services */,
+			);
+			name = .;
+			path = .;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C9C0353B2A993B0F604ECE14 /* DailyArc */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5BEB2534FEF90FDD7A22E385 /* Build configuration list for PBXNativeTarget "DailyArc" */;
+			buildPhases = (
+				15DD5E5467A64CF3192D0C94 /* Sources */,
+				90B98CA0A675592F67A5CB10 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DailyArc;
+			packageProductDependencies = (
+			);
+			productName = DailyArc;
+			productReference = DCB69FBC90C37CCBA87D5F79 /* DailyArc.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E88CE4FCF992A321FA2E18A9 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = 7964540614FFB0BEFC49B5A6 /* Build configuration list for PBXProject "DailyArc" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 64B529A4FB13CF793EC7E34D;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 18A048BB13C8F8B3173BB34D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C9C0353B2A993B0F604ECE14 /* DailyArc */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		90B98CA0A675592F67A5CB10 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E109BCA2304097A00C0A5520 /* DailyArc.xcodeproj in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		15DD5E5467A64CF3192D0C94 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C64C95AF9177DB96E77A2347 /* ActivityTagsView.swift in Sources */,
+				A01061DEB4AC88AA702E85A6 /* BadgeCeremonyView.swift in Sources */,
+				9F8671D12D20F75D5BB60A38 /* BadgeEngine.swift in Sources */,
+				10A7C4610AD46960BAECC1BF /* BadgesView.swift in Sources */,
+				0923C195AC09DE12CD643D68 /* CelebrationOverlay.swift in Sources */,
+				E685F961858A1B940FEB34D7 /* ColorExtensions.swift in Sources */,
+				B194A5F00D83DC754A97E4B7 /* CompletionCircleView.swift in Sources */,
+				BC79DDDC1CD98D83D4E25646 /* ContentView.swift in Sources */,
+				16194B4850096C6852032088 /* CorrelationCardView.swift in Sources */,
+				2BAA057304A5CF1B4589F080 /* CorrelationEngine.swift in Sources */,
+				D7E0EB061EBEC144F24DA4EB /* DailyArcApp.swift in Sources */,
+				C04E102E3FEC8FAFD1E5FFC7 /* DailyArcSchemaV1.swift in Sources */,
+				FA4F19249920E551133B30BE /* DailyArcTokens.swift in Sources */,
+				4A3F0D3E065B9D0B49E0CE6F /* DailyArcWidgetBundle.swift in Sources */,
+				265B14DA1C303DA76A231ED8 /* DateHelpers.swift in Sources */,
+				FB1D635CFF29FE4C7A25CA39 /* DateNavigationBar.swift in Sources */,
+				8D90971B9BA7D352FA1ABB8D /* DaySnapshot.swift in Sources */,
+				7252FB978A68304B228A5637 /* DebouncedSave.swift in Sources */,
+				E430DC7E02A0AFFED9741083 /* DebugDataGenerator.swift in Sources */,
+				534A456181538634AE068A58 /* EmptyStateView.swift in Sources */,
+				DD5096A92FB74E592B7E6BA4 /* EnergyPickerView.swift in Sources */,
+				CFD5E2764412D514A574D47E /* ExportService.swift in Sources */,
+				DBBBDD1FE70D9E9F26C5F7BA /* HabitColorPalette.swift in Sources */,
+				98E438332CD04CEBD2357998 /* HabitFormView.swift in Sources */,
+				0A5A18799F2A15B0A59BB3C9 /* HabitManagementView.swift in Sources */,
+				DBAF0C6E19836ECE23E76CA5 /* HabitRowView.swift in Sources */,
+				D2C2060DC0E404B425D006DC /* HapticManager.swift in Sources */,
+				4CC81C7A04DA08138BCA890B /* HeatMapCanvasView.swift in Sources */,
+				7F5402F81D8B196F17FA9388 /* InsightNudgeBannerView.swift in Sources */,
+				59436ADA430C9BF93F915015 /* MediumTodayWidget.swift in Sources */,
+				FB76019ECE27375BF4409FEE /* MoodCheckInView.swift in Sources */,
+				9C7722E04597DF969D422FEA /* MoodTrendView.swift in Sources */,
+				814E4B88C3614D3D8A4733BA /* NotificationService.swift in Sources */,
+				4D926B344C1C358F7CB5151D /* OnboardingView.swift in Sources */,
+				A3BB065F82BFC0A3F14F2DFE /* PaywallView.swift in Sources */,
+				EC129420023092EA1712E13D /* PerHabitCardView.swift in Sources */,
+				5935D8F4AC1777B3C4F6A49C /* PerHabitDetailView.swift in Sources */,
+				47D7CE249933A72401FBBDA7 /* RuleEngine.swift in Sources */,
+				ED23615BCFB9169BB50AE5FF /* SettingsView.swift in Sources */,
+				AAA8A5EDA875196676E198F5 /* ShareCardView.swift in Sources */,
+				0B9566CE74816CBDAEA9FEF2 /* SmallStreakWidget.swift in Sources */,
+				A3B7E7BD8A853BD05D328F08 /* StatsView.swift in Sources */,
+				9E0CCC6530860A7159A9D663 /* StatsViewModel.swift in Sources */,
+				A0C59FDA96E5D6B45C5EB4D7 /* StoreKitManager.swift in Sources */,
+				C4FBE5430BC2F975EB8C09BC /* StreakEngine.swift in Sources */,
+				826FFDB90112DE59349D20C6 /* SuggestionCardView.swift in Sources */,
+				C791B40F0C65AF21E7E4E383 /* TodayView.swift in Sources */,
+				D19AAF21E9CCC54D04650FEC /* TodayViewModel.swift in Sources */,
+				93225FF3A2BECF96CD467DF7 /* WidgetDataService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1186B2CE0A86508B5B82AD99 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_KEY_CFBundleDisplayName = DailyArc;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.dailyarc.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		2BB3CEB716843C6C318A9E89 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_KEY_CFBundleDisplayName = DailyArc;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.dailyarc.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B2CE8D51390C1572AA7B7073 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		D3AB26BB2720E7D9A838DE57 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5BEB2534FEF90FDD7A22E385 /* Build configuration list for PBXNativeTarget "DailyArc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1186B2CE0A86508B5B82AD99 /* Debug */,
+				2BB3CEB716843C6C318A9E89 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7964540614FFB0BEFC49B5A6 /* Build configuration list for PBXProject "DailyArc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B2CE8D51390C1572AA7B7073 /* Debug */,
+				D3AB26BB2720E7D9A838DE57 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E88CE4FCF992A321FA2E18A9 /* Project object */;
+}
