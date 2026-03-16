@@ -233,7 +233,17 @@ struct MoodTrendView: View {
                     )
             }
         }
-        .accessibilityLabel("Mood trend chart showing \(filteredEntries.count) entries over the last \(period) days")
+        .accessibilityLabel(moodChartAccessibilityLabel)
+    }
+
+    private var moodChartAccessibilityLabel: String {
+        let count = filteredEntries.count
+        guard count > 0 else {
+            return "Mood trend chart with no data"
+        }
+        let avgMood = Double(filteredEntries.reduce(0) { $0 + $1.moodScore }) / Double(count)
+        let avgLabel = String(format: "%.1f", avgMood)
+        return "Mood trend chart showing \(count) entries over \(period) days, average mood \(avgLabel) out of 5"
     }
 
     private var xAxisStride: Int {

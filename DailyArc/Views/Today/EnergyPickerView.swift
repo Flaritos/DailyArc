@@ -49,7 +49,7 @@ struct EnergyPickerView: View {
                             )
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Energy level \(score) of 5")
+                    .accessibilityLabel("Energy level \(score), \(energyDescription(for: score))")
                     .accessibilityAddTraits(selectedScore == score ? .isSelected : [])
                 }
 
@@ -59,6 +59,16 @@ struct EnergyPickerView: View {
             }
         }
         .padding(.vertical, DailyArcSpacing.sm)
+    }
+    private func energyDescription(for score: Int) -> String {
+        switch score {
+        case 1: return "low"
+        case 2: return "below average"
+        case 3: return "moderate"
+        case 4: return "above average"
+        case 5: return "high"
+        default: return ""
+        }
     }
 }
 

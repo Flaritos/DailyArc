@@ -40,6 +40,8 @@ struct HabitFormView: View {
         comps.minute = 0
         return Calendar.current.date(from: comps) ?? Date()
     }()
+    @State private var autoLogHealth = false
+    @State private var healthKitType = "workouts"
 
     @State private var selectedTemplate: String? = nil
     @FocusState private var nameFieldFocused: Bool
@@ -77,6 +79,16 @@ struct HabitFormView: View {
     private var editingHabit: Habit? {
         if case .edit(let habit) = mode { return habit }
         return nil
+    }
+
+    /// Whether the habit name/emoji suggests a health-related category that can auto-log from HealthKit.
+    private var canAutoLog: Bool {
+        let keywords = ["exercise", "workout", "run", "walk", "sleep", "meditat", "mindful", "steps", "gym", "yoga", "swim", "cycle", "bike"]
+        let healthEmojis = ["\u{1F3C3}", "\u{1F6B6}", "\u{1F9D8}", "\u{1F4A4}", "\u{1F6B4}", "\u{1F3CA}", "\u{1F4AA}", "\u{1F6CC}"]
+        let lowerName = name.lowercased()
+        let nameMatch = keywords.contains { lowerName.contains($0) }
+        let emojiMatch = healthEmojis.contains(emoji)
+        return nameMatch || emojiMatch
     }
 
     /// Whether the free tier limit is hit (3 active habits, adding a new one, not premium).
@@ -400,6 +412,35 @@ struct HabitFormView: View {
                 .background(DailyArcTokens.backgroundSecondary)
                 .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusLarge))
 
+                // Health Integration (only for health-related habits)
+                if canAutoLog {
+                    VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
+                        Text("Health Integration")
+                            .typography(.callout)
+                            .foregroundStyle(DailyArcTokens.textSecondary)
+
+                        Toggle("Auto-log from Apple Health", isOn: $autoLogHealth)
+                            .typography(.bodyLarge)
+                            .onChange(of: autoLogHealth) { _, enabled in
+                                if enabled {
+                                    Task { await HealthKitService.shared.requestAuthorization() }
+                                }
+                            }
+
+                        if autoLogHealth {
+                            Picker("Health Metric", selection: $healthKitType) {
+                                Text("Workouts").tag("workouts")
+                                Text("Steps (5,000+)").tag("steps")
+                                Text("Sleep (7+ hrs)").tag("sleep")
+                                Text("Mindful Minutes").tag("mindful")
+                            }
+                        }
+                    }
+                    .padding(DailyArcSpacing.lg)
+                    .background(DailyArcTokens.backgroundSecondary)
+                    .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusLarge))
+                }
+
                 Spacer(minLength: DailyArcSpacing.xxl)
 
                 // Save Button
@@ -447,6 +488,8 @@ struct HabitFormView: View {
         if habit.frequency == .custom {
             customDays = Set(habit.customDayIndices)
         }
+        autoLogHealth = habit.autoLogHealth
+        healthKitType = habit.healthKitTypeRaw ?? "workouts"
     }
 
     private func saveHabit() {
@@ -467,6 +510,8 @@ struct HabitFormView: View {
             habit.targetCount = targetCount
             habit.reminderEnabled = reminderEnabled
             habit.reminderTime = reminderEnabled ? reminderTime : nil
+            habit.autoLogHealth = autoLogHealth
+            habit.healthKitTypeRaw = autoLogHealth ? healthKitType : nil
         } else {
             // Add mode: create new with sortOrder = max + 1
             let descriptor = FetchDescriptor<Habit>(
@@ -483,6 +528,8 @@ struct HabitFormView: View {
                 targetCount: targetCount,
                 reminderTime: reminderEnabled ? reminderTime : nil,
                 reminderEnabled: reminderEnabled,
+                healthKitTypeRaw: autoLogHealth ? healthKitType : nil,
+                autoLogHealth: autoLogHealth,
                 startDate: Date(),
                 sortOrder: maxOrder + 1
             )

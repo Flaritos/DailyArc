@@ -1,9 +1,5 @@
 import SwiftUI
-
-// NOTE: This file belongs in the Widget extension target, not the main app.
-// Uncomment WidgetKit import and Widget conformance after moving to widget target.
-
-// import WidgetKit
+import WidgetKit
 
 // MARK: - Medium Today Widget
 
@@ -144,6 +140,7 @@ struct MediumTodayWidgetView: View {
             }
         }
         .padding(.horizontal, 12)
+        .widgetURL(URL(string: "dailyarc://today")!)
     }
 }
 

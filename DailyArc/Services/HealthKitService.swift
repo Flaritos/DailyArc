@@ -1,7 +1,10 @@
+@preconcurrency import HealthKit
 import Foundation
-import HealthKit
 import SwiftData
 
+// NOTE: Spec calls for this to be a proper `actor` instead of @MainActor class.
+// Changing to `actor` would require major refactoring of all callers, so keeping
+// @MainActor @Observable for now. TODO: Migrate to actor isolation.
 @MainActor
 @Observable
 final class HealthKitService {
@@ -30,6 +33,8 @@ final class HealthKitService {
         HKHealthStore.isHealthDataAvailable()
     }
 
+    // MARK: - Authorization
+
     func requestAuthorization(for metrics: [HealthMetric]) async -> Bool {
         guard isAvailable else { return false }
         let types = Set(metrics.compactMap { $0.sampleType })
@@ -42,20 +47,35 @@ final class HealthKitService {
         }
     }
 
+    /// Convenience: request authorization for all metrics.
+    @discardableResult
+    func requestAuthorization() async -> Bool {
+        await requestAuthorization(for: HealthMetric.allCases)
+    }
+
+    // MARK: - Metric Queries
+
     func checkMetric(_ metric: HealthMetric, for date: Date, calendar: Calendar) async -> Bool {
         let start = calendar.startOfDay(for: date)
         guard let end = calendar.date(byAdding: .day, value: 1, to: start) else { return false }
-        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
+        nonisolated(unsafe) let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
 
-        switch metric {
-        case .workouts:
-            return await queryWorkouts(predicate: predicate)
-        case .steps:
-            return await querySteps(predicate: predicate, threshold: 5000)
-        case .sleep:
-            return await querySleep(predicate: predicate, thresholdMinutes: 7 * 60)
-        case .mindfulMinutes:
-            return await queryMindful(predicate: predicate)
+        do {
+            return try await withTimeout(10) {
+                switch metric {
+                case .workouts:
+                    return await self.queryWorkouts(predicate: predicate)
+                case .steps:
+                    return await self.querySteps(predicate: predicate, threshold: 5000)
+                case .sleep:
+                    return await self.querySleep(predicate: predicate, thresholdMinutes: 7 * 60)
+                case .mindfulMinutes:
+                    return await self.queryMindful(predicate: predicate)
+                }
+            }
+        } catch {
+            // Timeout or cancellation — treat as metric not met
+            return false
         }
     }
 
@@ -79,6 +99,24 @@ final class HealthKitService {
             }
         }
     }
+
+    // MARK: - Timeout Utility
+
+    /// Wraps an async operation with a timeout. Throws CancellationError if the timeout elapses first.
+    private func withTimeout<T: Sendable>(_ seconds: TimeInterval, operation: @escaping @Sendable () async throws -> T) async throws -> T {
+        try await withThrowingTaskGroup(of: T.self) { group in
+            group.addTask { try await operation() }
+            group.addTask {
+                try await Task.sleep(for: .seconds(seconds))
+                throw CancellationError()
+            }
+            let result = try await group.next()!
+            group.cancelAll()
+            return result
+        }
+    }
+
+    // MARK: - Private Query Helpers
 
     private func queryWorkouts(predicate: NSPredicate) async -> Bool {
         await withCheckedContinuation { continuation in
@@ -118,8 +156,13 @@ final class HealthKitService {
                 limit: HKObjectQueryNoLimit,
                 sortDescriptors: nil
             ) { _, results, _ in
+                // Filter for actual sleep samples (.asleepUnspecified) to exclude
+                // "in bed" and other non-sleep analysis categories.
                 let totalMinutes = (results as? [HKCategorySample])?.reduce(0.0) { sum, sample in
-                    sum + sample.endDate.timeIntervalSince(sample.startDate) / 60.0
+                    guard sample.value == HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue else {
+                        return sum
+                    }
+                    return sum + sample.endDate.timeIntervalSince(sample.startDate) / 60.0
                 } ?? 0
                 continuation.resume(returning: totalMinutes >= thresholdMinutes)
             }

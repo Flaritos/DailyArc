@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CC11111111111111111111B1 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC11111111111111111111F1 /* AnalyticsService.swift */; };
+		CC22222222222222222222B2 /* DedupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC22222222222222222222F2 /* DedupService.swift */; };
+		CC33333333333333333333B3 /* DataCompactionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC33333333333333333333F3 /* DataCompactionService.swift */; };
 		0265023CE281712CD787D9BD /* KeychainDOBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 689E8FBD356D1D2EAABDFA4A /* KeychainDOBService.swift */; };
 		0923C195AC09DE12CD643D68 /* CelebrationOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3993100A49F177ECC2210465 /* CelebrationOverlay.swift */; };
 		0A5A18799F2A15B0A59BB3C9 /* HabitManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE651E9DC69F50BA2672916A /* HabitManagementView.swift */; };
@@ -75,10 +78,14 @@
 		AA44444444444444444444B4 /* AppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA44444444444444444444F4 /* AppIconView.swift */; };
 		AA55555555555555555555B5 /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA55555555555555555555F5 /* WhatsNewView.swift */; };
 		AA66666666666666666666B6 /* AnnualArcView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA66666666666666666666F6 /* AnnualArcView.swift */; };
+		BB77777777777777777777B7 /* LargeStatsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB77777777777777777777F7 /* LargeStatsWidget.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		00E4C2BA05918DBA309FA6F3 /* HabitColorPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitColorPalette.swift; sourceTree = "<group>"; };
+		CC11111111111111111111F1 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
+		CC22222222222222222222F2 /* DedupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DedupService.swift; sourceTree = "<group>"; };
+		CC33333333333333333333F3 /* DataCompactionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCompactionService.swift; sourceTree = "<group>"; };
 		189BDD9114632576EB6E325D /* DailyArcWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyArcWidgetBundle.swift; sourceTree = "<group>"; };
 		1B86BCD074FB23B1EDF1887B /* BadgesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgesView.swift; sourceTree = "<group>"; };
 		2B778F6950FA553DF1C6DBB8 /* PerHabitCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerHabitCardView.swift; sourceTree = "<group>"; };
@@ -147,6 +154,7 @@
 		AA44444444444444444444F4 /* AppIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconView.swift; sourceTree = "<group>"; };
 		AA55555555555555555555F5 /* WhatsNewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
 		AA66666666666666666666F6 /* AnnualArcView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnualArcView.swift; sourceTree = "<group>"; };
+		BB77777777777777777777F7 /* LargeStatsWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeStatsWidget.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -262,6 +270,7 @@
 			isa = PBXGroup;
 			children = (
 				189BDD9114632576EB6E325D /* DailyArcWidgetBundle.swift */,
+				BB77777777777777777777F7 /* LargeStatsWidget.swift */,
 				8B52C09743E537F3867D3183 /* MediumTodayWidget.swift */,
 				69904F3AB52932615A5DE5A9 /* SmallStreakWidget.swift */,
 			);
@@ -311,9 +320,12 @@
 		FA1EE128E26150E72335165B /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				CC11111111111111111111F1 /* AnalyticsService.swift */,
 				5CE8EDAB0612835C9E4FAF92 /* BadgeEngine.swift */,
 				9B72E52730DFE36876D5445B /* CelebrationService.swift */,
 				BE0668EC138F1EC40A82255D /* CorrelationEngine.swift */,
+				CC33333333333333333333F3 /* DataCompactionService.swift */,
+				CC22222222222222222222F2 /* DedupService.swift */,
 				B3AA529407FE962799E23038 /* EasterEggManager.swift */,
 				B6A35C52E58BAF9C775DC384 /* ExportService.swift */,
 				67D9BAF334EF6CC87C2505AF /* HealthKitService.swift */,
@@ -428,6 +440,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C64C95AF9177DB96E77A2347 /* ActivityTagsView.swift in Sources */,
+				CC11111111111111111111B1 /* AnalyticsService.swift in Sources */,
 				AA66666666666666666666B6 /* AnnualArcView.swift in Sources */,
 				AA44444444444444444444B4 /* AppIconView.swift in Sources */,
 				2A82E62278C961A6E1889561 /* ArchiveToastView.swift in Sources */,
@@ -446,11 +459,13 @@
 				C04E102E3FEC8FAFD1E5FFC7 /* DailyArcSchemaV1.swift in Sources */,
 				FA4F19249920E551133B30BE /* DailyArcTokens.swift in Sources */,
 				4A3F0D3E065B9D0B49E0CE6F /* DailyArcWidgetBundle.swift in Sources */,
+				CC33333333333333333333B3 /* DataCompactionService.swift in Sources */,
 				265B14DA1C303DA76A231ED8 /* DateHelpers.swift in Sources */,
 				FB1D635CFF29FE4C7A25CA39 /* DateNavigationBar.swift in Sources */,
 				8D90971B9BA7D352FA1ABB8D /* DaySnapshot.swift in Sources */,
 				7252FB978A68304B228A5637 /* DebouncedSave.swift in Sources */,
 				E430DC7E02A0AFFED9741083 /* DebugDataGenerator.swift in Sources */,
+				CC22222222222222222222B2 /* DedupService.swift in Sources */,
 				4FF6CA2125073B1CB36C5E68 /* EasterEggManager.swift in Sources */,
 				534A456181538634AE068A58 /* EmptyStateView.swift in Sources */,
 				DD5096A92FB74E592B7E6BA4 /* EnergyPickerView.swift in Sources */,
@@ -467,6 +482,7 @@
 				7F5402F81D8B196F17FA9388 /* InsightNudgeBannerView.swift in Sources */,
 				A0765C1A42B4744D802CCC88 /* JournalingPrompts.swift in Sources */,
 				0265023CE281712CD787D9BD /* KeychainDOBService.swift in Sources */,
+				BB77777777777777777777B7 /* LargeStatsWidget.swift in Sources */,
 				59436ADA430C9BF93F915015 /* MediumTodayWidget.swift in Sources */,
 				FB76019ECE27375BF4409FEE /* MoodCheckInView.swift in Sources */,
 				9C7722E04597DF969D422FEA /* MoodTrendView.swift in Sources */,

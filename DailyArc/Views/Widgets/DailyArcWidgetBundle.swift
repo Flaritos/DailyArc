@@ -14,5 +14,6 @@ import SwiftUI
 //     var body: some Widget {
 //         SmallStreakWidget()
 //         MediumTodayWidget()
+//         LargeStatsWidget()
 //     }
 // }

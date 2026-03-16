@@ -1,9 +1,5 @@
 import SwiftUI
-
-// NOTE: This file belongs in the Widget extension target, not the main app.
-// Uncomment WidgetKit import and Widget conformance after moving to widget target.
-
-// import WidgetKit
+import WidgetKit
 
 // MARK: - Small Streak Widget
 
@@ -86,6 +82,10 @@ struct SmallStreakWidgetView: View {
                         .font(.system(size: 24, weight: .bold, design: .rounded))
                         .foregroundStyle(.primary)
 
+                    // Mini arc indicator showing streak progress
+                    MiniArcView(progress: min(Double(streakCount) / 30.0, 1.0))
+                        .frame(width: 40, height: 20)
+
                     Text("day streak")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
@@ -99,6 +99,36 @@ struct SmallStreakWidgetView: View {
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
+        }
+        .widgetURL(URL(string: "dailyarc://today")!)
+    }
+}
+
+// MARK: - Mini Arc Shape
+
+/// A small arc shape used in the streak widget to visualize progress.
+struct MiniArcView: View {
+    let progress: Double
+
+    var body: some View {
+        Canvas { context, size in
+            let center = CGPoint(x: size.width / 2, y: size.height)
+            let radius = min(size.width / 2, size.height) - 2
+
+            // Background arc
+            var bgPath = Path()
+            bgPath.addArc(center: center, radius: radius, startAngle: .degrees(180), endAngle: .degrees(0), clockwise: false)
+            context.stroke(bgPath, with: .color(.gray.opacity(0.3)), lineWidth: 3)
+
+            // Progress arc
+            let endAngle = 180.0 + (progress * 180.0)
+            var fgPath = Path()
+            fgPath.addArc(center: center, radius: radius, startAngle: .degrees(180), endAngle: .degrees(endAngle), clockwise: false)
+            context.stroke(fgPath, with: .linearGradient(
+                Gradient(colors: [.blue, .purple]),
+                startPoint: CGPoint(x: 0, y: size.height),
+                endPoint: CGPoint(x: size.width, y: size.height)
+            ), lineWidth: 3)
         }
     }
 }

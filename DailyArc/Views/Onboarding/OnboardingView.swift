@@ -393,12 +393,19 @@ struct OnboardingView: View {
                 .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
                 .padding(.horizontal)
 
-                // Premium preview
-                Text("Premium includes unlimited habits, mood insights, and detailed stats.")
-                    .font(.caption)
-                    .foregroundStyle(DailyArcTokens.textTertiary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
+                // Brief premium preview
+                VStack(spacing: DailyArcSpacing.sm) {
+                    Text("Unlock the full arc")
+                        .typography(.caption)
+                        .foregroundStyle(DailyArcTokens.textSecondary)
+                    Text("Unlimited habits, mood insights, and more")
+                        .typography(.caption)
+                        .foregroundStyle(DailyArcTokens.textTertiary)
+                }
+                .padding(DailyArcSpacing.md)
+                .background(DailyArcTokens.premiumGold.opacity(DailyArcTokens.opacitySubtle))
+                .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
+                .padding(.horizontal)
 
                 // Selected habits preview
                 if !selectedTemplates.isEmpty {

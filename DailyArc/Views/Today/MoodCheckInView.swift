@@ -65,7 +65,8 @@ struct MoodCheckInView: View {
                             .animation(.spring(response: 0.3, dampingFraction: 0.6), value: selectedScore)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("\(mood.label) mood, score \(mood.score) of 5")
+                    .accessibilityLabel("Mood: \(mood.label.lowercased()), \(mood.score) of 5")
+                    .accessibilityAddTraits(selectedScore == mood.score ? .isSelected : [])
                 }
             }
         }

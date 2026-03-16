@@ -150,21 +150,29 @@ final class CelebrationService {
 
     // MARK: - Streak Loss Compassion
 
-    /// Show a compassionate message when a streak is lost.
+    /// Show a compassionate message when a streak is lost, graduated by tier.
     /// - Parameters:
     ///   - habitName: Display name of the habit.
     ///   - lostStreak: The streak value that was lost.
     func showStreakLoss(habitName: String, lostStreak: Int) {
-        let messages = [
-            "Your \(lostStreak)-day streak on \(habitName) ended, but your arc continues.",
-            "A pause in your \(habitName) arc. \(lostStreak) days is still something to be proud of.",
-            "Every arc has pauses. Your \(lostStreak) days of \(habitName) still count.",
-        ]
-        let index = Int(stableHash(habitName + String(lostStreak))) % messages.count
+        let message: String
+        switch lostStreak {
+        case 3...6:
+            message = "\(lostStreak) days is a great start. Ready for the next arc?"
+        case 7...29:
+            message = "\(lostStreak) days is \(lostStreak) more than zero. Ready for the next arc?"
+        case 30...99:
+            message = "\(lostStreak) days of effort don't vanish \u{2014} they're part of your arc forever."
+        case 100...:
+            message = "\(lostStreak) days. That arc changed you. The next one will too."
+        default:
+            message = "Every arc has pauses. Your \(lostStreak) days of \(habitName) still count."
+        }
+
         activeCelebration = Celebration(
             tier: .starter,
             title: "A pause in your arc",
-            message: messages[index],
+            message: message,
             emoji: "",
             showShareCard: false,
             habitName: habitName

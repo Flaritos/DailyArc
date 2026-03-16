@@ -22,6 +22,8 @@ struct StatsView: View {
     @State private var showMoodConsentPrompt = false
     /// Controls staggered appearance animations for "Your Arc" content (A5).
     @State private var hasAppeared = false
+    /// Gap #6: Skeleton loading state
+    @State private var isLoading = true
     @AppStorage("moodCorrelationConsentDate") private var moodConsentDate = ""
     @AppStorage("moodConsentPromptDismissed") private var moodConsentDismissed = false
 
@@ -44,11 +46,31 @@ struct StatsView: View {
 
             // Content
             Group {
-                switch viewModel.selectedSegment {
-                case .yourArc:
-                    yourArcContent
-                case .insights:
-                    insightsContent
+                if isLoading {
+                    // Gap #6: Skeleton loading
+                    StatsSkeletonView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                        .padding(.top, DailyArcSpacing.lg)
+                } else if viewModel.snapshots.isEmpty && !activeHabits.isEmpty {
+                    // Gap #5: Error state when data fails to load
+                    ScrollView {
+                        VStack {
+                            Spacer(minLength: DailyArcSpacing.xxxl)
+                            ErrorStateView(message: "Couldn't load your stats. Please try again.") {
+                                viewModel.loadSnapshots(habits: activeHabits, logs: allLogs, moods: allMoods)
+                                viewModel.computeCorrelations(habits: activeHabits, logs: allLogs, moods: allMoods)
+                            }
+                            .padding(.horizontal, DailyArcSpacing.lg)
+                            Spacer(minLength: DailyArcSpacing.xxxl)
+                        }
+                    }
+                } else {
+                    switch viewModel.selectedSegment {
+                    case .yourArc:
+                        yourArcContent
+                    case .insights:
+                        insightsContent
+                    }
                 }
             }
         }
@@ -57,6 +79,13 @@ struct StatsView: View {
         .onAppear {
             viewModel.loadSnapshots(habits: activeHabits, logs: allLogs, moods: allMoods)
             viewModel.computeCorrelations(habits: activeHabits, logs: allLogs, moods: allMoods)
+            // Gap #6: Flip loading off after first data load
+            if isLoading {
+                Task {
+                    try? await Task.sleep(for: .milliseconds(100))
+                    isLoading = false
+                }
+            }
         }
         .onDisappear {
             viewModel.cancelTasks()

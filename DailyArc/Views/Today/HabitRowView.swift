@@ -215,8 +215,19 @@ struct HabitRowView: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(habit.emoji) \(habit.name), \(count) of \(habit.targetCount) complete")
+        .accessibilityLabel(habitAccessibilityLabel)
         .accessibilityHint(habit.targetCount == 1 ? "Double tap to toggle" : "Use stepper to adjust count")
+    }
+
+    private var habitAccessibilityLabel: String {
+        var label = "\(habit.emoji) \(habit.name), \(count) of \(habit.targetCount) complete"
+        if habit.currentStreak > 0 {
+            label += ", streak \(habit.currentStreak) days"
+        }
+        if isComplete {
+            label += ", done"
+        }
+        return label
     }
 
     // MARK: - Ripple Effect

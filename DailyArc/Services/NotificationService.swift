@@ -4,11 +4,15 @@ import SwiftUI
 /// Local notification scheduling for DailyArc.
 /// Morning reminder (default 8 AM), evening reminder (default 8 PM) with body variants,
 /// weekly summary (Sunday 6 PM). Requests permission on first toggle.
+/// Per-habit reminders, reactivation reminders, and notification budget enforcement.
 @MainActor
 final class NotificationService {
     static let shared = NotificationService()
 
     private let center = UNUserNotificationCenter.current()
+
+    /// Maximum notifications allowed per calendar day to avoid overwhelming the user.
+    private let maxDailyNotifications = 3
 
     // MARK: - Notification Identifiers
 
@@ -18,6 +22,10 @@ final class NotificationService {
         static let moodReminder = "com.dailyarc.notification.mood"
         static let streakCheckIn = "com.dailyarc.notification.streakcheckin"
         static let weeklySummary = "com.dailyarc.notification.weekly"
+        static func habitReminder(_ habitID: UUID) -> String { "habit-\(habitID)" }
+        static let reactivationDay3 = "com.dailyarc.notification.reactivation.day3"
+        static let reactivationDay7 = "com.dailyarc.notification.reactivation.day7"
+        static let reactivationDay14 = "com.dailyarc.notification.reactivation.day14"
     }
 
     // MARK: - Evening Body Variants
@@ -189,6 +197,132 @@ final class NotificationService {
     /// Cancel weekly summary.
     func cancelWeeklySummary() {
         center.removePendingNotificationRequests(withIdentifiers: [Identifier.weeklySummary])
+    }
+
+    // MARK: - Per-Habit Reminders
+
+    /// Schedule a daily reminder for a specific habit at the given time.
+    /// Identifier: "habit-{habitID}" for easy cancellation.
+    func scheduleHabitReminder(habitID: UUID, habitName: String, emoji: String, hour: Int, minute: Int) {
+        Task { @MainActor in
+            guard await canScheduleForToday(hour: hour, minute: minute) else { return }
+
+            let content = UNMutableNotificationContent()
+            content.title = String(localized: "Habit Reminder")
+            content.body = "\(emoji) Time for \(habitName)!"
+            content.sound = .default
+
+            var dateComponents = DateComponents()
+            dateComponents.hour = hour
+            dateComponents.minute = minute
+
+            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+            let request = UNNotificationRequest(
+                identifier: Identifier.habitReminder(habitID),
+                content: content,
+                trigger: trigger
+            )
+
+            try? await center.add(request)
+        }
+    }
+
+    /// Cancel a per-habit reminder.
+    func cancelHabitReminder(habitID: UUID) {
+        center.removePendingNotificationRequests(withIdentifiers: [Identifier.habitReminder(habitID)])
+    }
+
+    // MARK: - Reactivation Reminders
+
+    /// Schedule reactivation reminders at days 3, 7, and (conditionally) 14 after first launch.
+    /// Fires only once — guarded by `@AppStorage("reactivationScheduled")`.
+    /// Per spec, max 2 reactivation notifications; Day 14 is omitted if user has been active
+    /// (defined as 3+ app opens).
+    func scheduleReactivationReminders() {
+        let defaults = UserDefaults.standard
+        guard !defaults.bool(forKey: "reactivationScheduled") else { return }
+
+        // Read firstLaunchDate stored as ISO8601 string by EasterEggManager
+        guard let firstLaunchString = defaults.string(forKey: "firstLaunchDate"),
+              !firstLaunchString.isEmpty,
+              let firstLaunch = ISO8601DateFormatter().date(from: firstLaunchString) else {
+            return
+        }
+
+        let calendar = Calendar.current
+
+        // Day 3
+        if let day3 = calendar.date(byAdding: .day, value: 3, to: firstLaunch) {
+            scheduleReactivationNotification(
+                identifier: Identifier.reactivationDay3,
+                date: day3,
+                title: String(localized: "Your arc is growing"),
+                body: String(localized: "Your arc is taking shape! Open DailyArc to keep building.")
+            )
+        }
+
+        // Day 7
+        if let day7 = calendar.date(byAdding: .day, value: 7, to: firstLaunch) {
+            scheduleReactivationNotification(
+                identifier: Identifier.reactivationDay7,
+                date: day7,
+                title: String(localized: "One week milestone"),
+                body: String(localized: "One week in — your patterns are starting to emerge.")
+            )
+        }
+
+        // Day 14 — only if user has NOT been active (fewer than 3 app opens)
+        let appOpenCount = defaults.integer(forKey: "appOpenCount")
+        if appOpenCount < 3, let day14 = calendar.date(byAdding: .day, value: 14, to: firstLaunch) {
+            scheduleReactivationNotification(
+                identifier: Identifier.reactivationDay14,
+                date: day14,
+                title: String(localized: "Insights ready"),
+                body: String(localized: "Your mood insights are ready! Open DailyArc to see what affects your mood.")
+            )
+        }
+
+        defaults.set(true, forKey: "reactivationScheduled")
+    }
+
+    /// Helper to schedule a one-shot reactivation notification at a specific date (10 AM).
+    private func scheduleReactivationNotification(identifier: String, date: Date, title: String, body: String) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+
+        var components = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        components.hour = 10
+        components.minute = 0
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        center.add(request)
+    }
+
+    // MARK: - Notification Budget
+
+    /// Check whether scheduling another notification for the given time today would exceed the daily budget.
+    /// Returns true if we can still schedule.
+    private func canScheduleForToday(hour: Int, minute: Int) async -> Bool {
+        let pending = await center.pendingNotificationRequests()
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        var todayCount = 0
+        for request in pending {
+            guard let calTrigger = request.trigger as? UNCalendarNotificationTrigger else { continue }
+            if calTrigger.repeats {
+                // Repeating daily notifications always count toward today's budget
+                todayCount += 1
+            } else if let nextDate = calTrigger.nextTriggerDate(),
+                      calendar.isDate(nextDate, inSameDayAs: today) {
+                todayCount += 1
+            }
+        }
+
+        return todayCount < maxDailyNotifications
     }
 
     // MARK: - Cancel All

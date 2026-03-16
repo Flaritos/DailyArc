@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import StoreKit
+import UniformTypeIdentifiers
 import WidgetKit
 
 struct SettingsView: View {
@@ -42,6 +43,10 @@ struct SettingsView: View {
     @State private var exportedFileURL: URL?
     @State private var showShareSheet = false
     @State private var exportError: String?
+
+    // MARK: - Import
+    @State private var showImportPicker = false
+    @State private var importResult: String?
 
     // MARK: - Delete All Data
     @State private var showDeleteConfirmation = false
@@ -232,6 +237,14 @@ struct SettingsView: View {
                     }
                 }
 
+                if storeKit.isPremium {
+                    Button {
+                        showImportPicker = true
+                    } label: {
+                        Label("Import JSON", systemImage: "square.and.arrow.down")
+                    }
+                }
+
                 Button(role: .destructive) {
                     HapticManager.deleteConfirmation()
                     showDeleteConfirmation = true
@@ -410,6 +423,39 @@ struct SettingsView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text("DailyArc does not sell, rent, or share your personal information for advertising or monetary consideration. Your habit and mood data stays on your device. There is nothing to opt out of.")
+        }
+        .fileImporter(isPresented: $showImportPicker, allowedContentTypes: [.json]) { result in
+            switch result {
+            case .success(let url):
+                guard url.startAccessingSecurityScopedResource() else {
+                    importResult = "Unable to access the selected file."
+                    return
+                }
+                defer { url.stopAccessingSecurityScopedResource() }
+                do {
+                    let data = try Data(contentsOf: url)
+                    Task {
+                        let outcome = try await ExportService.shared.importFromJSON(
+                            data: data,
+                            context: modelContext,
+                            mergeMode: .skipExisting
+                        )
+                        importResult = "Imported \(outcome.habitsImported) habits, \(outcome.logsImported) logs, \(outcome.moodsImported) moods."
+                    }
+                } catch {
+                    importResult = "Import failed: \(error.localizedDescription)"
+                }
+            case .failure(let error):
+                importResult = "Could not select file: \(error.localizedDescription)"
+            }
+        }
+        .alert("Import Result", isPresented: Binding(
+            get: { importResult != nil },
+            set: { if !$0 { importResult = nil } }
+        )) {
+            Button("OK", role: .cancel) { importResult = nil }
+        } message: {
+            Text(importResult ?? "")
         }
         .alert("Permissions Guide", isPresented: $showPermissionsGuide) {
             Button("Open Settings") {

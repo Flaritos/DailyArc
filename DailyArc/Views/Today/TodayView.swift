@@ -45,6 +45,19 @@ struct TodayView: View {
     // MARK: - Scroll Anchoring (Gap #9)
     @State private var scrollAnchorID: String? = nil
 
+    // Streak loss compassion (Gap #2)
+    @AppStorage("lastStreakLossShownHabitID") private var lastStreakLossShownHabitID = ""
+
+    // Error state (Gap #5)
+    @State private var showError = false
+    @State private var errorMessage = ""
+
+    // Skeleton loading (Gap #6)
+    @State private var isLoading = true
+
+    // Accessibility
+    @Environment(\.accessibilityVoiceOverEnabled) private var isVoiceOverEnabled
+
     // Archive toast
     @State private var archiveToast: ArchiveToastInfo? = nil
     struct ArchiveToastInfo: Identifiable {
@@ -402,6 +415,26 @@ struct TodayView: View {
 
     var body: some View {
         ZStack {
+            if showError {
+                // Gap #5: Error state
+                ScrollView {
+                    VStack {
+                        Spacer(minLength: DailyArcSpacing.xxxl)
+                        ErrorStateView(message: errorMessage) {
+                            showError = false
+                            refreshData()
+                        }
+                        .padding(.horizontal, DailyArcSpacing.lg)
+                        Spacer(minLength: DailyArcSpacing.xxxl)
+                    }
+                }
+                .background(DailyArcTokens.backgroundPrimary)
+            } else if isLoading {
+                // Gap #6: Skeleton loading
+                TodaySkeletonView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .background(DailyArcTokens.backgroundPrimary)
+            } else {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(spacing: DailyArcSpacing.xl) {
@@ -611,6 +644,7 @@ struct TodayView: View {
                     }
                 }
             }
+            } // end else (loading/error)
 
             // Celebration overlay
             CelebrationOverlay(isShowing: $viewModel.showCelebration)
@@ -704,6 +738,9 @@ struct TodayView: View {
             }
             refreshData()
 
+            // Dedup: remove duplicate records (runs once per launch)
+            DedupService.runDedup(context: context)
+
             // A2: Fetch yesterday's completion for adaptive greeting
             viewModel.fetchYesterdayCompletion(habits: habits, context: context, calendar: calendar)
 
@@ -745,6 +782,17 @@ struct TodayView: View {
 
             // Gap #7: Compute visible banners based on priority
             recomputeVisibleBanners()
+
+            // Gap #2: Streak loss compassion check
+            checkStreakLossCompassion()
+
+            // Gap #6: Flip loading off after first data load
+            if isLoading {
+                Task {
+                    try? await Task.sleep(for: .milliseconds(100))
+                    isLoading = false
+                }
+            }
         }
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
@@ -754,6 +802,8 @@ struct TodayView: View {
                 UserDefaults.standard.set(Date(), forKey: "lastOpenDate")
             case .inactive:
                 debouncedSave?.flush()
+                // Gap #5: Check for save errors after flush
+                checkForSaveError()
             default:
                 break
             }
@@ -777,17 +827,27 @@ struct TodayView: View {
         viewModel.fetchMoodEntry(context: context, calendar: calendar)
     }
 
+    /// Gap #5: Surface DebouncedSave errors to the user.
+    private func checkForSaveError() {
+        if debouncedSave?.lastError != nil {
+            errorMessage = "Couldn't save your data. Please try again."
+            showError = true
+        }
+    }
+
     private func checkStreakMilestone(_ habit: Habit) {
         let milestones = [3, 7, 14, 21, 30, 42, 50, 100, 150, 200, 365]
         if milestones.contains(habit.currentStreak) {
             // Gap #9: Capture scroll anchor before celebration fires
             scrollAnchorID = "habitSection"
-            CelebrationService.shared.checkStreakMilestone(habit: habit, previousStreak: habit.bestStreak)
+            // Gap #13: Pass bestStreak as previousStreak only if current < best (meaning a previous run was lost)
+            let previousStreak = habit.currentStreak < habit.bestStreak ? habit.bestStreak : 0
+            CelebrationService.shared.checkStreakMilestone(habit: habit, previousStreak: previousStreak)
         }
 
-        // Easter egg: streak-based
+        // Gap #17: Easter egg display — show as inline toast instead of discarding
         if let easterEgg = EasterEggManager.shared.checkStreakEasterEgg(streak: habit.currentStreak) {
-            _ = easterEgg
+            viewModel.undoToastMessage = easterEgg
         }
     }
 
@@ -810,10 +870,24 @@ struct TodayView: View {
         )
     }
 
+    /// Gap #2: Check if any habit lost a streak and show compassion message (once per habit).
+    private func checkStreakLossCompassion() {
+        for habit in habits {
+            if habit.currentStreak == 0 && habit.bestStreak > 2 {
+                let habitIDString = habit.id.uuidString
+                guard lastStreakLossShownHabitID != habitIDString else { continue }
+                lastStreakLossShownHabitID = habitIDString
+                CelebrationService.shared.showStreakLoss(habitName: habit.name, lostStreak: habit.bestStreak)
+                break // Show one at a time
+            }
+        }
+    }
+
     private func showArchiveToast(_ action: ArchiveToastView.ArchiveAction, name: String, emoji: String, streak: Int) {
         archiveToast = ArchiveToastInfo(action: action, name: name, emoji: emoji, streak: streak)
+        let dismissDelay: Double = isVoiceOverEnabled ? 8 : 4
         Task {
-            try? await Task.sleep(for: .seconds(4))
+            try? await Task.sleep(for: .seconds(dismissDelay))
             withAnimation { archiveToast = nil }
         }
     }

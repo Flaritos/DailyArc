@@ -53,6 +53,8 @@ struct HeatMapCanvasView: View {
                     drawCells(context: context, size: size)
                 }
                 .frame(width: totalWidth, height: totalHeight)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(heatMapAccessibilityLabel)
                 .gesture(
                     SpatialTapGesture()
                         .onEnded { value in
@@ -74,6 +76,16 @@ struct HeatMapCanvasView: View {
                 todayPulse = true
             }
         }
+    }
+
+    private var heatMapAccessibilityLabel: String {
+        let daysWithData = snapshots.filter { $0.totalHabits > 0 }
+        let count = daysWithData.count
+        guard count > 0 else {
+            return "Heat map showing no data yet"
+        }
+        let avgCompletion = daysWithData.reduce(0.0) { $0 + $1.completionPercentage } / Double(count)
+        return "Heat map showing \(count) days of data, average \(Int(avgCompletion * 100)) percent completion"
     }
 
     // MARK: - Canvas Drawing

@@ -1,11 +1,16 @@
 import SwiftUI
 
 struct ContentView: View {
+    // NOTE: SceneStorage for NavigationPath serialization is deferred.
+    // Full implementation requires NavigationPath Codable conformance and
+    // per-tab path persistence, which is a larger refactor. Using @AppStorage
+    // for tab selection is sufficient for now.
     @AppStorage("selectedTab") private var selectedTab = 0
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("isCOPPABlocked") private var isCOPPABlocked = false
     @AppStorage("lastSeenVersion") private var lastSeenVersion = ""
     @State private var showWhatsNew = false
+    @State private var pendingDeepLink: URL?
 
     private var currentVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
@@ -16,6 +21,15 @@ struct ContentView: View {
             coppaBlockScreen
         } else if !hasCompletedOnboarding {
             OnboardingView()
+                .onOpenURL { url in
+                    pendingDeepLink = url
+                }
+                .onChange(of: hasCompletedOnboarding) { _, completed in
+                    if completed, let url = pendingDeepLink {
+                        handleDeepLink(url)
+                        pendingDeepLink = nil
+                    }
+                }
         } else {
             mainContent
                 .onAppear {
@@ -23,6 +37,11 @@ struct ContentView: View {
                         showWhatsNew = true
                     }
                     lastSeenVersion = currentVersion
+                    // Process any pending deep link from before onboarding completed
+                    if let url = pendingDeepLink {
+                        handleDeepLink(url)
+                        pendingDeepLink = nil
+                    }
                 }
                 .sheet(isPresented: $showWhatsNew) {
                     WhatsNewView()
@@ -100,6 +119,19 @@ struct ContentView: View {
         .tint(DailyArcTokens.accent)
         .onAppear {
             checkKeychainCOPPA()
+        }
+        .onOpenURL { url in
+            handleDeepLink(url)
+        }
+    }
+
+    private func handleDeepLink(_ url: URL) {
+        guard let host = url.host() else { return }
+        switch host {
+        case "today": selectedTab = 0
+        case "stats": selectedTab = 1
+        case "settings": selectedTab = 2
+        default: selectedTab = 0 // malformed → Today
         }
     }
 }

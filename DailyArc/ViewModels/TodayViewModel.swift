@@ -499,9 +499,10 @@ final class TodayViewModel {
         undoToastMessage = message
         undoAction = action
 
-        // Auto-dismiss after 3 seconds
+        // Auto-dismiss: 6 seconds when VoiceOver active, 3 seconds otherwise
+        let dismissDelay: Double = UIAccessibility.isVoiceOverRunning ? 6 : 3
         Task {
-            try? await Task.sleep(for: .seconds(3))
+            try? await Task.sleep(for: .seconds(dismissDelay))
             if undoToastMessage == message {
                 withAnimation { undoToastMessage = nil }
                 undoAction = nil

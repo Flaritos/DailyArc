@@ -22,7 +22,10 @@ struct ShareCardView: View {
     private static let healthKeywords: Set<String> = [
         "medication", "therapy", "medicine", "pill", "drug", "treatment",
         "doctor", "psychiatrist", "counseling", "rehab", "addiction",
-        "mental health", "anxiety", "depression", "bipolar", "adhd"
+        "mental health", "anxiety", "depression", "bipolar", "adhd",
+        "meds", "therapist", "counseling", "psychiatr", "antidepress",
+        "sobriety", "sober", "rehab", "blood pressure", "glucose",
+        "insulin", "weight", "diet", "prescription", "panic", "ocd"
     ]
 
     private static func sanitizeName(_ name: String) -> String {
@@ -243,7 +246,7 @@ struct ShareCardView: View {
             .padding(.horizontal, 32)
 
             // CTA
-            Text("Track your own habits \u{2192} DailyArc")
+            Text("Track your own habits \u{2192} DailyArc  #MyDailyArc")
                 .font(.system(size: 12))
                 .foregroundStyle(.white.opacity(0.5))
                 .padding(.bottom, 20)

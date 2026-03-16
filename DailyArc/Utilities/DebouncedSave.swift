@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import WidgetKit
 
 /// Coalesces rapid SwiftData writes into a single save() after 300ms of inactivity.
 /// Prevents write storms when user rapidly taps habits.
@@ -61,6 +62,7 @@ final class DebouncedSave {
             try context.save()
             // Update widget data after successful save
             try? WidgetDataService.writeNow(context: context, calendar: userCalendar)
+            WidgetCenter.shared.reloadAllTimelines()
             lastError = nil
             retryCount = 0
         } catch {

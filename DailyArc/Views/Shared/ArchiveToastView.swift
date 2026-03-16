@@ -3,6 +3,7 @@ import SwiftUI
 /// Compassion toast shown when archiving or unarchiving a habit.
 /// Archive: acknowledges the streak and reassures the user.
 /// Unarchive: welcomes the habit back with encouragement.
+/// Posts VoiceOver announcements on appearance for accessibility.
 struct ArchiveToastView: View {
     let action: ArchiveAction
     let habitName: String
@@ -39,6 +40,12 @@ struct ArchiveToastView: View {
                 .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
         )
         .padding(.horizontal, DailyArcSpacing.lg)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(message)
+        .onAppear {
+            AccessibilityNotification.Announcement(message)
+                .post()
+        }
     }
 }
 

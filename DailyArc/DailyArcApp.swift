@@ -14,6 +14,8 @@ struct DailyArcApp: App {
             )
             // Disable autosave — DebouncedSave manages all saves
             container.mainContext.autosaveEnabled = false
+            // Schedule reactivation reminders on first launch (fires only once)
+            NotificationService.shared.scheduleReactivationReminders()
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
         }
