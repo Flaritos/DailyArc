@@ -4,17 +4,17 @@ struct ContentView: View {
     @AppStorage("selectedTab") private var selectedTab = 0
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("isCOPPABlocked") private var isCOPPABlocked = false
-    @State private var showOnboarding = false
 
     var body: some View {
         if isCOPPABlocked {
             coppaBlockScreen
+        } else if !hasCompletedOnboarding {
+            OnboardingView()
         } else {
             mainContent
         }
     }
 
-    /// Check Keychain for COPPA block status on launch (survives reinstall).
     private func checkKeychainCOPPA() {
         if KeychainDOBService.isCOPPABlocked() {
             isCOPPABlocked = true
@@ -82,12 +82,6 @@ struct ContentView: View {
         .tint(DailyArcTokens.accent)
         .onAppear {
             checkKeychainCOPPA()
-            if !hasCompletedOnboarding {
-                showOnboarding = true
-            }
-        }
-        .fullScreenCover(isPresented: $showOnboarding) {
-            OnboardingView()
         }
     }
 }

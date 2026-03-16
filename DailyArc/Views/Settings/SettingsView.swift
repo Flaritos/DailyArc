@@ -463,6 +463,7 @@ struct SettingsView: View {
     // MARK: - Delete All Data
 
     private func deleteAllData() {
+        // Delete all SwiftData objects
         do {
             try modelContext.delete(model: HabitLog.self)
             try modelContext.delete(model: MoodEntry.self)
@@ -471,23 +472,39 @@ struct SettingsView: View {
             try modelContext.save()
         } catch {}
 
-        // Clear standard UserDefaults
+        // Reset @AppStorage properties directly so SwiftUI reacts immediately.
+        // Using @AppStorage setters ensures the in-memory cache updates too,
+        // unlike UserDefaults.standard.removeObject which only clears on disk.
+        userName = ""
+        showStreaks = true
+        morningReminderEnabled = false
+        eveningReminderEnabled = false
+        moodReminderEnabled = false
+        weeklySummaryEnabled = true
+        morningReminderHour = 8
+        morningReminderMinute = 0
+        eveningReminderHour = 20
+        eveningReminderMinute = 0
+        moodReminderHour = 21
+        moodReminderMinute = 0
+        gdprConsentDate = ""
+        gdprConsentWithdrawn = false
+        versionTapCount = 0
+        devEasterEggFound = false
+
+        // Clear remaining keys that don't have @AppStorage bindings here
         let defaults = UserDefaults.standard
         let keysToRemove = [
-            "hasCompletedOnboarding", "selectedTab",
-            "morningReminderEnabled", "eveningReminderEnabled", "moodReminderEnabled",
-            "weeklySummaryEnabled",
-            "morningReminderHour", "morningReminderMinute",
-            "eveningReminderHour", "eveningReminderMinute",
-            "moodReminderHour", "moodReminderMinute",
+            "selectedTab",
             "isPremium", "isCOPPABlocked", "moodDisclaimerShown",
-            "userName", "showStreaks", "userGoal", "userEmail",
-            "gdprConsentDate", "gdprConsentWithdrawn", "gdprConsentScope",
+            "userGoal", "userEmail",
+            "gdprConsentScope",
             "emailMarketingConsentDate",
             "hasCompletedFirstHabit", "hasLoggedFirstMood",
             "easterEggDiscoveries", "appOpenCount", "firstLaunchDate",
-            "versionTapCount", "devEasterEggFound",
             "lastOpenDate", "insightNudgeShown",
+            "moodCorrelationConsentDate", "moodConsentPromptDismissed",
+            "earnedBadges",
         ]
         for key in keysToRemove {
             defaults.removeObject(forKey: key)
@@ -501,6 +518,10 @@ struct SettingsView: View {
 
         // Cancel all notifications
         NotificationService.shared.cancelAll()
+
+        // Reset onboarding LAST — this triggers ContentView to swap to OnboardingView
+        // because ContentView reads @AppStorage("hasCompletedOnboarding") in its body.
+        defaults.set(false, forKey: "hasCompletedOnboarding")
     }
 
     // MARK: - Feedback Email
