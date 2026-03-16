@@ -1,0 +1,30 @@
+{
+  "identifier" : "com.dailyarc.storekit",
+  "nonRenewableSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "5.99",
+      "familyShareable" : false,
+      "internalID" : "com.dailyarc.premium",
+      "localizations" : [
+        {
+          "description" : "Unlimited habits, mood insights, and more.",
+          "displayName" : "DailyArc Premium",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.dailyarc.premium",
+      "referenceName" : "DailyArc Premium (Lifetime)",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "com.dailyarc.app",
+    "_developerTeamID" : ""
+  },
+  "subscriptionGroups" : [],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

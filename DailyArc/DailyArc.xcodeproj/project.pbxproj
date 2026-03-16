@@ -79,6 +79,10 @@
 		AA55555555555555555555B5 /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA55555555555555555555F5 /* WhatsNewView.swift */; };
 		AA66666666666666666666B6 /* AnnualArcView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA66666666666666666666F6 /* AnnualArcView.swift */; };
 		BB77777777777777777777B7 /* LargeStatsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB77777777777777777777F7 /* LargeStatsWidget.swift */; };
+		DD11111111111111111111B1 /* AppIconGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD11111111111111111111F1 /* AppIconGenerator.swift */; };
+		W5E5E5E5E5E5E5E5E5E5E5E5 /* DailyArcWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = W2B2B2B2B2B2B2B2B2B2B2B2 /* DailyArcWidgetBundle.swift */; };
+		W6F6F6F6F6F6F6F6F6F6F6F6 /* DailyArcWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = W3C3C3C3C3C3C3C3C3C3C3C3 /* DailyArcWidget.swift */; };
+		WH7H7H7H7H7H7H7H7H7H7H7 /* DailyArcWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = W1A1A1A1A1A1A1A1A1A1A1A1 /* DailyArcWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -155,7 +159,38 @@
 		AA55555555555555555555F5 /* WhatsNewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
 		AA66666666666666666666F6 /* AnnualArcView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnualArcView.swift; sourceTree = "<group>"; };
 		BB77777777777777777777F7 /* LargeStatsWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeStatsWidget.swift; sourceTree = "<group>"; };
+		DD11111111111111111111F1 /* AppIconGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconGenerator.swift; sourceTree = "<group>"; };
+		DD22222222222222222222F2 /* DailyArc.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DailyArc.entitlements; sourceTree = "<group>"; };
+		W1A1A1A1A1A1A1A1A1A1A1A1 /* DailyArcWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DailyArcWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		W2B2B2B2B2B2B2B2B2B2B2B2 /* DailyArcWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyArcWidgetBundle.swift; sourceTree = "<group>"; };
+		W3C3C3C3C3C3C3C3C3C3C3C3 /* DailyArcWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyArcWidget.swift; sourceTree = "<group>"; };
+		W4D4D4D4D4D4D4D4D4D4D4D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		WI8I8I8I8I8I8I8I8I8I8I8I /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration.storekit; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXContainerItemProxy section */
+		WE4E4E4E4E4E4E4E4E4E4E4E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E88CE4FCF992A321FA2E18A9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = WA0A0A0A0A0A0A0A0A0A0A0A;
+			remoteInfo = DailyArcWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		WG6G6G6G6G6G6G6G6G6G6G6G /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				WH7H7H7H7H7H7H7H7H7H7H7 /* DailyArcWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXGroup section */
 		0A6D14F8D9A0ADF2529BCE28 /* Schema */ = {
@@ -170,8 +205,19 @@
 			isa = PBXGroup;
 			children = (
 				DCB69FBC90C37CCBA87D5F79 /* DailyArc.app */,
+				W1A1A1A1A1A1A1A1A1A1A1A1 /* DailyArcWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		W7A7A7A7A7A7A7A7A7A7A7A7 /* DailyArcWidget */ = {
+			isa = PBXGroup;
+			children = (
+				W2B2B2B2B2B2B2B2B2B2B2B2 /* DailyArcWidgetBundle.swift */,
+				W3C3C3C3C3C3C3C3C3C3C3C3 /* DailyArcWidget.swift */,
+				W4D4D4D4D4D4D4D4D4D4D4D4 /* Info.plist */,
+			);
+			path = DailyArcWidget;
 			sourceTree = "<group>";
 		};
 		1A57D92EDEE8BD3929712EBC /* Habits */ = {
@@ -194,6 +240,7 @@
 		3FB34A49437B477406C024CD /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				DD11111111111111111111F1 /* AppIconGenerator.swift */,
 				EBC3F283BD857C4F79F8CEB1 /* ColorExtensions.swift */,
 				98893F5E39150983A8494EBB /* DailyArcTokens.swift */,
 				90BD50B25908A8A6EE510C3D /* DateHelpers.swift */,
@@ -217,6 +264,8 @@
 				3FB34A49437B477406C024CD /* Utilities */,
 				F79E1F60F2DEE24DB4CAC5B8 /* ViewModels */,
 				D040EE2CC76AF38E7CFA2DE9 /* Views */,
+				W7A7A7A7A7A7A7A7A7A7A7A7 /* DailyArcWidget */,
+				WI8I8I8I8I8I8I8I8I8I8I8I /* Configuration.storekit */,
 				18A048BB13C8F8B3173BB34D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -357,6 +406,7 @@
 		"TEMP_7CE5EA45-3656-450D-809C-4D22EB37D648" /* . */ = {
 			isa = PBXGroup;
 			children = (
+				DD22222222222222222222F2 /* DailyArc.entitlements */,
 				"TEMP_3ED9CBF2-D644-4F93-A9A8-3FFB5B3EDB57" /* DailyArc.xcodeproj */,
 				"TEMP_54059297-ECA8-46BF-BA6E-A94FEAECEC37" /* DailyArcApp.swift */,
 				"TEMP_84C4724B-4656-443B-BE74-9B963D07DA73" /* ContentView.swift */,
@@ -381,10 +431,12 @@
 			buildPhases = (
 				15DD5E5467A64CF3192D0C94 /* Sources */,
 				90B98CA0A675592F67A5CB10 /* Resources */,
+				WG6G6G6G6G6G6G6G6G6G6G6G /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				WF5F5F5F5F5F5F5F5F5F5F5F /* PBXTargetDependency */,
 			);
 			name = DailyArc;
 			packageProductDependencies = (
@@ -392,6 +444,22 @@
 			productName = DailyArc;
 			productReference = DCB69FBC90C37CCBA87D5F79 /* DailyArc.app */;
 			productType = "com.apple.product-type.application";
+		};
+		WA0A0A0A0A0A0A0A0A0A0A0A /* DailyArcWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = WD3D3D3D3D3D3D3D3D3D3D3D /* Build configuration list for PBXNativeTarget "DailyArcWidgetExtension" */;
+			buildPhases = (
+				W8B8B8B8B8B8B8B8B8B8B8B8 /* Sources */,
+				W9C9C9C9C9C9C9C9C9C9C9C9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DailyArcWidgetExtension;
+			productName = DailyArcWidgetExtension;
+			productReference = W1A1A1A1A1A1A1A1A1A1A1A1 /* DailyArcWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -402,6 +470,9 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
+					WA0A0A0A0A0A0A0A0A0A0A0A = {
+						CreatedOnToolsVersion = 16.0;
+					};
 				};
 			};
 			buildConfigurationList = 7964540614FFB0BEFC49B5A6 /* Build configuration list for PBXProject "DailyArc" */;
@@ -419,6 +490,7 @@
 			projectRoot = "";
 			targets = (
 				C9C0353B2A993B0F604ECE14 /* DailyArc */,
+				WA0A0A0A0A0A0A0A0A0A0A0A /* DailyArcWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -432,13 +504,30 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		W9C9C9C9C9C9C9C9C9C9C9C9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		W8B8B8B8B8B8B8B8B8B8B8B8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				W5E5E5E5E5E5E5E5E5E5E5E5 /* DailyArcWidgetBundle.swift in Sources */,
+				W6F6F6F6F6F6F6F6F6F6F6F6 /* DailyArcWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		15DD5E5467A64CF3192D0C94 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DD11111111111111111111B1 /* AppIconGenerator.swift in Sources */,
 				C64C95AF9177DB96E77A2347 /* ActivityTagsView.swift in Sources */,
 				CC11111111111111111111B1 /* AnalyticsService.swift in Sources */,
 				AA66666666666666666666B6 /* AnnualArcView.swift in Sources */,
@@ -515,13 +604,26 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		WF5F5F5F5F5F5F5F5F5F5F5F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = WA0A0A0A0A0A0A0A0A0A0A0A /* DailyArcWidgetExtension */;
+			targetProxy = WE4E4E4E4E4E4E4E4E4E4E4E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
 		1186B2CE0A86508B5B82AD99 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = DailyArc.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_KEY_CFBundleDisplayName = DailyArc;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "DailyArc reads health data to automatically log habits like exercise, sleep, and mindful minutes.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "DailyArc does not write health data.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -536,9 +638,14 @@
 		2BB3CEB716843C6C318A9E89 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = DailyArc.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_KEY_CFBundleDisplayName = DailyArc;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "DailyArc reads health data to automatically log habits like exercise, sleep, and mindful minutes.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "DailyArc does not write health data.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -681,6 +788,56 @@
 			};
 			name = Release;
 		};
+		WB1B1B1B1B1B1B1B1B1B1B1B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DailyArcWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DailyArcWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dailyarc.app.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		WC2C2C2C2C2C2C2C2C2C2C2C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DailyArcWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DailyArcWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dailyarc.app.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -691,13 +848,22 @@
 				2BB3CEB716843C6C318A9E89 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		7964540614FFB0BEFC49B5A6 /* Build configuration list for PBXProject "DailyArc" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B2CE8D51390C1572AA7B7073 /* Debug */,
 				D3AB26BB2720E7D9A838DE57 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		WD3D3D3D3D3D3D3D3D3D3D3D /* Build configuration list for PBXNativeTarget "DailyArcWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				WB1B1B1B1B1B1B1B1B1B1B1B /* Debug */,
+				WC2C2C2C2C2C2C2C2C2C2C2C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

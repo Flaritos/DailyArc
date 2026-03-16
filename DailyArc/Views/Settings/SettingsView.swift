@@ -328,6 +328,9 @@ struct SettingsView: View {
                 }
                 .foregroundStyle(DailyArcTokens.textPrimary)
 
+                Link("Privacy Policy", destination: URL(string: "https://dailyarc.app/privacy")!)
+                    .foregroundStyle(DailyArcTokens.accent)
+
                 Text("DailyArc is not a medical device. If you are experiencing mental health concerns, please consult a healthcare professional.")
                     .font(.footnote)
                     .foregroundStyle(DailyArcTokens.textTertiary)
@@ -396,6 +399,15 @@ struct SettingsView: View {
             Section("Developer") {
                 Button("Seed Demo Data (45 days)") {
                     DebugDataGenerator.seedData(context: modelContext)
+                }
+
+                Button("Export App Icon (1024x1024)") {
+                    if let data = AppIconGenerator.generateIcon() {
+                        let url = FileManager.default.temporaryDirectory.appendingPathComponent("AppIcon.png")
+                        try? data.write(to: url)
+                        exportedFileURL = url
+                        showShareSheet = true
+                    }
                 }
             }
             #endif
