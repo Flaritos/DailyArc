@@ -7,17 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0265023CE281712CD787D9BD /* KeychainDOBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 689E8FBD356D1D2EAABDFA4A /* KeychainDOBService.swift */; };
 		0923C195AC09DE12CD643D68 /* CelebrationOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3993100A49F177ECC2210465 /* CelebrationOverlay.swift */; };
 		0A5A18799F2A15B0A59BB3C9 /* HabitManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE651E9DC69F50BA2672916A /* HabitManagementView.swift */; };
 		0B9566CE74816CBDAEA9FEF2 /* SmallStreakWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69904F3AB52932615A5DE5A9 /* SmallStreakWidget.swift */; };
+		0EAF6AF0791C054D7DF221C4 /* MotivationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B8618E6CF4E8A682760FD9 /* MotivationService.swift */; };
 		10A7C4610AD46960BAECC1BF /* BadgesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B86BCD074FB23B1EDF1887B /* BadgesView.swift */; };
 		16194B4850096C6852032088 /* CorrelationCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAE9B9DB49647538B9B15175 /* CorrelationCardView.swift */; };
+		17E8A8FAD991C5A20E5F1076 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = "TEMP_84C4724B-4656-443B-BE74-9B963D07DA73" /* ContentView.swift */; };
 		265B14DA1C303DA76A231ED8 /* DateHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90BD50B25908A8A6EE510C3D /* DateHelpers.swift */; };
+		2A82E62278C961A6E1889561 /* ArchiveToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D043FF047131241C3172CDF1 /* ArchiveToastView.swift */; };
 		2BAA057304A5CF1B4589F080 /* CorrelationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE0668EC138F1EC40A82255D /* CorrelationEngine.swift */; };
+		33AA9D4B6B93639B96361465 /* StableHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAFB9FFEF5BE1420FCCE39BE /* StableHash.swift */; };
 		47D7CE249933A72401FBBDA7 /* RuleEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EFD5B662DB2161ACF87A6E /* RuleEngine.swift */; };
 		4A3F0D3E065B9D0B49E0CE6F /* DailyArcWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189BDD9114632576EB6E325D /* DailyArcWidgetBundle.swift */; };
 		4CC81C7A04DA08138BCA890B /* HeatMapCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F562D383EF547EB2D26BBD59 /* HeatMapCanvasView.swift */; };
 		4D926B344C1C358F7CB5151D /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4ECE583455A6C55F529C0F /* OnboardingView.swift */; };
+		4FDA37DC091B2DE5718FF784 /* MotivationCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 767B4977F7A6118487C720BA /* MotivationCardView.swift */; };
+		4FF6CA2125073B1CB36C5E68 /* EasterEggManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3AA529407FE962799E23038 /* EasterEggManager.swift */; };
+		53215C819E878881BB3A4B7A /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0CE08CBDF582CBD5B5FD9D /* SoundManager.swift */; };
 		534A456181538634AE068A58 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95C1932757B71344153F48C9 /* EmptyStateView.swift */; };
 		5935D8F4AC1777B3C4F6A49C /* PerHabitDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD9F5F41DC70F13A090D772A /* PerHabitDetailView.swift */; };
 		59436ADA430C9BF93F915015 /* MediumTodayWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B52C09743E537F3867D3183 /* MediumTodayWidget.swift */; };
@@ -25,6 +33,7 @@
 		7F5402F81D8B196F17FA9388 /* InsightNudgeBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A08057FF34110A251A2E4E /* InsightNudgeBannerView.swift */; };
 		814E4B88C3614D3D8A4733BA /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 627D595038369F57098F52A1 /* NotificationService.swift */; };
 		826FFDB90112DE59349D20C6 /* SuggestionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7663B877DFC156E7E400AD6 /* SuggestionCardView.swift */; };
+		8936D10C8CF571BD64B78D38 /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67D9BAF334EF6CC87C2505AF /* HealthKitService.swift */; };
 		8D90971B9BA7D352FA1ABB8D /* DaySnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74FF1A00F947EF3732774C5C /* DaySnapshot.swift */; };
 		93225FF3A2BECF96CD467DF7 /* WidgetDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4637BFC3CCB8FD2BBCAC1A6 /* WidgetDataService.swift */; };
 		98E438332CD04CEBD2357998 /* HabitFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 427FADD223B6094C9D0D13FC /* HabitFormView.swift */; };
@@ -32,12 +41,14 @@
 		9E0CCC6530860A7159A9D663 /* StatsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 343A47EA0036BD1D4575990C /* StatsViewModel.swift */; };
 		9F8671D12D20F75D5BB60A38 /* BadgeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CE8EDAB0612835C9E4FAF92 /* BadgeEngine.swift */; };
 		A01061DEB4AC88AA702E85A6 /* BadgeCeremonyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57580F01A5D4747F8AA5FD30 /* BadgeCeremonyView.swift */; };
+		A0765C1A42B4744D802CCC88 /* JournalingPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55D20DC9E81A23F725C9142D /* JournalingPrompts.swift */; };
 		A0C59FDA96E5D6B45C5EB4D7 /* StoreKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9EE3C52F9F4CFC12B60A938 /* StoreKitManager.swift */; };
 		A3B7E7BD8A853BD05D328F08 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD781EE9097A44286011CD7D /* StatsView.swift */; };
 		A3BB065F82BFC0A3F14F2DFE /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B44EEC6D7CED6B64B567F5 /* PaywallView.swift */; };
 		AAA8A5EDA875196676E198F5 /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76393F0777026D7823497C12 /* ShareCardView.swift */; };
 		B194A5F00D83DC754A97E4B7 /* CompletionCircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9458E518BEB532283AB0E914 /* CompletionCircleView.swift */; };
-		BC79DDDC1CD98D83D4E25646 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = "TEMP_484A1173-B8E8-4F5B-8765-13843B3CBFC0" /* ContentView.swift */; };
+		B1E691AB5C8C2DA446F89B09 /* UndoToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79561A55F258274B467A5AA7 /* UndoToastView.swift */; };
+		BF31E0DF4A306C7B7A84B284 /* DailyArcApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = "TEMP_54059297-ECA8-46BF-BA6E-A94FEAECEC37" /* DailyArcApp.swift */; };
 		C04E102E3FEC8FAFD1E5FFC7 /* DailyArcSchemaV1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A77ECB5ABC63CFE5434F02F /* DailyArcSchemaV1.swift */; };
 		C4FBE5430BC2F975EB8C09BC /* StreakEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9FA3DA276AF1856FA899A7A /* StreakEngine.swift */; };
 		C64C95AF9177DB96E77A2347 /* ActivityTagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DFDF5E5D95988920C62330F /* ActivityTagsView.swift */; };
@@ -45,13 +56,13 @@
 		CFD5E2764412D514A574D47E /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A35C52E58BAF9C775DC384 /* ExportService.swift */; };
 		D19AAF21E9CCC54D04650FEC /* TodayViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FE336A8DAAC23B4507CE8D4 /* TodayViewModel.swift */; };
 		D2C2060DC0E404B425D006DC /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80571F8B6983E8F8215A6152 /* HapticManager.swift */; };
-		D7E0EB061EBEC144F24DA4EB /* DailyArcApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = "TEMP_DA6ABA6B-F260-44ED-A62A-DDE253EB8F89" /* DailyArcApp.swift */; };
+		D3F23E405A51A399E809E2BE /* CelebrationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B72E52730DFE36876D5445B /* CelebrationService.swift */; };
 		DBAF0C6E19836ECE23E76CA5 /* HabitRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93DAAF7DD9DD6FD869422D36 /* HabitRowView.swift */; };
 		DBBBDD1FE70D9E9F26C5F7BA /* HabitColorPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00E4C2BA05918DBA309FA6F3 /* HabitColorPalette.swift */; };
 		DD5096A92FB74E592B7E6BA4 /* EnergyPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4E66382766912952729375 /* EnergyPickerView.swift */; };
-		E109BCA2304097A00C0A5520 /* DailyArc.xcodeproj in Resources */ = {isa = PBXBuildFile; fileRef = "TEMP_38EF22FD-113F-487F-809A-F8689DD89723" /* DailyArc.xcodeproj */; };
 		E430DC7E02A0AFFED9741083 /* DebugDataGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F725519755B9359B715E854A /* DebugDataGenerator.swift */; };
 		E685F961858A1B940FEB34D7 /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBC3F283BD857C4F79F8CEB1 /* ColorExtensions.swift */; };
+		E6D79B5FF389B5DDAAD113FF /* DailyArc.xcodeproj in Resources */ = {isa = PBXBuildFile; fileRef = "TEMP_3ED9CBF2-D644-4F93-A9A8-3FFB5B3EDB57" /* DailyArc.xcodeproj */; };
 		EC129420023092EA1712E13D /* PerHabitCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B778F6950FA553DF1C6DBB8 /* PerHabitCardView.swift */; };
 		ED23615BCFB9169BB50AE5FF /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F325BD5E22116DEB03AC7145 /* SettingsView.swift */; };
 		FA4F19249920E551133B30BE /* DailyArcTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98893F5E39150983A8494EBB /* DailyArcTokens.swift */; };
@@ -69,14 +80,20 @@
 		3A77ECB5ABC63CFE5434F02F /* DailyArcSchemaV1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyArcSchemaV1.swift; sourceTree = "<group>"; };
 		427FADD223B6094C9D0D13FC /* HabitFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitFormView.swift; sourceTree = "<group>"; };
 		4DFDF5E5D95988920C62330F /* ActivityTagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityTagsView.swift; sourceTree = "<group>"; };
+		55D20DC9E81A23F725C9142D /* JournalingPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalingPrompts.swift; sourceTree = "<group>"; };
 		572684923F60E35048E058A7 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
 		57580F01A5D4747F8AA5FD30 /* BadgeCeremonyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeCeremonyView.swift; sourceTree = "<group>"; };
 		57A08057FF34110A251A2E4E /* InsightNudgeBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightNudgeBannerView.swift; sourceTree = "<group>"; };
+		59B8618E6CF4E8A682760FD9 /* MotivationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationService.swift; sourceTree = "<group>"; };
 		5CE8EDAB0612835C9E4FAF92 /* BadgeEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeEngine.swift; sourceTree = "<group>"; };
 		627D595038369F57098F52A1 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		67D9BAF334EF6CC87C2505AF /* HealthKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitService.swift; sourceTree = "<group>"; };
+		689E8FBD356D1D2EAABDFA4A /* KeychainDOBService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainDOBService.swift; sourceTree = "<group>"; };
 		69904F3AB52932615A5DE5A9 /* SmallStreakWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallStreakWidget.swift; sourceTree = "<group>"; };
 		74FF1A00F947EF3732774C5C /* DaySnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaySnapshot.swift; sourceTree = "<group>"; };
 		76393F0777026D7823497C12 /* ShareCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardView.swift; sourceTree = "<group>"; };
+		767B4977F7A6118487C720BA /* MotivationCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationCardView.swift; sourceTree = "<group>"; };
+		79561A55F258274B467A5AA7 /* UndoToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoToastView.swift; sourceTree = "<group>"; };
 		80571F8B6983E8F8215A6152 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		84EFD5B662DB2161ACF87A6E /* RuleEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleEngine.swift; sourceTree = "<group>"; };
 		8B52C09743E537F3867D3183 /* MediumTodayWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediumTodayWidget.swift; sourceTree = "<group>"; };
@@ -86,8 +103,10 @@
 		95C1932757B71344153F48C9 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		98893F5E39150983A8494EBB /* DailyArcTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyArcTokens.swift; sourceTree = "<group>"; };
 		9B4ECE583455A6C55F529C0F /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		9B72E52730DFE36876D5445B /* CelebrationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelebrationService.swift; sourceTree = "<group>"; };
 		9B968BFE5D31762CA7D63959 /* MoodCheckInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoodCheckInView.swift; sourceTree = "<group>"; };
 		9FE336A8DAAC23B4507CE8D4 /* TodayViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayViewModel.swift; sourceTree = "<group>"; };
+		B3AA529407FE962799E23038 /* EasterEggManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EasterEggManager.swift; sourceTree = "<group>"; };
 		B6A35C52E58BAF9C775DC384 /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
 		BAE9B9DB49647538B9B15175 /* CorrelationCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CorrelationCardView.swift; sourceTree = "<group>"; };
 		BD727D091437B648C8A34E41 /* DateNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateNavigationBar.swift; sourceTree = "<group>"; };
@@ -95,10 +114,13 @@
 		C4AF6C9EF0BC7368B830C2D4 /* DebouncedSave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebouncedSave.swift; sourceTree = "<group>"; };
 		C9EE3C52F9F4CFC12B60A938 /* StoreKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitManager.swift; sourceTree = "<group>"; };
 		CA4E66382766912952729375 /* EnergyPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnergyPickerView.swift; sourceTree = "<group>"; };
+		D043FF047131241C3172CDF1 /* ArchiveToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchiveToastView.swift; sourceTree = "<group>"; };
 		D491627ADD8A175FC993F8F2 /* MoodTrendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoodTrendView.swift; sourceTree = "<group>"; };
 		D9FA3DA276AF1856FA899A7A /* StreakEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakEngine.swift; sourceTree = "<group>"; };
+		DC0CE08CBDF582CBD5B5FD9D /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
 		DCB69FBC90C37CCBA87D5F79 /* DailyArc.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DailyArc.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E7663B877DFC156E7E400AD6 /* SuggestionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionCardView.swift; sourceTree = "<group>"; };
+		EAFB9FFEF5BE1420FCCE39BE /* StableHash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StableHash.swift; sourceTree = "<group>"; };
 		EBC3F283BD857C4F79F8CEB1 /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
 		EE651E9DC69F50BA2672916A /* HabitManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitManagementView.swift; sourceTree = "<group>"; };
 		F325BD5E22116DEB03AC7145 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -108,9 +130,9 @@
 		F9B44EEC6D7CED6B64B567F5 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		FD781EE9097A44286011CD7D /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		FD9F5F41DC70F13A090D772A /* PerHabitDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerHabitDetailView.swift; sourceTree = "<group>"; };
-		"TEMP_38EF22FD-113F-487F-809A-F8689DD89723" /* DailyArc.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = DailyArc.xcodeproj; sourceTree = "<group>"; };
-		"TEMP_484A1173-B8E8-4F5B-8765-13843B3CBFC0" /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		"TEMP_DA6ABA6B-F260-44ED-A62A-DDE253EB8F89" /* DailyArcApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyArcApp.swift; sourceTree = "<group>"; };
+		"TEMP_3ED9CBF2-D644-4F93-A9A8-3FFB5B3EDB57" /* DailyArc.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = DailyArc.xcodeproj; sourceTree = "<group>"; };
+		"TEMP_54059297-ECA8-46BF-BA6E-A94FEAECEC37" /* DailyArcApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyArcApp.swift; sourceTree = "<group>"; };
+		"TEMP_84C4724B-4656-443B-BE74-9B963D07DA73" /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -156,6 +178,9 @@
 				C4AF6C9EF0BC7368B830C2D4 /* DebouncedSave.swift */,
 				00E4C2BA05918DBA309FA6F3 /* HabitColorPalette.swift */,
 				80571F8B6983E8F8215A6152 /* HapticManager.swift */,
+				55D20DC9E81A23F725C9142D /* JournalingPrompts.swift */,
+				DC0CE08CBDF582CBD5B5FD9D /* SoundManager.swift */,
+				EAFB9FFEF5BE1420FCCE39BE /* StableHash.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -177,10 +202,13 @@
 		799CC5272FF7AA6D666168DD /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				D043FF047131241C3172CDF1 /* ArchiveToastView.swift */,
 				57580F01A5D4747F8AA5FD30 /* BadgeCeremonyView.swift */,
 				9458E518BEB532283AB0E914 /* CompletionCircleView.swift */,
 				95C1932757B71344153F48C9 /* EmptyStateView.swift */,
+				767B4977F7A6118487C720BA /* MotivationCardView.swift */,
 				76393F0777026D7823497C12 /* ShareCardView.swift */,
+				79561A55F258274B467A5AA7 /* UndoToastView.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -263,8 +291,13 @@
 			isa = PBXGroup;
 			children = (
 				5CE8EDAB0612835C9E4FAF92 /* BadgeEngine.swift */,
+				9B72E52730DFE36876D5445B /* CelebrationService.swift */,
 				BE0668EC138F1EC40A82255D /* CorrelationEngine.swift */,
+				B3AA529407FE962799E23038 /* EasterEggManager.swift */,
 				B6A35C52E58BAF9C775DC384 /* ExportService.swift */,
+				67D9BAF334EF6CC87C2505AF /* HealthKitService.swift */,
+				689E8FBD356D1D2EAABDFA4A /* KeychainDOBService.swift */,
+				59B8618E6CF4E8A682760FD9 /* MotivationService.swift */,
 				627D595038369F57098F52A1 /* NotificationService.swift */,
 				84EFD5B662DB2161ACF87A6E /* RuleEngine.swift */,
 				C9EE3C52F9F4CFC12B60A938 /* StoreKitManager.swift */,
@@ -288,12 +321,12 @@
 			path = Today;
 			sourceTree = "<group>";
 		};
-		"TEMP_FA369264-C1BA-4F35-A760-69E8E056A729" /* . */ = {
+		"TEMP_7CE5EA45-3656-450D-809C-4D22EB37D648" /* . */ = {
 			isa = PBXGroup;
 			children = (
-				"TEMP_38EF22FD-113F-487F-809A-F8689DD89723" /* DailyArc.xcodeproj */,
-				"TEMP_DA6ABA6B-F260-44ED-A62A-DDE253EB8F89" /* DailyArcApp.swift */,
-				"TEMP_484A1173-B8E8-4F5B-8765-13843B3CBFC0" /* ContentView.swift */,
+				"TEMP_3ED9CBF2-D644-4F93-A9A8-3FFB5B3EDB57" /* DailyArc.xcodeproj */,
+				"TEMP_54059297-ECA8-46BF-BA6E-A94FEAECEC37" /* DailyArcApp.swift */,
+				"TEMP_84C4724B-4656-443B-BE74-9B963D07DA73" /* ContentView.swift */,
 				F79E1F60F2DEE24DB4CAC5B8 /* ViewModels */,
 				320C3BE7A8AC60B932DFCC9E /* Tests */,
 				9ADA097D11D8CF452F293835 /* Models */,
@@ -362,7 +395,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E109BCA2304097A00C0A5520 /* DailyArc.xcodeproj in Resources */,
+				E6D79B5FF389B5DDAAD113FF /* DailyArc.xcodeproj in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -374,16 +407,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				C64C95AF9177DB96E77A2347 /* ActivityTagsView.swift in Sources */,
+				2A82E62278C961A6E1889561 /* ArchiveToastView.swift in Sources */,
 				A01061DEB4AC88AA702E85A6 /* BadgeCeremonyView.swift in Sources */,
 				9F8671D12D20F75D5BB60A38 /* BadgeEngine.swift in Sources */,
 				10A7C4610AD46960BAECC1BF /* BadgesView.swift in Sources */,
 				0923C195AC09DE12CD643D68 /* CelebrationOverlay.swift in Sources */,
+				D3F23E405A51A399E809E2BE /* CelebrationService.swift in Sources */,
 				E685F961858A1B940FEB34D7 /* ColorExtensions.swift in Sources */,
 				B194A5F00D83DC754A97E4B7 /* CompletionCircleView.swift in Sources */,
-				BC79DDDC1CD98D83D4E25646 /* ContentView.swift in Sources */,
+				17E8A8FAD991C5A20E5F1076 /* ContentView.swift in Sources */,
 				16194B4850096C6852032088 /* CorrelationCardView.swift in Sources */,
 				2BAA057304A5CF1B4589F080 /* CorrelationEngine.swift in Sources */,
-				D7E0EB061EBEC144F24DA4EB /* DailyArcApp.swift in Sources */,
+				BF31E0DF4A306C7B7A84B284 /* DailyArcApp.swift in Sources */,
 				C04E102E3FEC8FAFD1E5FFC7 /* DailyArcSchemaV1.swift in Sources */,
 				FA4F19249920E551133B30BE /* DailyArcTokens.swift in Sources */,
 				4A3F0D3E065B9D0B49E0CE6F /* DailyArcWidgetBundle.swift in Sources */,
@@ -392,6 +427,7 @@
 				8D90971B9BA7D352FA1ABB8D /* DaySnapshot.swift in Sources */,
 				7252FB978A68304B228A5637 /* DebouncedSave.swift in Sources */,
 				E430DC7E02A0AFFED9741083 /* DebugDataGenerator.swift in Sources */,
+				4FF6CA2125073B1CB36C5E68 /* EasterEggManager.swift in Sources */,
 				534A456181538634AE068A58 /* EmptyStateView.swift in Sources */,
 				DD5096A92FB74E592B7E6BA4 /* EnergyPickerView.swift in Sources */,
 				CFD5E2764412D514A574D47E /* ExportService.swift in Sources */,
@@ -400,11 +436,16 @@
 				0A5A18799F2A15B0A59BB3C9 /* HabitManagementView.swift in Sources */,
 				DBAF0C6E19836ECE23E76CA5 /* HabitRowView.swift in Sources */,
 				D2C2060DC0E404B425D006DC /* HapticManager.swift in Sources */,
+				8936D10C8CF571BD64B78D38 /* HealthKitService.swift in Sources */,
 				4CC81C7A04DA08138BCA890B /* HeatMapCanvasView.swift in Sources */,
 				7F5402F81D8B196F17FA9388 /* InsightNudgeBannerView.swift in Sources */,
+				A0765C1A42B4744D802CCC88 /* JournalingPrompts.swift in Sources */,
+				0265023CE281712CD787D9BD /* KeychainDOBService.swift in Sources */,
 				59436ADA430C9BF93F915015 /* MediumTodayWidget.swift in Sources */,
 				FB76019ECE27375BF4409FEE /* MoodCheckInView.swift in Sources */,
 				9C7722E04597DF969D422FEA /* MoodTrendView.swift in Sources */,
+				4FDA37DC091B2DE5718FF784 /* MotivationCardView.swift in Sources */,
+				0EAF6AF0791C054D7DF221C4 /* MotivationService.swift in Sources */,
 				814E4B88C3614D3D8A4733BA /* NotificationService.swift in Sources */,
 				4D926B344C1C358F7CB5151D /* OnboardingView.swift in Sources */,
 				A3BB065F82BFC0A3F14F2DFE /* PaywallView.swift in Sources */,
@@ -414,6 +455,8 @@
 				ED23615BCFB9169BB50AE5FF /* SettingsView.swift in Sources */,
 				AAA8A5EDA875196676E198F5 /* ShareCardView.swift in Sources */,
 				0B9566CE74816CBDAEA9FEF2 /* SmallStreakWidget.swift in Sources */,
+				53215C819E878881BB3A4B7A /* SoundManager.swift in Sources */,
+				33AA9D4B6B93639B96361465 /* StableHash.swift in Sources */,
 				A3B7E7BD8A853BD05D328F08 /* StatsView.swift in Sources */,
 				9E0CCC6530860A7159A9D663 /* StatsViewModel.swift in Sources */,
 				A0C59FDA96E5D6B45C5EB4D7 /* StoreKitManager.swift in Sources */,
@@ -421,6 +464,7 @@
 				826FFDB90112DE59349D20C6 /* SuggestionCardView.swift in Sources */,
 				C791B40F0C65AF21E7E4E383 /* TodayView.swift in Sources */,
 				D19AAF21E9CCC54D04650FEC /* TodayViewModel.swift in Sources */,
+				B1E691AB5C8C2DA446F89B09 /* UndoToastView.swift in Sources */,
 				93225FF3A2BECF96CD467DF7 /* WidgetDataService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

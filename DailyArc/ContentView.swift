@@ -14,6 +14,13 @@ struct ContentView: View {
         }
     }
 
+    /// Check Keychain for COPPA block status on launch (survives reinstall).
+    private func checkKeychainCOPPA() {
+        if KeychainDOBService.isCOPPABlocked() {
+            isCOPPABlocked = true
+        }
+    }
+
     private var coppaBlockScreen: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -74,6 +81,7 @@ struct ContentView: View {
         }
         .tint(DailyArcTokens.accent)
         .onAppear {
+            checkKeychainCOPPA()
             if !hasCompletedOnboarding {
                 showOnboarding = true
             }

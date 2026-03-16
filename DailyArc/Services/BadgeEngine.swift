@@ -10,7 +10,7 @@ struct Badge: Identifiable, Codable, Sendable {
     var earnedDate: Date?
 
     enum Category: String, Codable, Sendable {
-        case streak, milestone
+        case streak, milestone, volume, discovery
     }
 
     var isEarned: Bool { earnedDate != nil }
@@ -34,10 +34,14 @@ class BadgeEngine {
         Badge(id: "golden_arc", name: "Golden Arc", emoji: "\u{1F3C6}", description: "100-day streak", category: .streak),
         Badge(id: "zenith", name: "Zenith", emoji: "\u{1F48E}", description: "365-day streak", category: .streak),
         // Milestone badges
-        Badge(id: "inner_arc", name: "Inner Arc", emoji: "\u{1F4AD}", description: "Log your first mood", category: .milestone),
+        Badge(id: "inner_arc", name: "Inner Arc", emoji: "\u{1F4CA}", description: "Log mood 50 times", category: .volume),
         Badge(id: "spectrum_arc", name: "Spectrum Arc", emoji: "\u{1F308}", description: "Use all 5 mood scores", category: .milestone),
-        Badge(id: "century_arc", name: "Century Arc", emoji: "\u{1F4AF}", description: "100 total completions", category: .milestone),
+        Badge(id: "century_arc", name: "Century Arc", emoji: "\u{1F3AF}", description: "100 total habit completions", category: .volume),
         Badge(id: "mindful_arc", name: "Mindful Arc", emoji: "\u{1F9D8}", description: "Log mood 7 days in a row", category: .milestone),
+        // Volume badges
+        Badge(id: "insight_arc", name: "Insight Arc", emoji: "\u{1F4C8}", description: "14+ paired mood & habit data points", category: .volume),
+        // Discovery badges
+        Badge(id: "detail_arc", name: "Detail Arc", emoji: "\u{1F50D}", description: "Found 5+ easter eggs", category: .discovery),
     ]
 
     private init() {
@@ -70,10 +74,10 @@ class BadgeEngine {
             }
         }
 
-        // --- inner_arc: Log your first mood ---
+        // --- inner_arc: Log mood 50 times ---
         if !earnedIDs.contains("inner_arc") {
-            let hasMood = moods.contains { $0.moodScore > 0 }
-            if hasMood {
+            let moodLogCount = moods.filter { $0.moodScore > 0 }.count
+            if moodLogCount >= 50 {
                 awardBadge(id: "inner_arc", date: now)
             }
         }
@@ -103,6 +107,31 @@ class BadgeEngine {
             )
             if hasConsecutiveDays(dates: moodDates, count: 7, calendar: calendar) {
                 awardBadge(id: "mindful_arc", date: now)
+            }
+        }
+
+        // --- insight_arc: 14+ days with both mood and habit data ---
+        if !earnedIDs.contains("insight_arc") {
+            let moodDates = Set(
+                moods
+                    .filter { $0.moodScore > 0 }
+                    .map { calendar.startOfDay(for: $0.date) }
+            )
+            let logDates = Set(
+                logs
+                    .filter { $0.count > 0 }
+                    .map { calendar.startOfDay(for: $0.date) }
+            )
+            let pairedDates = moodDates.intersection(logDates)
+            if pairedDates.count >= 14 {
+                awardBadge(id: "insight_arc", date: now)
+            }
+        }
+
+        // --- detail_arc: Found 5+ easter eggs ---
+        if !earnedIDs.contains("detail_arc") {
+            if EasterEggManager.shared.hasDetailArcBadge {
+                awardBadge(id: "detail_arc", date: now)
             }
         }
 

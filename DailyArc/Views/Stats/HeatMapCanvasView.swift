@@ -8,6 +8,7 @@ struct HeatMapCanvasView: View {
     @Binding var selectedSnapshot: DaySnapshot?
 
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
 
     private let cellSize: CGFloat = 12
     private let cellGap: CGFloat = 3
@@ -81,6 +82,35 @@ struct HeatMapCanvasView: View {
             let color = cellColor(for: snapshot)
             let path = RoundedRectangle(cornerRadius: 2).path(in: rect)
             context.fill(path, with: .color(color))
+
+            // Colorblind patterns when differentiateWithoutColor is enabled
+            if differentiateWithoutColor && snapshot.totalHabits > 0 {
+                let pct = snapshot.completionPercentage
+                let patternColor = Color.primary.opacity(0.4)
+                let center = CGPoint(x: rect.midX, y: rect.midY)
+
+                if pct <= 0 {
+                    // 0%: centered dot
+                    let dotRect = CGRect(x: center.x - 1, y: center.y - 1, width: 2, height: 2)
+                    let dot = Circle().path(in: dotRect)
+                    context.fill(dot, with: .color(patternColor))
+                } else if pct <= 0.25 {
+                    // 1-25%: diagonal line
+                    var linePath = Path()
+                    linePath.move(to: CGPoint(x: rect.minX + 2, y: rect.maxY - 2))
+                    linePath.addLine(to: CGPoint(x: rect.maxX - 2, y: rect.minY + 2))
+                    context.stroke(linePath, with: .color(patternColor), lineWidth: 1)
+                } else if pct <= 0.75 {
+                    // 26-75%: crosshatch
+                    var crossPath = Path()
+                    crossPath.move(to: CGPoint(x: rect.minX + 2, y: rect.maxY - 2))
+                    crossPath.addLine(to: CGPoint(x: rect.maxX - 2, y: rect.minY + 2))
+                    crossPath.move(to: CGPoint(x: rect.minX + 2, y: rect.minY + 2))
+                    crossPath.addLine(to: CGPoint(x: rect.maxX - 2, y: rect.maxY - 2))
+                    context.stroke(crossPath, with: .color(patternColor), lineWidth: 1)
+                }
+                // 76-100%: solid fill (already colored strongly, no extra pattern)
+            }
         }
     }
 

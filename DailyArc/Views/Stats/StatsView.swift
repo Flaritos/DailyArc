@@ -18,6 +18,10 @@ struct StatsView: View {
     private var allMoods: [MoodEntry]
 
     @State private var viewModel = StatsViewModel()
+    @State private var showPaywall = false
+    @State private var showMoodConsentPrompt = false
+    @AppStorage("moodCorrelationConsentDate") private var moodConsentDate = ""
+    @AppStorage("moodConsentPromptDismissed") private var moodConsentDismissed = false
 
     private let columns = [
         GridItem(.flexible(), spacing: DailyArcSpacing.md),
@@ -119,27 +123,48 @@ struct StatsView: View {
         ScrollView {
             VStack(spacing: DailyArcSpacing.xl) {
                 if viewModel.pairedDataDays < 14 {
-                    // Not enough data — show progress
+                    // Not enough data — show progress + teaser
                     dataCollectionProgressView
+
+                    // Pre-activation teaser
+                    insightTeaserCard
+                } else if !StoreKitManager.shared.isPremium {
+                    // Free user with enough data — show teaser + paywall CTA
+                    freeUserInsightTeaser
                 } else if viewModel.isComputingCorrelations {
-                    // Loading state
                     computingView
                 } else if viewModel.correlationResults.isEmpty {
                     if let error = viewModel.correlationError {
-                        // Timeout with no results
                         stillCrunchingView(message: error)
                     } else {
-                        // No significant correlations found
                         noCorrelationsView
                     }
                 } else {
-                    // Show real results
                     correlationResultsView
                 }
             }
             .padding(.vertical, DailyArcSpacing.lg)
         }
         .background(DailyArcTokens.backgroundPrimary)
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
+        }
+        .onAppear {
+            // Mood correlation consent prompt (single-shot)
+            if moodConsentDate.isEmpty && !moodConsentDismissed {
+                showMoodConsentPrompt = true
+            }
+        }
+        .alert("Enable mood insights?", isPresented: $showMoodConsentPrompt) {
+            Button("Enable") {
+                moodConsentDate = ISO8601DateFormatter().string(from: Date())
+            }
+            Button("Not Now", role: .cancel) {
+                moodConsentDismissed = true
+            }
+        } message: {
+            Text("DailyArc can show how your habits affect your mood \u{2014} all analysis stays on your device.")
+        }
     }
 
     // MARK: - Data Collection Progress
@@ -293,6 +318,118 @@ struct StatsView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, DailyArcSpacing.lg)
                 .padding(.top, DailyArcSpacing.sm)
+        }
+    }
+
+    // MARK: - Insight Teaser (Pre-14 days)
+
+    private var insightTeaserCard: some View {
+        VStack(spacing: DailyArcSpacing.md) {
+            HStack {
+                Image(systemName: "lock.fill")
+                    .font(.caption)
+                    .foregroundStyle(DailyArcTokens.textTertiary)
+                Text("Preview")
+                    .typography(.caption)
+                    .foregroundStyle(DailyArcTokens.textTertiary)
+                Spacer()
+            }
+
+            HStack(spacing: DailyArcSpacing.sm) {
+                Text("\u{1F3C3}")
+                    .font(.title3)
+                VStack(alignment: .leading, spacing: DailyArcSpacing.xxs) {
+                    Text("On exercise days, users average mood 4.2 vs 3.1 on skip days")
+                        .typography(.bodySmall)
+                        .foregroundStyle(DailyArcTokens.textSecondary)
+                    Text("Sample data \u{2014} your real insights unlock soon")
+                        .typography(.caption)
+                        .foregroundStyle(DailyArcTokens.textTertiary)
+                }
+            }
+        }
+        .padding(DailyArcSpacing.lg)
+        .background(
+            RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium)
+                .fill(DailyArcTokens.backgroundSecondary.opacity(0.5))
+        )
+        .padding(.horizontal, DailyArcSpacing.lg)
+    }
+
+    // MARK: - Free User Insight Teaser (Post-14 days, not premium)
+
+    private var freeUserInsightTeaser: some View {
+        VStack(spacing: DailyArcSpacing.xl) {
+            // Show the single strongest correlation as a freebie
+            if let topResult = viewModel.correlationResults.first {
+                VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
+                    Text("Your strongest pattern")
+                        .typography(.titleSmall)
+                        .foregroundStyle(DailyArcTokens.textPrimary)
+
+                    CorrelationCardView(result: topResult)
+                }
+                .padding(.horizontal, DailyArcSpacing.lg)
+            } else {
+                // Correlations still computing or empty
+                VStack(spacing: DailyArcSpacing.md) {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .font(.system(size: 40))
+                        .foregroundStyle(DailyArcTokens.accent)
+
+                    Text("Your data is ready!")
+                        .typography(.titleMedium)
+                        .foregroundStyle(DailyArcTokens.textPrimary)
+
+                    Text("14+ days of paired mood and habit data \u{2014} your insights are waiting.")
+                        .typography(.bodySmall)
+                        .foregroundStyle(DailyArcTokens.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, DailyArcSpacing.xl)
+                }
+            }
+
+            // Paywall CTA
+            VStack(spacing: DailyArcSpacing.md) {
+                Text("Want to see all your insights?")
+                    .typography(.bodySmall)
+                    .foregroundStyle(DailyArcTokens.textSecondary)
+
+                Button {
+                    showPaywall = true
+                } label: {
+                    HStack {
+                        Image(systemName: "crown.fill")
+                            .foregroundStyle(DailyArcTokens.premiumGold)
+                        Text("See all insights")
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .padding(.horizontal, DailyArcSpacing.xxl)
+            }
+            .padding(DailyArcSpacing.lg)
+            .background(
+                RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium)
+                    .fill(DailyArcTokens.backgroundSecondary)
+            )
+            .padding(.horizontal, DailyArcSpacing.lg)
+
+            // Free suggestions (limited set)
+            if !viewModel.suggestions.isEmpty {
+                let freeSuggestions = viewModel.suggestions.prefix(4)
+                VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
+                    Text("Suggestions")
+                        .typography(.titleSmall)
+                        .foregroundStyle(DailyArcTokens.textPrimary)
+                        .padding(.horizontal, DailyArcSpacing.lg)
+
+                    ForEach(Array(freeSuggestions)) { suggestion in
+                        SuggestionCardView(suggestion: suggestion)
+                            .padding(.horizontal, DailyArcSpacing.lg)
+                    }
+                }
+            }
         }
     }
 

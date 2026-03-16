@@ -19,31 +19,40 @@ struct TodayView: View {
     @State private var debouncedSave: DebouncedSave?
     @State private var streakEngine = StreakEngine()
     @State private var showAddHabitSheet = false
+    @State private var editingHabit: Habit?
+    @State private var showCalendarPicker = false
+    @State private var calendarPickerDate = Date()
+
+    // Archive toast
+    @State private var archiveToast: ArchiveToastInfo? = nil
+    struct ArchiveToastInfo: Identifiable {
+        let id = UUID()
+        let action: ArchiveToastView.ArchiveAction
+        let name: String
+        let emoji: String
+        let streak: Int
+    }
 
     private var calendar: Calendar {
         debouncedSave?.userCalendar ?? Calendar.current
     }
 
-    /// Habits filtered to those that should appear on the selected date.
     private var visibleHabits: [Habit] {
         habits.filter { $0.shouldAppear(on: viewModel.selectedDate, calendar: calendar) }
     }
 
-    /// Total completion progress for the overall arc indicator.
     private var totalProgress: (completed: Int, total: Int) {
         let total = visibleHabits.count
         let completed = visibleHabits.filter { viewModel.completionCount(for: $0) >= $0.targetCount }.count
         return (completed, total)
     }
 
-    /// Whether all visible habits are completed.
     private var allHabitsCompleted: Bool {
         let visible = visibleHabits
         guard !visible.isEmpty else { return false }
         return visible.allSatisfy { viewModel.completionCount(for: $0) >= $0.targetCount }
     }
 
-    /// Streak recovery info for display.
     private var recoverableHabit: (habit: Habit, missedDays: Int, dates: [Date])? {
         for habit in habits {
             let habitID = habit.id
@@ -59,10 +68,35 @@ struct TodayView: View {
         return nil
     }
 
+    /// Whether GDPR consent is withdrawn (read-only mode)
+    private var isConsentWithdrawn: Bool {
+        UserDefaults.standard.bool(forKey: "gdprConsentWithdrawn")
+    }
+
+    /// Whether free tier limit hint should show
+    private var showFreeTierHint: Bool {
+        habits.count >= 3 && !StoreKitManager.shared.isPremium
+    }
+
     var body: some View {
         ZStack {
             ScrollView {
                 VStack(spacing: DailyArcSpacing.xl) {
+                    // Consent withdrawn banner
+                    if isConsentWithdrawn {
+                        HStack {
+                            Image(systemName: "pause.circle.fill")
+                                .foregroundStyle(DailyArcTokens.warning)
+                            Text("Data processing paused. Re-enable in Settings \u{2192} Privacy.")
+                                .typography(.caption)
+                                .foregroundStyle(DailyArcTokens.textSecondary)
+                        }
+                        .padding(DailyArcSpacing.md)
+                        .background(DailyArcTokens.warning.opacity(DailyArcTokens.opacityLight))
+                        .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
+                        .padding(.horizontal, DailyArcSpacing.lg)
+                    }
+
                     // Greeting
                     Text(viewModel.greetingText(habits: habits))
                         .typography(.titleLarge)
@@ -71,20 +105,43 @@ struct TodayView: View {
                         .padding(.horizontal, DailyArcSpacing.lg)
                         .padding(.top, DailyArcSpacing.sm)
 
-                    // Date Navigation
-                    DateNavigationBar(
-                        dateLabel: viewModel.dateLabel,
-                        canNavigateForward: viewModel.canNavigateForward,
-                        onBack: {
-                            viewModel.navigateBack()
-                            refreshData()
-                        },
-                        onForward: {
-                            viewModel.navigateForward()
-                            refreshData()
-                        }
-                    )
+                    // Motivation card
+                    if let card = MotivationService.shared.activeCard {
+                        let style: MotivationCardView.MotivationCardStyle = {
+                            switch card.style {
+                            case .toast: return .toast
+                            case .card: return .card
+                            case .goldCard: return .goldCard
+                            }
+                        }()
+                        MotivationCardView(
+                            message: card.message,
+                            style: style,
+                            onDismiss: { MotivationService.shared.dismiss() }
+                        )
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+
+                    // Date Navigation (tap center for calendar)
+                    HStack {
+                        DateNavigationBar(
+                            dateLabel: viewModel.dateLabel,
+                            canNavigateForward: viewModel.canNavigateForward,
+                            onBack: {
+                                viewModel.navigateBack()
+                                refreshData()
+                            },
+                            onForward: {
+                                viewModel.navigateForward()
+                                refreshData()
+                            }
+                        )
+                    }
                     .padding(.horizontal, DailyArcSpacing.sm)
+                    .onTapGesture {
+                        calendarPickerDate = viewModel.selectedDate
+                        showCalendarPicker = true
+                    }
 
                     // Streak Recovery Banner
                     if let recovery = recoverableHabit {
@@ -132,56 +189,74 @@ struct TodayView: View {
                         }
                         .buttonStyle(.plain)
                         .padding(.horizontal, DailyArcSpacing.lg)
-                        .accessibilityLabel("Streak recovery available. You missed \(recovery.missedDays) day\(recovery.missedDays == 1 ? "" : "s"). Tap to recover.")
+                        .accessibilityLabel("Streak recovery available")
                     }
 
                     // Mood Check-In Section
-                    VStack(spacing: DailyArcSpacing.sm) {
-                        MoodCheckInView(
-                            selectedScore: viewModel.moodEntry?.moodScore ?? 0,
-                            onSelect: { score in
-                                viewModel.saveMood(
-                                    score: score,
-                                    context: context,
-                                    calendar: calendar,
-                                    debouncedSave: debouncedSave
-                                )
-                                HapticManager.habitTap()
-                                checkBadgesAfterChange()
-                            }
-                        )
-
-                        // Energy picker — shown after mood is selected
-                        if (viewModel.moodEntry?.moodScore ?? 0) > 0 {
-                            EnergyPickerView(
-                                selectedScore: viewModel.moodEntry?.energyScore ?? 0,
+                    if !isConsentWithdrawn {
+                        VStack(spacing: DailyArcSpacing.sm) {
+                            MoodCheckInView(
+                                selectedScore: viewModel.moodEntry?.moodScore ?? 0,
                                 onSelect: { score in
-                                    viewModel.saveEnergy(
+                                    viewModel.saveMood(
                                         score: score,
                                         context: context,
                                         calendar: calendar,
                                         debouncedSave: debouncedSave
                                     )
                                     HapticManager.habitTap()
+                                    checkBadgesAfterChange()
                                 }
                             )
 
-                            // Activity tags — shown below energy picker
-                            ActivityTagsView(
-                                selectedActivities: viewModel.moodEntry?.activityList ?? [],
-                                onToggle: { tag in
-                                    viewModel.toggleActivity(
-                                        tag,
-                                        context: context,
-                                        calendar: calendar,
-                                        debouncedSave: debouncedSave
+                            if (viewModel.moodEntry?.moodScore ?? 0) > 0 {
+                                EnergyPickerView(
+                                    selectedScore: viewModel.moodEntry?.energyScore ?? 0,
+                                    onSelect: { score in
+                                        viewModel.saveEnergy(
+                                            score: score,
+                                            context: context,
+                                            calendar: calendar,
+                                            debouncedSave: debouncedSave
+                                        )
+                                        HapticManager.habitTap()
+                                    }
+                                )
+
+                                ActivityTagsView(
+                                    selectedActivities: viewModel.moodEntry?.activityList ?? [],
+                                    onToggle: { tag in
+                                        viewModel.toggleActivity(
+                                            tag,
+                                            context: context,
+                                            calendar: calendar,
+                                            debouncedSave: debouncedSave
+                                        )
+                                        HapticManager.habitTap()
+                                    }
+                                )
+
+                                // Notes field with journaling prompt
+                                VStack(alignment: .leading, spacing: DailyArcSpacing.xs) {
+                                    TextField(
+                                        JournalingPrompts.prompt(for: viewModel.selectedDate),
+                                        text: $viewModel.moodNotes,
+                                        axis: .vertical
                                     )
-                                    HapticManager.habitTap()
+                                    .lineLimit(2...6)
+                                    .textFieldStyle(.roundedBorder)
+                                    .onChange(of: viewModel.moodNotes) { _, _ in
+                                        viewModel.saveMoodNotes(
+                                            context: context,
+                                            calendar: calendar,
+                                            debouncedSave: debouncedSave
+                                        )
+                                    }
                                 }
-                            )
+                            }
                         }
+                        .padding(.horizontal, DailyArcSpacing.lg)
                     }
-                    .padding(.horizontal, DailyArcSpacing.lg)
 
                     Divider()
                         .padding(.horizontal, DailyArcSpacing.lg)
@@ -197,7 +272,7 @@ struct TodayView: View {
                         }
                         .padding(.vertical, DailyArcSpacing.xxxl)
                     } else {
-                        // Habits header with arc progress
+                        // Habits header with arc progress + Manage link
                         HStack {
                             Text("Habits")
                                 .typography(.titleSmall)
@@ -212,6 +287,14 @@ struct TodayView: View {
                             )
 
                             Spacer()
+
+                            NavigationLink {
+                                HabitManagementView()
+                            } label: {
+                                Text("Manage")
+                                    .typography(.caption)
+                                    .foregroundStyle(DailyArcTokens.accent)
+                            }
                         }
                         .padding(.horizontal, DailyArcSpacing.lg)
 
@@ -222,6 +305,7 @@ struct TodayView: View {
                                     habit: habit,
                                     count: viewModel.completionCount(for: habit),
                                     onToggle: {
+                                        guard !isConsentWithdrawn else { return }
                                         let wasComplete = viewModel.completionCount(for: habit) >= habit.targetCount
                                         viewModel.toggleHabit(
                                             habit,
@@ -233,6 +317,7 @@ struct TodayView: View {
                                         let nowComplete = viewModel.completionCount(for: habit) >= habit.targetCount
                                         if !wasComplete && nowComplete {
                                             HapticManager.habitCompletion()
+                                            CelebrationService.shared.checkFirstEverHabitCompletion()
                                             checkStreakMilestone(habit)
                                             checkAllComplete()
                                             checkBadgesAfterChange()
@@ -241,6 +326,7 @@ struct TodayView: View {
                                         }
                                     },
                                     onIncrement: {
+                                        guard !isConsentWithdrawn else { return }
                                         let wasComplete = viewModel.completionCount(for: habit) >= habit.targetCount
                                         viewModel.incrementHabit(
                                             habit,
@@ -252,6 +338,7 @@ struct TodayView: View {
                                         let nowComplete = viewModel.completionCount(for: habit) >= habit.targetCount
                                         if !wasComplete && nowComplete {
                                             HapticManager.habitCompletion()
+                                            CelebrationService.shared.checkFirstEverHabitCompletion()
                                             checkStreakMilestone(habit)
                                             checkAllComplete()
                                             checkBadgesAfterChange()
@@ -270,16 +357,29 @@ struct TodayView: View {
                                         HapticManager.habitTap()
                                     },
                                     onEdit: {
-                                        // TODO: Present HabitFormView in edit mode
+                                        editingHabit = habit
                                     },
                                     onArchive: {
+                                        let streak = habit.currentStreak
+                                        let name = habit.name
+                                        let emoji = habit.emoji
                                         habit.isArchived = true
                                         debouncedSave?.trigger()
+                                        showArchiveToast(.archive, name: name, emoji: emoji, streak: streak)
                                     }
                                 )
                             }
                         }
                         .padding(.horizontal, DailyArcSpacing.sm)
+
+                        // Free tier hint
+                        if showFreeTierHint {
+                            Text("Archive a habit to make room, or upgrade for unlimited.")
+                                .font(.caption)
+                                .foregroundStyle(DailyArcTokens.textTertiary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, DailyArcSpacing.lg)
+                        }
                     }
                 }
                 .padding(.bottom, DailyArcSpacing.xxl)
@@ -292,6 +392,40 @@ struct TodayView: View {
 
             // Badge ceremony overlay
             BadgeCeremonyView(badgeEngine: BadgeEngine.shared)
+
+            // Celebration service overlay
+            if CelebrationService.shared.showCelebration, let celebration = CelebrationService.shared.activeCelebration {
+                celebrationOverlay(celebration)
+            }
+
+            // Undo toast
+            if let message = viewModel.undoToastMessage {
+                VStack {
+                    Spacer()
+                    UndoToastView(message: message) {
+                        viewModel.performUndo()
+                    }
+                    .padding(.bottom, DailyArcSpacing.xl)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+                .animation(.spring(response: 0.3), value: viewModel.undoToastMessage != nil)
+            }
+
+            // Archive toast
+            if let toast = archiveToast {
+                VStack {
+                    Spacer()
+                    ArchiveToastView(
+                        action: toast.action,
+                        habitName: toast.name,
+                        habitEmoji: toast.emoji,
+                        streak: toast.streak
+                    )
+                    .padding(.bottom, DailyArcSpacing.xl)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+                .animation(.spring(response: 0.3), value: archiveToast != nil)
+            }
         }
         .navigationTitle("Today")
         .toolbar {
@@ -302,22 +436,64 @@ struct TodayView: View {
                     Image(systemName: "plus")
                 }
                 .accessibilityLabel("Add new habit")
+                .disabled(isConsentWithdrawn)
             }
         }
         .sheet(isPresented: $showAddHabitSheet) {
             HabitFormView(mode: .add)
+        }
+        .sheet(item: $editingHabit) { habit in
+            HabitFormView(mode: .edit(habit))
+        }
+        .sheet(isPresented: $showCalendarPicker) {
+            NavigationStack {
+                DatePicker(
+                    "Jump to date",
+                    selection: $calendarPickerDate,
+                    in: ...Date(),
+                    displayedComponents: .date
+                )
+                .datePickerStyle(.graphical)
+                .tint(DailyArcTokens.accent)
+                .padding()
+                .navigationTitle("Select Date")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") {
+                            viewModel.selectedDate = calendarPickerDate
+                            showCalendarPicker = false
+                            refreshData()
+                        }
+                    }
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") { showCalendarPicker = false }
+                    }
+                }
+            }
+            .presentationDetents([.medium])
         }
         .onAppear {
             if debouncedSave == nil {
                 debouncedSave = DebouncedSave(context: context)
             }
             refreshData()
+
+            // Track app opens and last open date
+            EasterEggManager.shared.incrementAppOpen()
+            UserDefaults.standard.set(Date(), forKey: "lastOpenDate")
+
+            // Check motivation milestones
+            let totalDays = viewModel.totalDaysLogged(context: context, calendar: calendar)
+            let userName = UserDefaults.standard.string(forKey: "userName") ?? ""
+            MotivationService.shared.checkDayMilestone(totalDaysLogged: totalDays, userName: userName)
         }
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
             case .active:
                 debouncedSave?.userCalendar = Calendar.current
                 refreshData()
+                UserDefaults.standard.set(Date(), forKey: "lastOpenDate")
             case .inactive:
                 debouncedSave?.flush()
             default:
@@ -331,15 +507,19 @@ struct TodayView: View {
         viewModel.fetchMoodEntry(context: context, calendar: calendar)
     }
 
-    /// Check if a habit just hit a streak milestone (7, 14, 21, 30, 50, 100, ...).
     private func checkStreakMilestone(_ habit: Habit) {
-        let milestones = [7, 14, 21, 30, 50, 100, 150, 200, 365]
+        let milestones = [3, 7, 14, 21, 30, 42, 50, 100, 150, 200, 365]
         if milestones.contains(habit.currentStreak) {
-            HapticManager.streakMilestone()
+            CelebrationService.shared.checkStreakMilestone(habit: habit, previousStreak: habit.bestStreak)
+        }
+
+        // Easter egg: streak-based
+        if let easterEgg = EasterEggManager.shared.checkStreakEasterEgg(streak: habit.currentStreak) {
+            // The message is handled by the easter egg manager's recording
+            _ = easterEgg
         }
     }
 
-    /// Check if all habits are now completed and trigger celebration.
     private func checkAllComplete() {
         if allHabitsCompleted {
             withAnimation {
@@ -348,7 +528,6 @@ struct TodayView: View {
         }
     }
 
-    /// Check badges after a habit or mood change.
     private func checkBadgesAfterChange() {
         BadgeEngine.shared.checkBadges(
             habits: habits,
@@ -356,6 +535,67 @@ struct TodayView: View {
             moods: allMoods,
             calendar: calendar
         )
+    }
+
+    private func showArchiveToast(_ action: ArchiveToastView.ArchiveAction, name: String, emoji: String, streak: Int) {
+        archiveToast = ArchiveToastInfo(action: action, name: name, emoji: emoji, streak: streak)
+        Task {
+            try? await Task.sleep(for: .seconds(4))
+            withAnimation { archiveToast = nil }
+        }
+    }
+
+    @ViewBuilder
+    private func celebrationOverlay(_ celebration: CelebrationService.Celebration) -> some View {
+        ZStack {
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+                .onTapGesture { CelebrationService.shared.dismiss() }
+
+            VStack(spacing: DailyArcSpacing.lg) {
+                Text(celebration.emoji)
+                    .font(.system(size: 64))
+
+                Text(celebration.title)
+                    .typography(.titleLarge)
+                    .foregroundStyle(DailyArcTokens.textPrimary)
+                    .multilineTextAlignment(.center)
+
+                Text(celebration.message)
+                    .typography(.bodySmall)
+                    .foregroundStyle(DailyArcTokens.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, DailyArcSpacing.xl)
+
+                HStack(spacing: DailyArcSpacing.md) {
+                    if celebration.showShareCard, let habitName = celebration.habitName {
+                        ShareButton(
+                            cardType: .streakMilestone(
+                                habitName: habitName,
+                                emoji: celebration.emoji,
+                                streak: 0,
+                                message: celebration.message
+                            ),
+                            label: "Share"
+                        )
+                        .buttonStyle(.bordered)
+                    }
+
+                    Button("Nice!") {
+                        CelebrationService.shared.dismiss()
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            }
+            .padding(DailyArcSpacing.xxl)
+            .background(
+                RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusLarge)
+                    .fill(DailyArcTokens.backgroundPrimary)
+                    .shadow(radius: 20)
+            )
+            .padding(DailyArcSpacing.xxl)
+        }
+        .transition(.opacity)
     }
 }
 

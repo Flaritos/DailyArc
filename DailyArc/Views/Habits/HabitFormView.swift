@@ -41,7 +41,17 @@ struct HabitFormView: View {
         return Calendar.current.date(from: comps) ?? Date()
     }()
 
+    @State private var selectedTemplate: String? = nil
     @FocusState private var nameFieldFocused: Bool
+
+    // MARK: - Template Data
+
+    private let formTemplates: [(emoji: String, name: String, targetCount: Int)] = [
+        ("\u{1F3C3}", "Exercise", 1), ("\u{1F4DA}", "Reading", 1),
+        ("\u{1F9D8}", "Meditate", 1), ("\u{1F4A4}", "Sleep 8hrs", 1),
+        ("\u{1F4A7}", "Drink Water", 8), ("\u{1F4DD}", "Journal", 1),
+        ("\u{1F6B6}", "Walk", 1), ("\u{1F3A8}", "Creative Time", 1)
+    ]
 
     // MARK: - Emoji Grid Data
 
@@ -129,6 +139,59 @@ struct HabitFormView: View {
     private var step1View: some View {
         ScrollView {
             VStack(spacing: DailyArcSpacing.xl) {
+                // Template Quick-Start (Add mode only)
+                if !isEditing {
+                    VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
+                        Text("Start from a template")
+                            .typography(.callout)
+                            .foregroundStyle(DailyArcTokens.textSecondary)
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: DailyArcSpacing.sm) {
+                                ForEach(formTemplates, id: \.name) { template in
+                                    let isSelected = selectedTemplate == template.name
+                                    Button {
+                                        selectedTemplate = template.name
+                                        emoji = template.emoji
+                                        name = template.name
+                                        targetCount = template.targetCount
+                                        frequencyRaw = 0
+                                    } label: {
+                                        VStack(spacing: DailyArcSpacing.xs) {
+                                            Text(template.emoji)
+                                                .font(.system(size: 28))
+                                            Text(template.name)
+                                                .font(.caption)
+                                                .foregroundStyle(DailyArcTokens.textPrimary)
+                                                .lineLimit(1)
+                                        }
+                                        .frame(width: 80, height: 80)
+                                        .background(
+                                            isSelected
+                                                ? DailyArcTokens.accent.opacity(DailyArcTokens.opacityLight)
+                                                : DailyArcTokens.backgroundSecondary
+                                        )
+                                        .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusSmall))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusSmall)
+                                                .stroke(isSelected ? DailyArcTokens.accent : .clear, lineWidth: 2)
+                                        )
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                        }
+                    }
+
+                    HStack {
+                        VStack { Divider() }
+                        Text("or create custom")
+                            .font(.caption)
+                            .foregroundStyle(DailyArcTokens.textTertiary)
+                        VStack { Divider() }
+                    }
+                }
+
                 // Emoji Picker
                 VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
                     Text("Emoji")

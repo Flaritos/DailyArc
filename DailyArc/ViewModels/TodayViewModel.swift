@@ -2,7 +2,8 @@ import Foundation
 import SwiftData
 import SwiftUI
 
-/// ViewModel for the Today View. Manages date selection, log fetching, and habit completion logic.
+/// ViewModel for the Today View. Manages date selection, log fetching, habit completion,
+/// greeting generation, undo, and integration with celebration/motivation services.
 @Observable
 @MainActor
 final class TodayViewModel {
@@ -10,35 +11,112 @@ final class TodayViewModel {
     var moodEntry: MoodEntry?
     var habitLogs: [UUID: HabitLog] = [:]
     var streakUpdatedToday: Set<UUID> = []
+    var showCelebration: Bool = false
 
-    /// Init for creation in @State.
+    // Undo support
+    var undoToastMessage: String? = nil
+    var undoAction: (() -> Void)? = nil
+
+    // Notes field for mood
+    var moodNotes: String = ""
+
     init() {
         self.selectedDate = Date()
     }
 
-    /// Whether to show the celebration overlay (all habits completed).
-    var showCelebration: Bool = false
+    // MARK: - Greeting
 
-    /// Greeting text based on time of day and streak status.
-    /// "Good morning" (5am-12pm), "Good afternoon" (12pm-5pm),
-    /// "Good evening" (5pm-9pm), "Winding down" (9pm-5am).
-    /// Adds streak-aware variant when user has a 7+ day streak.
+    /// Personalized greeting based on time, name, streaks, day-of-week, easter eggs.
     func greetingText(habits: [Habit]) -> String {
+        let name = UserDefaults.standard.string(forKey: "userName") ?? ""
+        let displayName = name.isEmpty ? "" : ", \(name)"
         let hour = Calendar.current.component(.hour, from: Date())
-        let base: String
-        switch hour {
-        case 5..<12: base = "Good morning"
-        case 12..<17: base = "Good afternoon"
-        case 17..<21: base = "Good evening"
-        default: base = "Winding down"
+
+        // Easter egg greetings first (holiday-based)
+        if let easterGreeting = EasterEggManager.shared.dateGreeting(name: name.isEmpty ? "there" : name) {
+            return easterGreeting
+        }
+
+        // 100th open check
+        if let openMsg = EasterEggManager.shared.check100thOpen() {
+            return openMsg
+        }
+
+        // Anniversary check
+        if let annMsg = EasterEggManager.shared.checkAnniversary() {
+            return annMsg
+        }
+
+        // Returning user check (14+ days absent)
+        let lastOpenDate = UserDefaults.standard.object(forKey: "lastOpenDate") as? Date
+        if let lastOpen = lastOpenDate {
+            let daysSinceOpen = Calendar.current.dateComponents([.day], from: lastOpen, to: Date()).day ?? 0
+            if daysSinceOpen >= 14 {
+                let variants = [
+                    "Welcome back\(displayName). Your arc remembers you.",
+                    "Hey\(displayName) \u{2014} it\u{2019}s been a while. Ready to pick up where you left off?",
+                    "Good to see you again\(displayName). Every arc has pauses \u{2014} yours continues now.",
+                ]
+                let index = Int(StableHash.hash(ISO8601DateFormatter().string(from: Date()))) % variants.count
+                return variants[index]
+            }
         }
 
         // Check for 7+ day streak on any habit
         let maxStreak = habits.map(\.currentStreak).max() ?? 0
-        if maxStreak >= 7 {
-            return "\(base) \u{1F525}"
+        let showStreaks = UserDefaults.standard.object(forKey: "showStreaks") == nil
+            || UserDefaults.standard.bool(forKey: "showStreaks")
+
+        // Streak-aware variants
+        if maxStreak >= 7 && showStreaks {
+            switch hour {
+            case 5..<12: return "Morning\(displayName)! Day \(maxStreak) of your arc \u{2600}\u{FE0F}"
+            case 12..<17: return "Keep it going\(displayName) \u{2014} \(maxStreak) days strong \u{1F324}"
+            case 17..<21: return "\(maxStreak)-day arc and counting\(displayName) \u{1F305}"
+            default: return "\(maxStreak)-day arc\(displayName). Keep the momentum \u{1F319}"
+            }
         }
-        return base
+
+        // Day-of-week variants
+        let weekday = Calendar.current.component(.weekday, from: Date())
+        let dayVariant: String? = {
+            switch weekday {
+            case 2: return "Fresh week\(displayName) \u{2014} keep building your arc."
+            case 6: return "Friday\(displayName)! Finish the week strong."
+            case 7: return "Weekend arc\(displayName) \u{2014} habits don\u{2019}t clock out."
+            case 1: return "Sunday wind-down\(displayName). Reflect on your week."
+            default: return nil
+            }
+        }()
+        // 30% chance to use day variant
+        if let variant = dayVariant, Int(StableHash.hash("dow-\(selectedDate.timeIntervalSince1970)")) % 3 == 0 {
+            return variant
+        }
+
+        // Seasonal variants
+        let month = Calendar.current.component(.month, from: Date())
+        let seasonal: String? = {
+            switch month {
+            case 1: return "New year, new arc\(displayName)."
+            case 3...5: return "Spring energy\(displayName) \u{2014} your arc is blooming."
+            case 6...8: return "Summer arc\(displayName) \u{2014} keep the momentum."
+            case 9...11: return "Fresh start energy\(displayName)."
+            case 12: return "End-of-year arc\(displayName) \u{2014} finish strong."
+            default: return nil
+            }
+        }()
+        // 20% chance to use seasonal
+        if let variant = seasonal, Int(StableHash.hash("season-\(month)")) % 5 == 0 {
+            return variant
+        }
+
+        // Default time-of-day
+        switch hour {
+        case 5..<12: return "Good morning\(displayName) \u{2600}\u{FE0F}"
+        case 12..<17: return "Good afternoon\(displayName) \u{1F324}"
+        case 17..<21: return "Good evening\(displayName) \u{1F305}"
+        default: return "Burning the midnight oil\(displayName)? \u{1F319}"
+        }
     }
 
     /// Save energy score to the current mood entry.
@@ -61,22 +139,17 @@ final class TodayViewModel {
         debouncedSave?.trigger()
     }
 
-    /// Whether the selected date is today.
-    var isToday: Bool {
-        Calendar.current.isDateInToday(selectedDate)
+    /// Save mood notes.
+    func saveMoodNotes(context: ModelContext, calendar: Calendar, debouncedSave: DebouncedSave?) {
+        guard let entry = moodEntry else { return }
+        entry.notes = moodNotes
+        debouncedSave?.trigger()
     }
 
-    /// Whether the selected date is yesterday.
-    var isYesterday: Bool {
-        Calendar.current.isDateInYesterday(selectedDate)
-    }
+    var isToday: Bool { Calendar.current.isDateInToday(selectedDate) }
+    var isYesterday: Bool { Calendar.current.isDateInYesterday(selectedDate) }
+    var canNavigateForward: Bool { !isToday }
 
-    /// Whether the user can navigate forward (not past today).
-    var canNavigateForward: Bool {
-        !isToday
-    }
-
-    /// Formatted date label for the navigation bar.
     var dateLabel: String {
         if isToday { return "Today" }
         if isYesterday { return "Yesterday" }
@@ -85,7 +158,6 @@ final class TodayViewModel {
         return formatter.string(from: selectedDate)
     }
 
-    /// Navigate to the previous day.
     func navigateBack() {
         let calendar = Calendar.current
         if let newDate = calendar.date(byAdding: .day, value: -1, to: selectedDate) {
@@ -94,7 +166,6 @@ final class TodayViewModel {
         }
     }
 
-    /// Navigate to the next day (capped at today).
     func navigateForward() {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
@@ -105,7 +176,6 @@ final class TodayViewModel {
         }
     }
 
-    /// Fetch all habit logs for the selected date.
     func fetchLogsForDate(context: ModelContext, calendar: Calendar) {
         let normalizedDate = calendar.startOfDay(for: selectedDate)
         var descriptor = FetchDescriptor<HabitLog>(
@@ -120,7 +190,6 @@ final class TodayViewModel {
         habitLogs = logMap
     }
 
-    /// Fetch the mood entry for the selected date.
     func fetchMoodEntry(context: ModelContext, calendar: Calendar) {
         let normalizedDate = calendar.startOfDay(for: selectedDate)
         var descriptor = FetchDescriptor<MoodEntry>(
@@ -128,19 +197,17 @@ final class TodayViewModel {
         )
         descriptor.fetchLimit = 1
         moodEntry = (try? context.fetch(descriptor))?.first
+        moodNotes = moodEntry?.notes ?? ""
     }
 
-    /// Get the log for a specific habit on the selected date.
     func log(for habit: Habit) -> HabitLog? {
         habitLogs[habit.id]
     }
 
-    /// Get completion count for a habit on the selected date.
     func completionCount(for habit: Habit) -> Int {
         habitLogs[habit.id]?.count ?? 0
     }
 
-    /// Toggle or increment a habit's completion.
     func toggleHabit(
         _ habit: Habit,
         context: ModelContext,
@@ -149,35 +216,37 @@ final class TodayViewModel {
         debouncedSave: DebouncedSave?
     ) {
         let log = HabitLog.fetchOrCreate(habit: habit, date: selectedDate, context: context, calendar: calendar)
+        let previousCount = log.count
 
         if habit.targetCount == 1 {
-            // Toggle: 0 -> 1, 1 -> 0
             log.count = log.count >= habit.targetCount ? 0 : habit.targetCount
         } else {
-            // Increment, wrap to 0 after reaching target
             log.count = log.count >= habit.targetCount ? 0 : log.count + 1
         }
 
-        // Update local cache
         habitLogs[habit.id] = log
 
-        // Recalculate streaks
         let habitID = habit.id
         let logDescriptor = FetchDescriptor<HabitLog>(predicate: #Predicate { $0.habitIDDenormalized == habitID })
-        let habitLogs = (try? context.fetch(logDescriptor)) ?? []
+        let allLogs = (try? context.fetch(logDescriptor)) ?? []
         let isFirst = !streakUpdatedToday.contains(habit.id)
-        streakEngine.recalculateStreaks(for: habit, logs: habitLogs, isFirstCallToday: isFirst, calendar: calendar)
+        streakEngine.recalculateStreaks(for: habit, logs: allLogs, isFirstCallToday: isFirst, calendar: calendar)
         if isFirst { streakUpdatedToday.insert(habit.id) }
 
-        // Streak-critical: immediate save when habit reaches targetCount
-        if log.count >= habit.targetCount && (log.count - 1) < habit.targetCount {
+        if log.count >= habit.targetCount && previousCount < habit.targetCount {
             debouncedSave?.triggerImmediate()
         } else {
             debouncedSave?.trigger()
         }
+
+        // Undo support
+        showUndoToast(message: "\(habit.emoji) logged \u{2713}") {
+            log.count = previousCount
+            self.habitLogs[habit.id] = log
+            debouncedSave?.trigger()
+        }
     }
 
-    /// Increment a stepper habit's count.
     func incrementHabit(
         _ habit: Habit,
         context: ModelContext,
@@ -186,6 +255,7 @@ final class TodayViewModel {
         debouncedSave: DebouncedSave?
     ) {
         let log = HabitLog.fetchOrCreate(habit: habit, date: selectedDate, context: context, calendar: calendar)
+        let previousCount = log.count
         log.count = min(log.count + 1, habit.targetCount)
 
         habitLogs[habit.id] = log
@@ -197,14 +267,19 @@ final class TodayViewModel {
         streakEngine.recalculateStreaks(for: habit, logs: allLogs, isFirstCallToday: isFirst, calendar: calendar)
         if isFirst { streakUpdatedToday.insert(habit.id) }
 
-        if log.count >= habit.targetCount && (log.count - 1) < habit.targetCount {
+        if log.count >= habit.targetCount && previousCount < habit.targetCount {
             debouncedSave?.triggerImmediate()
         } else {
             debouncedSave?.trigger()
         }
+
+        showUndoToast(message: "\(habit.emoji) logged \u{2713}") {
+            log.count = previousCount
+            self.habitLogs[habit.id] = log
+            debouncedSave?.trigger()
+        }
     }
 
-    /// Decrement a stepper habit's count.
     func decrementHabit(
         _ habit: Habit,
         context: ModelContext,
@@ -225,12 +300,56 @@ final class TodayViewModel {
         debouncedSave?.trigger()
     }
 
-    /// Save mood selection.
     func saveMood(score: Int, context: ModelContext, calendar: Calendar, debouncedSave: DebouncedSave?) {
         let entry = MoodEntry.fetchOrCreate(date: selectedDate, context: context, calendar: calendar)
+        let previousScore = entry.moodScore
         entry.moodScore = score
         moodEntry = entry
-        // Mood is streak-critical — immediate save
         debouncedSave?.triggerImmediate()
+
+        // First-ever mood celebration
+        CelebrationService.shared.checkFirstEverMoodLog()
+
+        // Undo support
+        showUndoToast(message: "Mood logged \u{2713}") {
+            entry.moodScore = previousScore
+            self.moodEntry = entry
+            debouncedSave?.trigger()
+        }
+    }
+
+    /// Count total unique days the user has logged at least one habit
+    func totalDaysLogged(context: ModelContext, calendar: Calendar) -> Int {
+        let descriptor = FetchDescriptor<HabitLog>()
+        let logs = (try? context.fetch(descriptor)) ?? []
+        let uniqueDays = Set(logs.filter { $0.count > 0 }.map { calendar.startOfDay(for: $0.date) })
+        return uniqueDays.count
+    }
+
+    // MARK: - Undo Toast
+
+    private func showUndoToast(message: String, action: @escaping () -> Void) {
+        undoToastMessage = message
+        undoAction = action
+
+        // Auto-dismiss after 3 seconds
+        Task {
+            try? await Task.sleep(for: .seconds(3))
+            if undoToastMessage == message {
+                withAnimation { undoToastMessage = nil }
+                undoAction = nil
+            }
+        }
+    }
+
+    func performUndo() {
+        undoAction?()
+        withAnimation { undoToastMessage = nil }
+        undoAction = nil
+    }
+
+    func dismissUndo() {
+        withAnimation { undoToastMessage = nil }
+        undoAction = nil
     }
 }

@@ -1,29 +1,69 @@
 import SwiftUI
 import SwiftData
+import UserNotifications
 
 struct OnboardingView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("isCOPPABlocked") private var isCOPPABlocked = false
+    @AppStorage("userGoal") private var userGoal = ""
+    @AppStorage("userEmail") private var userEmail = ""
+    @AppStorage("emailMarketingConsentDate") private var emailConsentDate = ""
+    @AppStorage("gdprConsentDate") private var gdprConsentDate = ""
+    @AppStorage("gdprConsentScope") private var gdprConsentScope = ""
     @State private var currentPage = 0
 
-    // Page 2 (Welcome) state
+    // Page 1 (Welcome) state
     @State private var showConsent = false
     @State private var consentProcessing = false
     @State private var dobYear = 2000
 
-    // Page 3 (Habits) state
+    // Page 2 (Habits) state
     @State private var selectedTemplates: Set<String> = []
     @State private var templateTimes: [String: String] = [:]
 
-    // Page 4 (Preview) state
+    // Page 3 (Preview) state
     @State private var previewMood: Int? = nil
+    @State private var enableReminder = true
+    @State private var emailInput = ""
+    @State private var emailMarketingConsent = false
 
     private let templates: [(emoji: String, name: String, targetCount: Int)] = [
-        ("🏃", "Exercise", 1), ("📚", "Reading", 1), ("🧘", "Meditate", 1), ("💤", "Sleep 8hrs", 1),
-        ("💧", "Drink Water", 8), ("📝", "Journal", 1), ("🚶", "Walk", 1), ("🎨", "Creative Time", 1)
+        ("\u{1F3C3}", "Exercise", 1), ("\u{1F4DA}", "Reading", 1),
+        ("\u{1F9D8}", "Meditate", 1), ("\u{1F4A4}", "Sleep 8hrs", 1),
+        ("\u{1F4A7}", "Drink Water", 8), ("\u{1F4DD}", "Journal", 1),
+        ("\u{1F6B6}", "Walk", 1), ("\u{1F3A8}", "Creative Time", 1)
     ]
+
+    /// Templates reordered based on user goal
+    private var orderedTemplates: [(emoji: String, name: String, targetCount: Int)] {
+        switch userGoal {
+        case "Get healthier":
+            let prioritized = ["Exercise", "Walk", "Drink Water", "Sleep 8hrs"]
+            return templates.sorted { a, b in
+                let aIdx = prioritized.firstIndex(of: a.name) ?? 99
+                let bIdx = prioritized.firstIndex(of: b.name) ?? 99
+                return aIdx < bIdx
+            }
+        case "Be more productive":
+            let prioritized = ["Journal", "Reading", "Creative Time"]
+            return templates.sorted { a, b in
+                let aIdx = prioritized.firstIndex(of: a.name) ?? 99
+                let bIdx = prioritized.firstIndex(of: b.name) ?? 99
+                return aIdx < bIdx
+            }
+        case "Build mindfulness":
+            let prioritized = ["Meditate", "Journal", "Walk"]
+            return templates.sorted { a, b in
+                let aIdx = prioritized.firstIndex(of: a.name) ?? 99
+                let bIdx = prioritized.firstIndex(of: b.name) ?? 99
+                return aIdx < bIdx
+            }
+        default:
+            return templates
+        }
+    }
 
     var body: some View {
         TabView(selection: $currentPage) {
@@ -67,7 +107,7 @@ struct OnboardingView: View {
                 Text("We believe self-knowledge is the foundation of well-being.")
                     .multilineTextAlignment(.center)
 
-                Text("DailyArc helps you understand yourself better through the simple act of showing up each day — connecting what you do to how you feel.")
+                Text("DailyArc helps you understand yourself better through the simple act of showing up each day \u{2014} connecting what you do to how you feel.")
                     .multilineTextAlignment(.center)
                     .foregroundStyle(DailyArcTokens.textSecondary)
 
@@ -83,7 +123,7 @@ struct OnboardingView: View {
             Button {
                 withAnimation { currentPage = 1 }
             } label: {
-                Text("Let's begin")
+                Text("Let\u{2019}s begin")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
@@ -93,7 +133,7 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Page 1: Welcome + Age + Consent
+    // MARK: - Page 1: Welcome + Age + Consent (Two-Step Progressive Disclosure)
 
     private var welcomePage: some View {
         ScrollView {
@@ -107,6 +147,7 @@ struct OnboardingView: View {
                 }
                 .padding(.top, DailyArcSpacing.xxxl)
 
+                // Step 1: Value props (always visible)
                 VStack(alignment: .leading, spacing: DailyArcSpacing.md) {
                     valuePropRow(icon: "arrow.up.right.circle.fill", text: "Your daily habits shape an arc of growth")
                     valuePropRow(icon: "link.circle.fill", text: "Discover the connection between what you do and how you feel")
@@ -114,9 +155,23 @@ struct OnboardingView: View {
                 }
                 .padding(.horizontal, DailyArcSpacing.lg)
 
-                // Consent section (always visible on this page)
+                // "Continue" button (Step 1 -> Step 2)
+                if !showConsent {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showConsent = true
+                        }
+                    } label: {
+                        Text("Continue")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .padding(.horizontal, DailyArcSpacing.xl)
+                }
+
+                // Step 2: Age + consent (revealed after Continue)
                 VStack(alignment: .leading, spacing: DailyArcSpacing.lg) {
-                    // Age picker
                     HStack {
                         Text("Birth year")
                             .foregroundStyle(DailyArcTokens.textSecondary)
@@ -135,13 +190,19 @@ struct OnboardingView: View {
                     Text("Your data is stored on your device only and retained until you delete it.")
                         .font(.footnote)
                         .foregroundStyle(DailyArcTokens.textTertiary)
+
+                    Text("Data controller: DailyArc. Contact: privacy@dailyarc.app")
+                        .font(.caption2)
+                        .foregroundStyle(DailyArcTokens.textTertiary)
                 }
                 .padding()
                 .background(DailyArcTokens.backgroundSecondary)
                 .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusLarge))
                 .padding(.horizontal)
+                .opacity(showConsent ? 1 : 0)
+                .offset(y: showConsent ? 0 : 20)
 
-                if isUnderAge {
+                if isUnderAge && showConsent {
                     VStack(spacing: DailyArcSpacing.md) {
                         Image(systemName: "hand.raised.fill")
                             .font(.system(size: 40))
@@ -158,19 +219,26 @@ struct OnboardingView: View {
                     .padding(.horizontal)
                     .onAppear {
                         isCOPPABlocked = true
+                        KeychainDOBService.setCOPPABlocked(true)
+                        KeychainDOBService.deleteDOB()
                     }
                 }
 
-                Button {
-                    withAnimation { currentPage = 2 }
-                } label: {
-                    Text("Get Started")
-                        .frame(maxWidth: .infinity)
+                if showConsent {
+                    Button {
+                        KeychainDOBService.saveDOBYear(dobYear)
+                        gdprConsentDate = ISO8601DateFormatter().string(from: Date())
+                        gdprConsentScope = "processing"
+                        withAnimation { currentPage = 2 }
+                    } label: {
+                        Text("Get Started")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .padding(.horizontal, DailyArcSpacing.xl)
+                    .disabled(!consentProcessing || isUnderAge)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .padding(.horizontal, DailyArcSpacing.xl)
-                .disabled(!consentProcessing || isUnderAge)
 
                 Spacer(minLength: DailyArcSpacing.jumbo)
             }
@@ -189,14 +257,32 @@ struct OnboardingView: View {
                     .typography(.titleLarge)
                     .padding(.top, DailyArcSpacing.xxxl)
 
-                Text("Pick 1–3 to start. You can always add more later.")
+                Text("Pick 1\u{2013}3 to start. You can always add more later.")
                     .typography(.bodySmall)
                     .foregroundStyle(DailyArcTokens.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
 
+                // Goal picker
+                VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
+                    Text("What\u{2019}s your main goal?")
+                        .typography(.bodySmall)
+                        .foregroundStyle(DailyArcTokens.textSecondary)
+
+                    Picker("Goal", selection: $userGoal) {
+                        Text("Select a goal...").tag("")
+                        Text("Get healthier").tag("Get healthier")
+                        Text("Be more productive").tag("Be more productive")
+                        Text("Build mindfulness").tag("Build mindfulness")
+                        Text("Just trying it out").tag("Just trying it out")
+                    }
+                    .pickerStyle(.menu)
+                    .tint(DailyArcTokens.accent)
+                }
+                .padding(.horizontal)
+
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: DailyArcSpacing.md) {
-                    ForEach(templates, id: \.name) { template in
+                    ForEach(orderedTemplates, id: \.name) { template in
                         templateCard(template)
                     }
                 }
@@ -245,6 +331,16 @@ struct OnboardingView: View {
                 .padding(.horizontal, DailyArcSpacing.xl)
                 .disabled(selectedTemplates.isEmpty)
 
+                // Skip link
+                Button {
+                    selectedTemplates.removeAll()
+                    withAnimation { currentPage = 3 }
+                } label: {
+                    Text("Skip \u{2014} I\u{2019}ll create custom habits")
+                        .font(.caption)
+                        .foregroundStyle(DailyArcTokens.textTertiary)
+                }
+
                 Spacer(minLength: DailyArcSpacing.jumbo)
             }
         }
@@ -265,7 +361,7 @@ struct OnboardingView: View {
 
                 HStack(spacing: DailyArcSpacing.lg) {
                     ForEach(1...5, id: \.self) { score in
-                        let emojis = ["", "😔", "😕", "😐", "🙂", "😄"]
+                        let emojis = ["", "\u{1F614}", "\u{1F615}", "\u{1F610}", "\u{1F642}", "\u{1F604}"]
                         Button {
                             withAnimation(.spring(response: 0.3)) {
                                 previewMood = score
@@ -287,7 +383,7 @@ struct OnboardingView: View {
                     Text("On exercise days, mood averages 4.2")
                         .typography(.bodySmall)
                         .multilineTextAlignment(.center)
-                    Text("This is what you'll discover after 2 weeks of logging.")
+                    Text("This is what you\u{2019}ll discover after 2 weeks of logging.")
                         .font(.caption)
                         .foregroundStyle(DailyArcTokens.textTertiary)
                         .multilineTextAlignment(.center)
@@ -296,6 +392,13 @@ struct OnboardingView: View {
                 .background(DailyArcTokens.backgroundSecondary)
                 .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
                 .padding(.horizontal)
+
+                // Premium preview
+                Text("Premium includes unlimited habits, mood insights, and detailed stats.")
+                    .font(.caption)
+                    .foregroundStyle(DailyArcTokens.textTertiary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
 
                 // Selected habits preview
                 if !selectedTemplates.isEmpty {
@@ -319,6 +422,36 @@ struct OnboardingView: View {
                     .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
                     .padding(.horizontal)
                 }
+
+                // Notification opt-in
+                VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
+                    Toggle("Get a gentle evening reminder?", isOn: $enableReminder)
+                        .tint(DailyArcTokens.accent)
+                }
+                .padding()
+                .background(DailyArcTokens.backgroundSecondary)
+                .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
+                .padding(.horizontal)
+
+                // Email collection (optional)
+                VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
+                    TextField("Your email (optional)", text: $emailInput)
+                        .keyboardType(.emailAddress)
+                        .textContentType(.emailAddress)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                        .textFieldStyle(.roundedBorder)
+
+                    if !emailInput.isEmpty {
+                        Toggle("I agree to receive weekly summary emails from DailyArc", isOn: $emailMarketingConsent)
+                            .font(.caption)
+                            .tint(DailyArcTokens.accent)
+                    }
+                }
+                .padding()
+                .background(DailyArcTokens.backgroundSecondary)
+                .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
+                .padding(.horizontal)
 
                 Button {
                     createHabitsAndFinish()
@@ -373,7 +506,7 @@ struct OnboardingView: View {
                     .font(.subheadline)
                     .foregroundStyle(DailyArcTokens.textPrimary)
                 if template.targetCount > 1 {
-                    Text("\(template.targetCount)× daily")
+                    Text("\(template.targetCount)\u{00D7} daily")
                         .font(.caption2)
                         .foregroundStyle(DailyArcTokens.textTertiary)
                 }
@@ -427,7 +560,29 @@ struct OnboardingView: View {
             order += 1
         }
 
+        // Save email if provided with consent
+        if !emailInput.isEmpty && emailInput.contains("@") && emailInput.contains(".") {
+            userEmail = emailInput
+            if emailMarketingConsent {
+                emailConsentDate = ISO8601DateFormatter().string(from: Date())
+            }
+        }
+
         try? context.save()
+
+        // Request notification permission if reminder enabled
+        if enableReminder {
+            Task {
+                let granted = try? await UNUserNotificationCenter.current()
+                    .requestAuthorization(options: [.alert, .badge, .sound])
+                if granted == true {
+                    await MainActor.run {
+                        NotificationService.shared.scheduleEveningReminder(hour: 20, minute: 0)
+                    }
+                }
+            }
+        }
+
         hasCompletedOnboarding = true
         dismiss()
     }

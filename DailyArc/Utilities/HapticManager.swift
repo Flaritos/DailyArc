@@ -21,4 +21,9 @@ enum HapticManager {
     static func streakMilestone() {
         notification.notificationOccurred(.success)
     }
+
+    /// Light feedback for subtle moments (streak loss compassion, etc.).
+    static func light() {
+        lightImpact.impactOccurred()
+    }
 }

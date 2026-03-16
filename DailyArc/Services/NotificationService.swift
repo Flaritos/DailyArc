@@ -15,6 +15,8 @@ final class NotificationService {
     private enum Identifier {
         static let morningReminder = "com.dailyarc.notification.morning"
         static let eveningReminder = "com.dailyarc.notification.evening"
+        static let moodReminder = "com.dailyarc.notification.mood"
+        static let streakCheckIn = "com.dailyarc.notification.streakcheckin"
         static let weeklySummary = "com.dailyarc.notification.weekly"
     }
 
@@ -104,6 +106,60 @@ final class NotificationService {
     /// Cancel evening reminder.
     func cancelEveningReminder() {
         center.removePendingNotificationRequests(withIdentifiers: [Identifier.eveningReminder])
+    }
+
+    // MARK: - Mood Reminder
+
+    /// Schedule a daily mood logging reminder at the given time.
+    func scheduleMoodReminder(hour: Int, minute: Int) {
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "How's your arc shaping up?")
+        content.body = String(localized: "Take a moment to check in with how you're feeling today.")
+        content.sound = .default
+
+        var dateComponents = DateComponents()
+        dateComponents.hour = hour
+        dateComponents.minute = minute
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        let request = UNNotificationRequest(
+            identifier: Identifier.moodReminder,
+            content: content,
+            trigger: trigger
+        )
+        center.add(request)
+    }
+
+    /// Cancel mood reminder.
+    func cancelMoodReminder() {
+        center.removePendingNotificationRequests(withIdentifiers: [Identifier.moodReminder])
+    }
+
+    // MARK: - Streak Check-In
+
+    /// Schedule a morning-after check-in for incomplete habits (9 AM next day).
+    func scheduleStreakCheckIn(hour: Int = 9, minute: Int = 0) {
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "Your arc continues")
+        content.body = String(localized: "Yesterday had some gaps. A quick log keeps your streak alive.")
+        content.sound = .default
+
+        var dateComponents = DateComponents()
+        dateComponents.hour = hour
+        dateComponents.minute = minute
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        let request = UNNotificationRequest(
+            identifier: Identifier.streakCheckIn,
+            content: content,
+            trigger: trigger
+        )
+        center.add(request)
+    }
+
+    /// Cancel streak check-in.
+    func cancelStreakCheckIn() {
+        center.removePendingNotificationRequests(withIdentifiers: [Identifier.streakCheckIn])
     }
 
     // MARK: - Weekly Summary
