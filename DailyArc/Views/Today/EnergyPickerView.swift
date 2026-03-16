@@ -20,6 +20,7 @@ struct EnergyPickerView: View {
 
                 ForEach(1...5, id: \.self) { score in
                     Button {
+                        HapticManager.energySelection()
                         onSelect(score)
                     } label: {
                         Text("\(score)")

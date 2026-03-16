@@ -4,9 +4,11 @@ import SwiftUI
 /// Tap toggles for targetCount==1, stepper UI for targetCount > 1.
 /// Swipe actions for edit/archive.
 /// Completion triggers a ripple effect in the habit's color.
+/// Long-press shows quick stats popover with streak info and 7-day visualization.
 struct HabitRowView: View {
     let habit: Habit
     let count: Int
+    let last7DaysCompleted: [Bool]
     let onToggle: () -> Void
     let onIncrement: () -> Void
     let onDecrement: () -> Void
@@ -26,6 +28,29 @@ struct HabitRowView: View {
 
     /// Bounce for multi-count increment
     @State private var countBounce: Bool = false
+
+    /// Controls the quick stats popover on long-press
+    @State private var showQuickStats: Bool = false
+
+    init(
+        habit: Habit,
+        count: Int,
+        last7DaysCompleted: [Bool] = [],
+        onToggle: @escaping () -> Void,
+        onIncrement: @escaping () -> Void,
+        onDecrement: @escaping () -> Void,
+        onEdit: @escaping () -> Void,
+        onArchive: @escaping () -> Void
+    ) {
+        self.habit = habit
+        self.count = count
+        self.last7DaysCompleted = last7DaysCompleted
+        self.onToggle = onToggle
+        self.onIncrement = onIncrement
+        self.onDecrement = onDecrement
+        self.onEdit = onEdit
+        self.onArchive = onArchive
+    }
 
     private var habitColor: Color {
         habit.color(for: colorScheme)
@@ -62,6 +87,7 @@ struct HabitRowView: View {
                             Text("\(habit.currentStreak)")
                                 .typography(.caption)
                                 .foregroundStyle(DailyArcTokens.streakFire)
+                                .contentTransition(.numericText())
                         }
                     }
                 }
@@ -85,6 +111,7 @@ struct HabitRowView: View {
                         Text("\(count)/\(habit.targetCount)")
                             .typography(.callout)
                             .foregroundStyle(DailyArcTokens.textSecondary)
+                            .contentTransition(.numericText())
                             .frame(minWidth: 36)
                             .scaleEffect(countBounce ? 1.2 : 1.0)
                             .animation(.spring(response: 0.3, dampingFraction: 0.5), value: countBounce)
@@ -133,6 +160,36 @@ struct HabitRowView: View {
             .animation(.spring(response: 0.15, dampingFraction: 0.5), value: completionBounce)
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            // Quick Stats header
+            Section {
+                Label {
+                    Text("\(habit.emoji) \(habit.name)")
+                } icon: {
+                    Image(systemName: "chart.bar.fill")
+                }
+
+                Label {
+                    Text("\u{1F525} \(habit.currentStreak) day streak")
+                } icon: {
+                    Image(systemName: "flame.fill")
+                }
+
+                Label {
+                    Text("Best: \(habit.bestStreak) days")
+                } icon: {
+                    Image(systemName: "trophy.fill")
+                }
+            }
+
+            // 7-day mini visualization as text
+            if !last7DaysCompleted.isEmpty {
+                let dots = last7DaysCompleted.suffix(7).map { $0 ? "\u{25CF}" : "\u{25CB}" }.joined(separator: " ")
+                Section("Last 7 Days") {
+                    Text(dots)
+                }
+            }
+        }
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
             Button {
                 onArchive()
@@ -198,9 +255,11 @@ struct HabitRowView: View {
             habit: {
                 let h = Habit(name: "Exercise", emoji: "\u{1F3C3}", targetCount: 1)
                 h.currentStreak = 5
+                h.bestStreak = 47
                 return h
             }(),
             count: 0,
+            last7DaysCompleted: [true, true, false, true, true, true, false],
             onToggle: {},
             onIncrement: {},
             onDecrement: {},
@@ -210,6 +269,7 @@ struct HabitRowView: View {
         HabitRowView(
             habit: Habit(name: "Drink Water", emoji: "\u{1F4A7}", targetCount: 5),
             count: 3,
+            last7DaysCompleted: [true, false, true, true, false, true, true],
             onToggle: {},
             onIncrement: {},
             onDecrement: {},

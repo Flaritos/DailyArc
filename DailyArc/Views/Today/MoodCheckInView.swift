@@ -37,6 +37,7 @@ struct MoodCheckInView: View {
             HStack(spacing: DailyArcSpacing.lg) {
                 ForEach(moods, id: \.score) { mood in
                     Button {
+                        HapticManager.moodSelection()
                         if !moodDisclaimerShown {
                             pendingScore = mood.score
                             showDisclaimer = true

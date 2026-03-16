@@ -69,6 +69,7 @@ struct BadgeCeremonyView: View {
             }
             .transition(.opacity)
             .onAppear {
+                HapticManager.badgeUnlock()
                 if reduceMotion {
                     emojiScale = 1.0
                     cardOpacity = 1.0

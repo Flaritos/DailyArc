@@ -47,6 +47,7 @@
 		A3BB065F82BFC0A3F14F2DFE /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B44EEC6D7CED6B64B567F5 /* PaywallView.swift */; };
 		AAA8A5EDA875196676E198F5 /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76393F0777026D7823497C12 /* ShareCardView.swift */; };
 		B194A5F00D83DC754A97E4B7 /* CompletionCircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9458E518BEB532283AB0E914 /* CompletionCircleView.swift */; };
+		B194A5F00D83DC754A97E4B8 /* AnnualArcView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9458E518BEB532283AB0E915 /* AnnualArcView.swift */; };
 		B1E691AB5C8C2DA446F89B09 /* UndoToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79561A55F258274B467A5AA7 /* UndoToastView.swift */; };
 		BF31E0DF4A306C7B7A84B284 /* DailyArcApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = "TEMP_54059297-ECA8-46BF-BA6E-A94FEAECEC37" /* DailyArcApp.swift */; };
 		C04E102E3FEC8FAFD1E5FFC7 /* DailyArcSchemaV1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A77ECB5ABC63CFE5434F02F /* DailyArcSchemaV1.swift */; };
@@ -68,6 +69,12 @@
 		FA4F19249920E551133B30BE /* DailyArcTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98893F5E39150983A8494EBB /* DailyArcTokens.swift */; };
 		FB1D635CFF29FE4C7A25CA39 /* DateNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD727D091437B648C8A34E41 /* DateNavigationBar.swift */; };
 		FB76019ECE27375BF4409FEE /* MoodCheckInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B968BFE5D31762CA7D63959 /* MoodCheckInView.swift */; };
+		AA11111111111111111111B1 /* SkeletonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11111111111111111111F1 /* SkeletonView.swift */; };
+		AA22222222222222222222B2 /* ErrorStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA22222222222222222222F2 /* ErrorStateView.swift */; };
+		AA33333333333333333333B3 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA33333333333333333333F3 /* FlowLayout.swift */; };
+		AA44444444444444444444B4 /* AppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA44444444444444444444F4 /* AppIconView.swift */; };
+		AA55555555555555555555B5 /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA55555555555555555555F5 /* WhatsNewView.swift */; };
+		AA66666666666666666666B6 /* AnnualArcView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA66666666666666666666F6 /* AnnualArcView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -100,6 +107,7 @@
 		90BD50B25908A8A6EE510C3D /* DateHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateHelpers.swift; sourceTree = "<group>"; };
 		93DAAF7DD9DD6FD869422D36 /* HabitRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitRowView.swift; sourceTree = "<group>"; };
 		9458E518BEB532283AB0E914 /* CompletionCircleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletionCircleView.swift; sourceTree = "<group>"; };
+		9458E518BEB532283AB0E915 /* AnnualArcView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnualArcView.swift; sourceTree = "<group>"; };
 		95C1932757B71344153F48C9 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		98893F5E39150983A8494EBB /* DailyArcTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyArcTokens.swift; sourceTree = "<group>"; };
 		9B4ECE583455A6C55F529C0F /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
@@ -133,6 +141,12 @@
 		"TEMP_3ED9CBF2-D644-4F93-A9A8-3FFB5B3EDB57" /* DailyArc.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = DailyArc.xcodeproj; sourceTree = "<group>"; };
 		"TEMP_54059297-ECA8-46BF-BA6E-A94FEAECEC37" /* DailyArcApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyArcApp.swift; sourceTree = "<group>"; };
 		"TEMP_84C4724B-4656-443B-BE74-9B963D07DA73" /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		AA11111111111111111111F1 /* SkeletonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletonView.swift; sourceTree = "<group>"; };
+		AA22222222222222222222F2 /* ErrorStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorStateView.swift; sourceTree = "<group>"; };
+		AA33333333333333333333F3 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
+		AA44444444444444444444F4 /* AppIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconView.swift; sourceTree = "<group>"; };
+		AA55555555555555555555F5 /* WhatsNewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
+		AA66666666666666666666F6 /* AnnualArcView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnualArcView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -202,13 +216,20 @@
 		799CC5272FF7AA6D666168DD /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				AA66666666666666666666F6 /* AnnualArcView.swift */,
+				AA44444444444444444444F4 /* AppIconView.swift */,
 				D043FF047131241C3172CDF1 /* ArchiveToastView.swift */,
 				57580F01A5D4747F8AA5FD30 /* BadgeCeremonyView.swift */,
+				9458E518BEB532283AB0E915 /* AnnualArcView.swift */,
 				9458E518BEB532283AB0E914 /* CompletionCircleView.swift */,
 				95C1932757B71344153F48C9 /* EmptyStateView.swift */,
+				AA22222222222222222222F2 /* ErrorStateView.swift */,
+				AA33333333333333333333F3 /* FlowLayout.swift */,
 				767B4977F7A6118487C720BA /* MotivationCardView.swift */,
 				76393F0777026D7823497C12 /* ShareCardView.swift */,
+				AA11111111111111111111F1 /* SkeletonView.swift */,
 				79561A55F258274B467A5AA7 /* UndoToastView.swift */,
+				AA55555555555555555555F5 /* WhatsNewView.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -407,6 +428,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				C64C95AF9177DB96E77A2347 /* ActivityTagsView.swift in Sources */,
+				AA66666666666666666666B6 /* AnnualArcView.swift in Sources */,
+				AA44444444444444444444B4 /* AppIconView.swift in Sources */,
 				2A82E62278C961A6E1889561 /* ArchiveToastView.swift in Sources */,
 				A01061DEB4AC88AA702E85A6 /* BadgeCeremonyView.swift in Sources */,
 				9F8671D12D20F75D5BB60A38 /* BadgeEngine.swift in Sources */,
@@ -414,6 +437,7 @@
 				0923C195AC09DE12CD643D68 /* CelebrationOverlay.swift in Sources */,
 				D3F23E405A51A399E809E2BE /* CelebrationService.swift in Sources */,
 				E685F961858A1B940FEB34D7 /* ColorExtensions.swift in Sources */,
+				B194A5F00D83DC754A97E4B8 /* AnnualArcView.swift in Sources */,
 				B194A5F00D83DC754A97E4B7 /* CompletionCircleView.swift in Sources */,
 				17E8A8FAD991C5A20E5F1076 /* ContentView.swift in Sources */,
 				16194B4850096C6852032088 /* CorrelationCardView.swift in Sources */,
@@ -430,7 +454,9 @@
 				4FF6CA2125073B1CB36C5E68 /* EasterEggManager.swift in Sources */,
 				534A456181538634AE068A58 /* EmptyStateView.swift in Sources */,
 				DD5096A92FB74E592B7E6BA4 /* EnergyPickerView.swift in Sources */,
+				AA22222222222222222222B2 /* ErrorStateView.swift in Sources */,
 				CFD5E2764412D514A574D47E /* ExportService.swift in Sources */,
+				AA33333333333333333333B3 /* FlowLayout.swift in Sources */,
 				DBBBDD1FE70D9E9F26C5F7BA /* HabitColorPalette.swift in Sources */,
 				98E438332CD04CEBD2357998 /* HabitFormView.swift in Sources */,
 				0A5A18799F2A15B0A59BB3C9 /* HabitManagementView.swift in Sources */,
@@ -454,6 +480,7 @@
 				47D7CE249933A72401FBBDA7 /* RuleEngine.swift in Sources */,
 				ED23615BCFB9169BB50AE5FF /* SettingsView.swift in Sources */,
 				AAA8A5EDA875196676E198F5 /* ShareCardView.swift in Sources */,
+				AA11111111111111111111B1 /* SkeletonView.swift in Sources */,
 				0B9566CE74816CBDAEA9FEF2 /* SmallStreakWidget.swift in Sources */,
 				53215C819E878881BB3A4B7A /* SoundManager.swift in Sources */,
 				33AA9D4B6B93639B96361465 /* StableHash.swift in Sources */,
@@ -465,6 +492,7 @@
 				C791B40F0C65AF21E7E4E383 /* TodayView.swift in Sources */,
 				D19AAF21E9CCC54D04650FEC /* TodayViewModel.swift in Sources */,
 				B1E691AB5C8C2DA446F89B09 /* UndoToastView.swift in Sources */,
+				AA55555555555555555555B5 /* WhatsNewView.swift in Sources */,
 				93225FF3A2BECF96CD467DF7 /* WidgetDataService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

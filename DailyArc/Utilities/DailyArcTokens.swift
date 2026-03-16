@@ -140,12 +140,35 @@ extension View {
         modifier(DailyArcTypography(style: style))
     }
 
-    /// Card styling: elevated background, rounded corners, subtle shadow
+    /// Card styling: elevated background, rounded corners, subtle shadow.
+    /// In dark mode: reduced shadow opacity, subtle separator border.
     func cardStyle() -> some View {
-        self
+        modifier(CardStyleModifier())
+    }
+}
+
+/// ViewModifier for premium card styling that adapts to light/dark mode (B10).
+/// Dark mode uses reduced shadow and a subtle border for quiet depth.
+struct CardStyleModifier: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
+        content
             .padding(DailyArcSpacing.lg)
             .background(DailyArcTokens.backgroundSecondary)
             .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
-            .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
+            .overlay(
+                RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium)
+                    .stroke(
+                        colorScheme == .dark ? DailyArcTokens.separator : Color.clear,
+                        lineWidth: DailyArcTokens.borderThin
+                    )
+            )
+            .shadow(
+                color: .black.opacity(colorScheme == .dark ? 0.03 : 0.06),
+                radius: 8,
+                x: 0,
+                y: 2
+            )
     }
 }

@@ -233,6 +233,7 @@ struct SettingsView: View {
                 }
 
                 Button(role: .destructive) {
+                    HapticManager.deleteConfirmation()
                     showDeleteConfirmation = true
                 } label: {
                     Label("Delete All Data", systemImage: "trash")
@@ -551,6 +552,7 @@ struct SettingsView: View {
             "hasSeenDateNavNudge", "lastSeenVersion",
             "moodCorrelationConsentDate", "moodConsentPromptDismissed",
             "earnedBadges",
+            "customActivityTags",
         ]
         for key in keysToRemove {
             defaults.removeObject(forKey: key)

@@ -1,10 +1,12 @@
 import SwiftUI
+import Charts
 
 /// Card in a 2-column LazyVGrid showing emoji, name, current streak,
-/// best streak, and completion ring for a single habit.
+/// best streak, completion ring, and 7-day sparkline for a single habit.
 struct PerHabitCardView: View {
     let habit: Habit
     let completionRate: Double
+    let last7DaysCounts: [Int]
 
     @Environment(\.colorScheme) private var colorScheme
 
@@ -35,6 +37,7 @@ struct PerHabitCardView: View {
                         Text("\(habit.currentStreak)")
                             .typography(.titleSmall)
                             .foregroundStyle(DailyArcTokens.streakFire)
+                            .contentTransition(.numericText())
                     }
                     Text("Current")
                         .typography(.caption2)
@@ -47,18 +50,22 @@ struct PerHabitCardView: View {
                     Text("\(habit.bestStreak)")
                         .typography(.titleSmall)
                         .foregroundStyle(DailyArcTokens.textSecondary)
+                        .contentTransition(.numericText())
                     Text("Best")
                         .typography(.caption2)
                         .foregroundStyle(DailyArcTokens.textTertiary)
                 }
             }
 
-            // Completion ring
+            // Completion ring + sparkline
             HStack {
                 Spacer()
                 completionRing
                 Spacer()
             }
+
+            // 7-day sparkline
+            sparkline
         }
         .padding(DailyArcSpacing.md)
         .background(DailyArcTokens.backgroundSecondary)
@@ -88,11 +95,31 @@ struct PerHabitCardView: View {
                 .rotationEffect(.degrees(-90))
                 .animation(.easeInOut(duration: 0.6), value: completionRate)
 
-            // Center text
+            // Center text — completion rate percentage
             Text("\(Int(completionRate * 100))%")
-                .typography(.caption)
-                .fontWeight(.bold)
+                .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(DailyArcTokens.textPrimary)
+                .contentTransition(.numericText())
         }
+    }
+
+    // MARK: - Sparkline
+
+    private var sparkline: some View {
+        Chart {
+            ForEach(Array(last7DaysCounts.enumerated()), id: \.offset) { index, count in
+                LineMark(
+                    x: .value("Day", index),
+                    y: .value("Count", count)
+                )
+                .interpolationMethod(.catmullRom)
+                .foregroundStyle(habit.color(for: colorScheme))
+                .lineStyle(StrokeStyle(lineWidth: 1.5))
+            }
+        }
+        .chartXAxis(.hidden)
+        .chartYAxis(.hidden)
+        .chartLegend(.hidden)
+        .frame(height: 30)
     }
 }

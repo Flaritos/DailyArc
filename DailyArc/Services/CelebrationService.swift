@@ -9,6 +9,7 @@ final class CelebrationService {
 
     var activeCelebration: Celebration? = nil
     var showCelebration = false
+    var show365Celebration = false
 
     struct Celebration: Identifiable {
         let id = UUID()
@@ -77,6 +78,11 @@ final class CelebrationService {
                 habitName: habit.name
             )
             showCelebration = true
+
+            // Trigger the 365-day golden arc animation
+            if streak == 365 {
+                show365Celebration = true
+            }
 
             // Haptic feedback scaled to tier
             switch variant.2 {
@@ -171,6 +177,7 @@ final class CelebrationService {
     func dismiss() {
         withAnimation(.easeOut(duration: 0.2)) {
             showCelebration = false
+            show365Celebration = false
         }
         activeCelebration = nil
     }

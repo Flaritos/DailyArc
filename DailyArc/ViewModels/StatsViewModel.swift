@@ -178,6 +178,58 @@ final class StatsViewModel {
         return totalDays > 0 ? Double(completedDays) / Double(totalDays) : 0
     }
 
+    /// Returns an array of 7 Ints representing the completion count for the habit
+    /// over the last 7 days (index 0 = 6 days ago, index 6 = today).
+    func last7DaysCounts(for habit: Habit, logs: [HabitLog]) -> [Int] {
+        let habitLogs = logs.filter { $0.habitIDDenormalized == habit.id }
+        let today = calendar.startOfDay(for: Date())
+        let logsByDate = Dictionary(grouping: habitLogs) { calendar.startOfDay(for: $0.date) }
+
+        var counts: [Int] = []
+        for i in (0..<7).reversed() {
+            let day = calendar.date(byAdding: .day, value: -i, to: today)
+                ?? today.addingTimeInterval(Double(-i) * 86400)
+            let dayStart = calendar.startOfDay(for: day)
+            let count = logsByDate[dayStart]?.first?.count ?? 0
+            counts.append(count)
+        }
+        return counts
+    }
+
+    // MARK: - Mood Day-of-Week Pattern (A4)
+
+    /// Checks for consistent below-average mood on a specific weekday.
+    /// Returns an annotation string like "Your mood tends to dip on Mondays." if a pattern
+    /// is detected (3+ occurrences of below-average mood on the same weekday).
+    func moodDayOfWeekInsight(moods: [MoodEntry]) -> String? {
+        let scoredMoods = moods.filter { $0.moodScore > 0 }
+        guard scoredMoods.count >= 7 else { return nil }
+
+        let overallAvg = Double(scoredMoods.map(\.moodScore).reduce(0, +)) / Double(scoredMoods.count)
+
+        // Group moods by weekday (1=Sunday ... 7=Saturday)
+        var weekdayScores: [Int: [Int]] = [:]
+        for mood in scoredMoods {
+            let weekday = calendar.component(.weekday, from: mood.date)
+            weekdayScores[weekday, default: []].append(mood.moodScore)
+        }
+
+        // Find weekdays where mood consistently dips below average
+        let dayNames = ["", "Sundays", "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays"]
+        for (weekday, scores) in weekdayScores {
+            let belowAvg = scores.filter { Double($0) < overallAvg }
+            if belowAvg.count >= 3 {
+                let dayAvg = Double(scores.reduce(0, +)) / Double(scores.count)
+                // Only flag if the day average is meaningfully below overall
+                if dayAvg < overallAvg - 0.3, weekday >= 1, weekday <= 7 {
+                    return "Your mood tends to dip on \(dayNames[weekday])."
+                }
+            }
+        }
+
+        return nil
+    }
+
     func totalCompletions(for habit: Habit, logs: [HabitLog]) -> Int {
         logs.filter { $0.habitIDDenormalized == habit.id && $0.count >= habit.targetCount }.count
     }

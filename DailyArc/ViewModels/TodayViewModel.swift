@@ -26,7 +26,8 @@ final class TodayViewModel {
 
     // MARK: - Greeting
 
-    /// Personalized greeting based on time, name, streaks, day-of-week, easter eggs.
+    /// Personalized greeting based on time, name, streaks, day-of-week, easter eggs,
+    /// and completion-aware weather metaphors (A2).
     func greetingText(habits: [Habit]) -> String {
         let name = UserDefaults.standard.string(forKey: "userName") ?? ""
         let displayName = name.isEmpty ? "" : ", \(name)"
@@ -59,6 +60,39 @@ final class TodayViewModel {
                 ]
                 let index = Int(StableHash.hash(ISO8601DateFormatter().string(from: Date()))) % variants.count
                 return variants[index]
+            }
+        }
+
+        // A2: Completion-aware weather metaphor greetings
+        // Based on yesterday's completion percentage
+        let yesterdayCompletion = lastYesterdayCompletionRate
+        if yesterdayCompletion >= 0 {
+            let completionGreeting: String? = {
+                let seed = Int(StableHash.hash("comp-\(selectedDate.timeIntervalSince1970)"))
+                if yesterdayCompletion >= 1.0 {
+                    let variants = [
+                        "Clear skies ahead\(displayName).",
+                        "Riding the momentum\(displayName).",
+                    ]
+                    return variants[seed % variants.count]
+                } else if yesterdayCompletion >= 0.5 {
+                    let variants = [
+                        "Building momentum\(displayName).",
+                        "Your arc continues\(displayName).",
+                    ]
+                    return variants[seed % variants.count]
+                } else {
+                    let variants = [
+                        "Every day is a fresh start\(displayName).",
+                        "Your arc awaits\(displayName).",
+                    ]
+                    return variants[seed % variants.count]
+                }
+            }()
+            // 40% chance to use completion-aware greeting
+            if let greeting = completionGreeting,
+               Int(StableHash.hash("comp-show-\(selectedDate.timeIntervalSince1970)")) % 5 < 2 {
+                return greeting
             }
         }
 
@@ -116,6 +150,139 @@ final class TodayViewModel {
         case 12..<17: return "Good afternoon\(displayName) \u{1F324}"
         case 17..<21: return "Good evening\(displayName) \u{1F305}"
         default: return "Burning the midnight oil\(displayName)? \u{1F319}"
+        }
+    }
+
+    /// Yesterday's completion rate for adaptive greetings (A2).
+    /// Returns -1 if no data available; 0.0-1.0 otherwise.
+    private var lastYesterdayCompletionRate: Double {
+        // This is set by fetchYesterdayCompletion when data is available
+        _yesterdayCompletionRate
+    }
+
+    /// Cached yesterday completion rate. -1 means not computed.
+    private var _yesterdayCompletionRate: Double = -1
+
+    /// Fetch yesterday's completion rate from the context for adaptive greeting.
+    func fetchYesterdayCompletion(habits: [Habit], context: ModelContext, calendar: Calendar) {
+        guard let yesterday = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: Date())) else {
+            _yesterdayCompletionRate = -1
+            return
+        }
+        let normalizedYesterday = calendar.startOfDay(for: yesterday)
+        let visibleYesterday = habits.filter { !$0.isArchived && $0.shouldAppear(on: normalizedYesterday, calendar: calendar) }
+        guard !visibleYesterday.isEmpty else {
+            _yesterdayCompletionRate = -1
+            return
+        }
+
+        var descriptor = FetchDescriptor<HabitLog>(
+            predicate: #Predicate { $0.date == normalizedYesterday }
+        )
+        descriptor.fetchLimit = 100
+        let logs = (try? context.fetch(descriptor)) ?? []
+        let logMap = Dictionary(grouping: logs) { $0.habitIDDenormalized }
+
+        let completed = visibleYesterday.filter { habit in
+            (logMap[habit.id]?.first?.count ?? 0) >= habit.targetCount
+        }.count
+
+        _yesterdayCompletionRate = Double(completed) / Double(visibleYesterday.count)
+    }
+
+    // MARK: - Week Summary (A6)
+
+    /// Compute "Your Week" summary for the last 7 days.
+    /// Returns nil if insufficient data or not applicable.
+    func weekSummary(habits: [Habit], context: ModelContext, calendar: Calendar) -> WeekSummaryData? {
+        let today = calendar.startOfDay(for: Date())
+        guard let weekAgo = calendar.date(byAdding: .day, value: -7, to: today) else { return nil }
+
+        // Fetch logs for the past 7 days
+        var logDescriptor = FetchDescriptor<HabitLog>(
+            predicate: #Predicate { $0.date >= weekAgo && $0.date < today }
+        )
+        logDescriptor.fetchLimit = 500
+        let logs = (try? context.fetch(logDescriptor)) ?? []
+
+        // Fetch moods for the past 7 days
+        var moodDescriptor = FetchDescriptor<MoodEntry>(
+            predicate: #Predicate { $0.date >= weekAgo && $0.date < today }
+        )
+        moodDescriptor.fetchLimit = 7
+        let moods = (try? context.fetch(moodDescriptor)) ?? []
+
+        // Compute completion rate
+        var totalScheduled = 0
+        var totalCompleted = 0
+        var bestDayName = ""
+        var bestDayRate = 0.0
+
+        for dayOffset in 0..<7 {
+            guard let day = calendar.date(byAdding: .day, value: -6 + dayOffset, to: today) else { continue }
+            let normalizedDay = calendar.startOfDay(for: day)
+            let visible = habits.filter { !$0.isArchived && $0.shouldAppear(on: normalizedDay, calendar: calendar) }
+            guard !visible.isEmpty else { continue }
+
+            totalScheduled += visible.count
+            let dayLogs = logs.filter { calendar.isDate($0.date, inSameDayAs: normalizedDay) }
+            let logMap = Dictionary(grouping: dayLogs) { $0.habitIDDenormalized }
+            let completed = visible.filter { (logMap[$0.id]?.first?.count ?? 0) >= $0.targetCount }.count
+            totalCompleted += completed
+
+            let dayRate = Double(completed) / Double(visible.count)
+            if dayRate > bestDayRate {
+                bestDayRate = dayRate
+                let formatter = DateFormatter()
+                formatter.dateFormat = "EEEE"
+                bestDayName = formatter.string(from: normalizedDay)
+            }
+        }
+
+        guard totalScheduled > 0 else { return nil }
+
+        let completionPercent = Int(round(Double(totalCompleted) / Double(totalScheduled) * 100))
+
+        // Compute average mood
+        let scoredMoods = moods.filter { $0.moodScore > 0 }
+        let avgMood: Double? = scoredMoods.isEmpty ? nil : Double(scoredMoods.map(\.moodScore).reduce(0, +)) / Double(scoredMoods.count)
+
+        // Mood emoji for average
+        let moodEmoji: String = {
+            guard let avg = avgMood else { return "" }
+            switch Int(round(avg)) {
+            case 1: return "\u{1F614}"
+            case 2: return "\u{1F615}"
+            case 3: return "\u{1F610}"
+            case 4: return "\u{1F642}"
+            case 5: return "\u{1F604}"
+            default: return ""
+            }
+        }()
+
+        return WeekSummaryData(
+            completionPercent: completionPercent,
+            avgMood: avgMood,
+            moodEmoji: moodEmoji,
+            bestDayName: bestDayName.isEmpty ? nil : bestDayName
+        )
+    }
+
+    struct WeekSummaryData {
+        let completionPercent: Int
+        let avgMood: Double?
+        let moodEmoji: String
+        let bestDayName: String?
+
+        var displayText: String {
+            var parts = ["Last week: \(completionPercent)% complete"]
+            if let avg = avgMood {
+                parts.append("avg mood \(String(format: "%.1f", avg)) \(moodEmoji)")
+            }
+            if let best = bestDayName {
+                parts.append("best day \(best)")
+            }
+            return parts.joined(separator: ", ")
         }
     }
 

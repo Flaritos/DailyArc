@@ -15,6 +15,7 @@ struct PerHabitDetailView: View {
     @State private var showArchiveConfirmation = false
     @State private var showDeleteConfirmation = false
     @State private var monthlyData: [(month: Date, count: Int)] = []
+    @State private var dailyThisMonthData: [(day: Int, count: Int)] = []
     @State private var totalCompletionCount = 0
 
     private let calendar = Calendar.current
@@ -28,7 +29,13 @@ struct PerHabitDetailView: View {
                 // Stat panels
                 statPanels
 
-                // Monthly bar chart
+                // This Month daily bar chart
+                thisMonthChart
+
+                Divider()
+                    .padding(.horizontal, DailyArcSpacing.sm)
+
+                // Last 12 Months bar chart
                 monthlyChart
 
                 // Actions
@@ -124,11 +131,68 @@ struct PerHabitDetailView: View {
             Text(value)
                 .typography(.titleSmall)
                 .foregroundStyle(valueColor)
+                .contentTransition(.numericText())
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(DailyArcSpacing.md)
         .background(DailyArcTokens.backgroundSecondary)
         .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
+    }
+
+    private var thisMonthChart: some View {
+        let monthName = Date().formatted(.dateTime.month(.wide))
+        return VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
+            Text("This Month")
+                .typography(.titleSmall)
+                .foregroundStyle(DailyArcTokens.textPrimary)
+
+            Text(monthName)
+                .typography(.caption)
+                .foregroundStyle(DailyArcTokens.textSecondary)
+
+            if dailyThisMonthData.isEmpty {
+                Text("No data yet")
+                    .typography(.bodySmall)
+                    .foregroundStyle(DailyArcTokens.textTertiary)
+                    .frame(maxWidth: .infinity, minHeight: 150)
+            } else {
+                Chart {
+                    ForEach(dailyThisMonthData, id: \.day) { item in
+                        BarMark(
+                            x: .value("Day", item.day),
+                            y: .value("Count", max(item.count, 0))
+                        )
+                        .foregroundStyle(barColor(for: item.count))
+                        .cornerRadius(2)
+                    }
+                }
+                .chartXAxis {
+                    AxisMarks(values: .automatic(desiredCount: 8)) { value in
+                        AxisValueLabel {
+                            if let day = value.as(Int.self) {
+                                Text("\(day)")
+                                    .font(.caption2)
+                            }
+                        }
+                    }
+                }
+                .chartYScale(domain: 0...max(habit.targetCount, 1))
+                .frame(height: 150)
+            }
+        }
+        .padding(DailyArcSpacing.md)
+        .background(DailyArcTokens.backgroundSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusLarge))
+    }
+
+    private func barColor(for count: Int) -> Color {
+        if count <= 0 {
+            return Color(.systemGray5)
+        } else if count >= habit.targetCount {
+            return habit.color(for: colorScheme)
+        } else {
+            return habit.color(for: colorScheme).opacity(0.5)
+        }
     }
 
     private var monthlyChart: some View {
@@ -219,6 +283,7 @@ struct PerHabitDetailView: View {
                 .typography(.caption)
                 .fontWeight(.bold)
                 .foregroundStyle(DailyArcTokens.textPrimary)
+                .contentTransition(.numericText())
         }
     }
 
@@ -259,14 +324,38 @@ struct PerHabitDetailView: View {
         // Total completions
         totalCompletionCount = habit.logs.filter { $0.count >= habit.targetCount }.count
 
-        // Monthly completions
+        // Daily completions for current month
+        let now = Date()
+        let currentMonthComps = calendar.dateComponents([.year, .month], from: now)
+        let daysInMonth = calendar.range(of: .day, in: .month, for: now)?.count ?? 31
+        let todayDay = calendar.component(.day, from: now)
+
+        let logsByDate = Dictionary(grouping: habit.logs) { calendar.startOfDay(for: $0.date) }
+
+        var daily: [(day: Int, count: Int)] = []
+        for day in 1...daysInMonth {
+            var comps = currentMonthComps
+            comps.day = day
+            if let dayDate = calendar.date(from: comps) {
+                let dayStart = calendar.startOfDay(for: dayDate)
+                let count = logsByDate[dayStart]?.first?.count ?? 0
+                // Only show data up to today
+                if day <= todayDay {
+                    daily.append((day: day, count: count))
+                } else {
+                    daily.append((day: day, count: 0))
+                }
+            }
+        }
+        dailyThisMonthData = daily
+
+        // Monthly completions (last 12 months)
         let completedLogs = habit.logs.filter { $0.count >= habit.targetCount }
         let grouped = Dictionary(grouping: completedLogs) { log -> Date in
             let comps = calendar.dateComponents([.year, .month], from: log.date)
             return calendar.date(from: comps) ?? log.date
         }
 
-        let now = Date()
         var result: [(month: Date, count: Int)] = []
         for i in (0..<12).reversed() {
             if let monthDate = calendar.date(byAdding: .month, value: -i, to: now) {

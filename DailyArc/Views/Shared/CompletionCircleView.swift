@@ -73,6 +73,7 @@ struct CompletionCircleView: View {
                 Text("\(count)")
                     .font(.system(size: size * 0.3, weight: .semibold))
                     .foregroundStyle(DailyArcTokens.textSecondary)
+                    .contentTransition(.numericText())
             }
         }
         .frame(width: size, height: size)

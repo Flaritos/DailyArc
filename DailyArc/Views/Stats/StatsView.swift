@@ -20,6 +20,8 @@ struct StatsView: View {
     @State private var viewModel = StatsViewModel()
     @State private var showPaywall = false
     @State private var showMoodConsentPrompt = false
+    /// Controls staggered appearance animations for "Your Arc" content (A5).
+    @State private var hasAppeared = false
     @AppStorage("moodCorrelationConsentDate") private var moodConsentDate = ""
     @AppStorage("moodConsentPromptDismissed") private var moodConsentDismissed = false
 
@@ -70,20 +72,45 @@ struct StatsView: View {
     private var yourArcContent: some View {
         ScrollView {
             VStack(spacing: DailyArcSpacing.xl) {
-                // Heat Map
+                // Heat Map — appears immediately
                 HeatMapCanvasView(
                     snapshots: viewModel.snapshots,
                     selectedSnapshot: $viewModel.selectedSnapshot
                 )
                 .padding(.horizontal, DailyArcSpacing.lg)
 
-                // Mood Trend
+                // Mood Trend — staggered delay 0.1s
                 MoodTrendView(
-                    moodEntries: viewModel.recentMoodEntries(from: allMoods)
+                    moodEntries: Array(allMoods)
                 )
                 .padding(.horizontal, DailyArcSpacing.lg)
+                .opacity(hasAppeared ? 1 : 0)
+                .offset(y: hasAppeared ? 0 : 20)
+                .animation(.easeOut(duration: 0.4).delay(0.1), value: hasAppeared)
 
-                // Per-Habit Cards
+                // A4: Mood day-of-week pattern insight
+                if let moodInsight = viewModel.moodDayOfWeekInsight(moods: allMoods) {
+                    HStack(spacing: DailyArcSpacing.sm) {
+                        Image(systemName: "chart.line.downtrend.xyaxis")
+                            .font(.caption)
+                            .foregroundStyle(DailyArcTokens.info)
+                        Text(moodInsight)
+                            .typography(.caption)
+                            .foregroundStyle(DailyArcTokens.textSecondary)
+                    }
+                    .padding(.horizontal, DailyArcSpacing.md)
+                    .padding(.vertical, DailyArcSpacing.sm)
+                    .background(
+                        RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusSmall)
+                            .fill(DailyArcTokens.info.opacity(DailyArcTokens.opacitySubtle))
+                    )
+                    .padding(.horizontal, DailyArcSpacing.lg)
+                    .opacity(hasAppeared ? 1 : 0)
+                    .offset(y: hasAppeared ? 0 : 20)
+                    .animation(.easeOut(duration: 0.4).delay(0.15), value: hasAppeared)
+                }
+
+                // Per-Habit Cards — staggered per-card delays
                 if activeHabits.isEmpty {
                     emptyHabitsState
                 } else {
@@ -92,16 +119,23 @@ struct StatsView: View {
                             .typography(.titleSmall)
                             .foregroundStyle(DailyArcTokens.textPrimary)
                             .padding(.horizontal, DailyArcSpacing.lg)
+                            .opacity(hasAppeared ? 1 : 0)
+                            .offset(y: hasAppeared ? 0 : 20)
+                            .animation(.easeOut(duration: 0.4).delay(0.2), value: hasAppeared)
 
                         LazyVGrid(columns: columns, spacing: DailyArcSpacing.md) {
-                            ForEach(activeHabits) { habit in
+                            ForEach(Array(activeHabits.enumerated()), id: \.element.id) { index, habit in
                                 NavigationLink(value: habit.id) {
                                     PerHabitCardView(
                                         habit: habit,
-                                        completionRate: viewModel.completionRate(for: habit, logs: allLogs)
+                                        completionRate: viewModel.completionRate(for: habit, logs: allLogs),
+                                        last7DaysCounts: viewModel.last7DaysCounts(for: habit, logs: allLogs)
                                     )
                                 }
                                 .buttonStyle(.plain)
+                                .opacity(hasAppeared ? 1 : 0)
+                                .offset(y: hasAppeared ? 0 : 20)
+                                .animation(.easeOut(duration: 0.4).delay(0.2 + Double(index) * 0.08), value: hasAppeared)
                             }
                         }
                         .padding(.horizontal, DailyArcSpacing.lg)
@@ -109,6 +143,10 @@ struct StatsView: View {
                 }
             }
             .padding(.vertical, DailyArcSpacing.lg)
+            .onAppear {
+                guard !hasAppeared else { return }
+                hasAppeared = true
+            }
         }
         .navigationDestination(for: UUID.self) { habitID in
             if let habit = activeHabits.first(where: { $0.id == habitID }) {
@@ -141,6 +179,9 @@ struct StatsView: View {
                     }
                 } else {
                     correlationResultsView
+
+                    // Activity Insights (premium only)
+                    activityInsightsSection
                 }
             }
             .padding(.vertical, DailyArcSpacing.lg)
@@ -181,12 +222,26 @@ struct StatsView: View {
                 .typography(.titleMedium)
                 .foregroundStyle(DailyArcTokens.textPrimary)
 
-            // Progress indicator
+            // Progress indicator with brand gradient
             let daysRemaining = max(0, 14 - viewModel.pairedDataDays)
+            let progressFraction = min(Double(viewModel.pairedDataDays) / 14.0, 1.0)
             VStack(spacing: DailyArcSpacing.sm) {
-                ProgressView(value: Double(viewModel.pairedDataDays), total: 14)
-                    .tint(DailyArcTokens.accent)
-                    .padding(.horizontal, DailyArcSpacing.xxl)
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        // Track
+                        Capsule()
+                            .fill(DailyArcTokens.border.opacity(0.3))
+                            .frame(height: 6)
+
+                        // Gradient fill
+                        Capsule()
+                            .fill(DailyArcTokens.brandGradient)
+                            .frame(width: max(geo.size.width * progressFraction, 6), height: 6)
+                            .animation(.easeOut(duration: 0.6), value: progressFraction)
+                    }
+                }
+                .frame(height: 6)
+                .padding(.horizontal, DailyArcSpacing.xxl)
 
                 Text("\(daysRemaining) more days until your first insights")
                     .typography(.bodySmall)
@@ -431,6 +486,105 @@ struct StatsView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Activity Insights
+
+    /// Activities logged on high-mood days (moodScore >= 4), shown as frequency chips.
+    private var activityInsightsSection: some View {
+        let highMoodActivities = computeHighMoodActivities()
+
+        return Group {
+            if highMoodActivities.isEmpty {
+                // Empty state for no activity data
+                VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
+                    Text("Activity Insights")
+                        .typography(.titleSmall)
+                        .foregroundStyle(DailyArcTokens.textPrimary)
+                        .padding(.horizontal, DailyArcSpacing.lg)
+
+                    Text("Tag activities when logging mood to see what lifts your spirits.")
+                        .typography(.bodySmall)
+                        .foregroundStyle(DailyArcTokens.textTertiary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, DailyArcSpacing.lg)
+                        .padding(.vertical, DailyArcSpacing.xl)
+                }
+            } else {
+                VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
+                    Text("Activity Insights")
+                        .typography(.titleSmall)
+                        .foregroundStyle(DailyArcTokens.textPrimary)
+                        .padding(.horizontal, DailyArcSpacing.lg)
+
+                    Text("Activities on your best days")
+                        .typography(.caption)
+                        .foregroundStyle(DailyArcTokens.textTertiary)
+                        .padding(.horizontal, DailyArcSpacing.lg)
+
+                    // Chip grid
+                    let maxCount = highMoodActivities.first?.count ?? 1
+                    FlowLayout(spacing: DailyArcSpacing.sm) {
+                        ForEach(highMoodActivities, id: \.name) { activity in
+                            let isTop = activity.count == maxCount
+                            Text("\(Self.emojiForActivity(activity.name))\(activity.name): \(activity.count)x")
+                                .typography(isTop ? .bodyLarge : .bodySmall)
+                                .fontWeight(isTop ? .semibold : .regular)
+                                .padding(.horizontal, DailyArcSpacing.md)
+                                .padding(.vertical, DailyArcSpacing.sm)
+                                .background(
+                                    Capsule()
+                                        .fill(DailyArcTokens.accent.opacity(
+                                            DailyArcTokens.opacitySubtle + DailyArcTokens.opacityLight * Double(activity.count) / Double(maxCount)
+                                        ))
+                                )
+                                .overlay(
+                                    Capsule()
+                                        .stroke(DailyArcTokens.accent.opacity(0.3), lineWidth: DailyArcTokens.borderThin)
+                                )
+                                .foregroundStyle(DailyArcTokens.textPrimary)
+                        }
+                    }
+                    .padding(.horizontal, DailyArcSpacing.lg)
+                }
+            }
+        }
+        .padding(.top, DailyArcSpacing.md)
+    }
+
+    private func computeHighMoodActivities() -> [(name: String, count: Int)] {
+        let highMoodEntries = allMoods.filter { $0.moodScore >= 4 && !$0.activities.isEmpty }
+        var activityCounts: [String: Int] = [:]
+
+        for entry in highMoodEntries {
+            let activities = entry.activities.split(separator: "|").map(String.init)
+            for activity in activities {
+                let trimmed = activity.trimmingCharacters(in: .whitespaces)
+                if !trimmed.isEmpty {
+                    activityCounts[trimmed, default: 0] += 1
+                }
+            }
+        }
+
+        return activityCounts
+            .map { (name: $0.key, count: $0.value) }
+            .sorted { $0.count > $1.count }
+    }
+
+    private static let activityEmojiMap: [String: String] = [
+        "Exercise": "\u{1F3C3} ",
+        "Work": "\u{1F4BC} ",
+        "Social": "\u{1F465} ",
+        "Creative": "\u{1F3A8} ",
+        "Music": "\u{1F3B5} ",
+        "Reading": "\u{1F4DA} ",
+        "Mindful": "\u{1F9D8} ",
+        "Rest": "\u{1F634} ",
+    ]
+
+    private static func emojiForActivity(_ name: String) -> String {
+        activityEmojiMap[name] ?? ""
     }
 
     // MARK: - Empty State

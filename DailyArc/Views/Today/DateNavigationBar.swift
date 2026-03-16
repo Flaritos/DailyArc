@@ -10,7 +10,10 @@ struct DateNavigationBar: View {
 
     var body: some View {
         HStack {
-            Button(action: onBack) {
+            Button(action: {
+                HapticManager.dateNavigation()
+                onBack()
+            }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 16, weight: .semibold))
                     .symbolRenderingMode(.hierarchical)
@@ -35,7 +38,10 @@ struct DateNavigationBar: View {
 
             Spacer()
 
-            Button(action: onForward) {
+            Button(action: {
+                HapticManager.dateNavigation()
+                onForward()
+            }) {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 16, weight: .semibold))
                     .symbolRenderingMode(.hierarchical)
