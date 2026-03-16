@@ -264,8 +264,7 @@ struct TodayView: View {
                     }
                 }
             }
-            .cardStyle()
-            .padding(.horizontal, DailyArcSpacing.sm)
+            .padding(.horizontal, DailyArcSpacing.lg)
         }
     }
 
@@ -398,9 +397,6 @@ struct TodayView: View {
                 )
             }
         }
-        .background(DailyArcTokens.backgroundSecondary)
-        .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
-        .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
         .padding(.horizontal, DailyArcSpacing.sm)
     }
 
