@@ -26,6 +26,36 @@ struct MoodTrendView: View {
         filteredEntries.contains { $0.energyScore > 0 }
     }
 
+    /// 3-day rolling average for smoother mood trend line
+    private var smoothedMoodData: [(date: Date, value: Double)] {
+        let entries = filteredEntries
+        guard entries.count >= 2 else {
+            return entries.map { ($0.date, Double($0.moodScore)) }
+        }
+        return entries.enumerated().map { i, entry in
+            let windowStart = max(0, i - 1)
+            let windowEnd = min(entries.count - 1, i + 1)
+            let window = entries[windowStart...windowEnd]
+            let avg = Double(window.reduce(0) { $0 + $1.moodScore }) / Double(window.count)
+            return (entry.date, avg)
+        }
+    }
+
+    /// 3-day rolling average for smoother energy trend line
+    private var smoothedEnergyData: [(date: Date, value: Double)] {
+        let entries = filteredEntries.filter { $0.energyScore > 0 }
+        guard entries.count >= 2 else {
+            return entries.map { ($0.date, Double($0.energyScore)) }
+        }
+        return entries.enumerated().map { i, entry in
+            let windowStart = max(0, i - 1)
+            let windowEnd = min(entries.count - 1, i + 1)
+            let window = entries[windowStart...windowEnd]
+            let avg = Double(window.reduce(0) { $0 + $1.energyScore }) / Double(window.count)
+            return (entry.date, avg)
+        }
+    }
+
     private var selectedEntry: MoodEntry? {
         guard let selectedDate else { return nil }
         return filteredEntries.min(by: {
@@ -100,47 +130,48 @@ struct MoodTrendView: View {
 
     private var chartView: some View {
         Chart {
-            // Area fill under mood line
-            ForEach(filteredEntries, id: \.id) { entry in
+            // Area fill under smoothed mood line
+            ForEach(Array(smoothedMoodData.enumerated()), id: \.offset) { _, point in
                 AreaMark(
-                    x: .value("Date", entry.date, unit: .day),
-                    y: .value("Mood", entry.moodScore)
+                    x: .value("Date", point.date, unit: .day),
+                    yStart: .value("Baseline", 1),
+                    yEnd: .value("Mood", point.value)
                 )
                 .foregroundStyle(
                     .linearGradient(
                         colors: [
-                            DailyArcTokens.accent.opacity(0.15),
-                            DailyArcTokens.accent.opacity(0.0)
+                            DailyArcTokens.accent.opacity(0.10),
+                            DailyArcTokens.accent.opacity(0.01)
                         ],
                         startPoint: .top,
                         endPoint: .bottom
                     )
                 )
-                .interpolationMethod(.catmullRom)
+                .interpolationMethod(.monotone)
             }
 
-            // Mood line
-            ForEach(filteredEntries, id: \.id) { entry in
+            // Smoothed mood line (3-day rolling average)
+            ForEach(Array(smoothedMoodData.enumerated()), id: \.offset) { _, point in
                 LineMark(
-                    x: .value("Date", entry.date, unit: .day),
-                    y: .value("Mood", entry.moodScore)
+                    x: .value("Date", point.date, unit: .day),
+                    y: .value("Mood", point.value)
                 )
                 .foregroundStyle(DailyArcTokens.accent)
-                .interpolationMethod(.catmullRom)
-                .lineStyle(StrokeStyle(lineWidth: 2))
+                .interpolationMethod(.monotone)
+                .lineStyle(StrokeStyle(lineWidth: 2.5))
             }
 
-            // Energy dashed overlay
+            // Smoothed energy dashed overlay
             if hasEnergyData {
-                ForEach(filteredEntries.filter { $0.energyScore > 0 }, id: \.id) { entry in
+                ForEach(Array(smoothedEnergyData.enumerated()), id: \.offset) { _, point in
                     LineMark(
-                        x: .value("Date", entry.date, unit: .day),
-                        y: .value("Energy", entry.energyScore),
+                        x: .value("Date", point.date, unit: .day),
+                        y: .value("Energy", point.value),
                         series: .value("Series", "Energy")
                     )
-                    .foregroundStyle(DailyArcTokens.accent.opacity(0.4))
-                    .interpolationMethod(.catmullRom)
-                    .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [5, 3]))
+                    .foregroundStyle(DailyArcTokens.accent.opacity(0.25))
+                    .interpolationMethod(.monotone)
+                    .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
                 }
             }
 
