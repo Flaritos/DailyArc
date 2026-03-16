@@ -22,7 +22,15 @@ enum DailyArcTokens {
     static let warning = Color(light: Color(hex: "#C68400")!, dark: Color(hex: "#E8A317")!)
     static let error = Color(light: Color(hex: "#CC2936")!, dark: Color(hex: "#FF6B6B")!)
     static let info = Color(light: Color(hex: "#1976D2")!, dark: Color(hex: "#64B5F6")!)
-    static let accent = Color.accentColor
+    static var accent: Color {
+        let index = UserDefaults.standard.integer(forKey: "accentColorIndex")
+        let safeIndex = (0..<HabitColorPalette.colors.count).contains(index) ? index : 5
+        let entry = HabitColorPalette.colors[safeIndex]
+        return Color(
+            light: Color(hex: entry.hex)!,
+            dark: Color(hex: entry.darkModeHex)!
+        )
+    }
 
     // MARK: - Specific UI Elements (adaptive)
     static let streakFire = Color(light: Color(hex: "#E8590C")!, dark: Color(hex: "#FB923C")!)
@@ -31,6 +39,21 @@ enum DailyArcTokens {
     static let premiumGold = Color(light: Color(hex: "#B8860B")!, dark: Color(hex: "#FFE44D")!)
     static let disabled = Color(.systemGray3)
     static let disabledText = Color(.systemGray)
+
+    // MARK: - Brand Gradient
+    static let brandGradient = LinearGradient(
+        colors: [Color(hex: "2563EB")!, Color(hex: "5F27CD")!],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
+    // MARK: - Card Style
+    static let cornerS: CGFloat = 10
+    static let cornerM: CGFloat = 12
+    static let cornerL: CGFloat = 16
+    static let spacingM: CGFloat = 12
+    static let spacingL: CGFloat = 16
+    static let spacingXL: CGFloat = 24
 
     // MARK: - Pressed/Active States
     static let pressedOpacity: CGFloat = 0.7
@@ -115,5 +138,14 @@ extension View {
     /// Apply DailyArc typography style to a view.
     func typography(_ style: DailyArcTypography.Style) -> some View {
         modifier(DailyArcTypography(style: style))
+    }
+
+    /// Card styling: elevated background, rounded corners, subtle shadow
+    func cardStyle() -> some View {
+        self
+            .padding(DailyArcSpacing.lg)
+            .background(DailyArcTokens.backgroundSecondary)
+            .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
+            .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
     }
 }

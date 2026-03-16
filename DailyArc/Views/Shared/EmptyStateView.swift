@@ -1,15 +1,29 @@
 import SwiftUI
 
 /// Empty state shown when the user has no habits.
-/// "No habits yet. Tap + to create your first one."
+/// Features a decorative 270-degree arc motif behind the icon.
 struct EmptyStateView: View {
+    @State private var pulseOpacity: Double = 0.6
+
     var body: some View {
         VStack(spacing: DailyArcSpacing.xl) {
             Spacer()
 
-            Image(systemName: "sparkles")
-                .font(.system(size: 56))
-                .foregroundStyle(DailyArcTokens.accent.opacity(0.6))
+            ZStack {
+                // Decorative arc motif behind the icon
+                AppIconView(size: 120)
+                    .opacity(pulseOpacity)
+                    .onAppear {
+                        withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
+                            pulseOpacity = 0.3
+                        }
+                    }
+
+                Image(systemName: "sparkles")
+                    .font(.system(size: 40))
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(DailyArcTokens.accent)
+            }
 
             VStack(spacing: DailyArcSpacing.sm) {
                 Text("No habits yet")

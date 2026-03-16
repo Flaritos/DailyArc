@@ -13,6 +13,7 @@ struct DateNavigationBar: View {
             Button(action: onBack) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 16, weight: .semibold))
+                    .symbolRenderingMode(.hierarchical)
                     .foregroundStyle(DailyArcTokens.accent)
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
@@ -24,6 +25,7 @@ struct DateNavigationBar: View {
             HStack(spacing: DailyArcSpacing.xs) {
                 Image(systemName: "calendar")
                     .font(.system(size: 14))
+                    .symbolRenderingMode(.hierarchical)
                     .foregroundStyle(DailyArcTokens.textTertiary)
 
                 Text(dateLabel)
@@ -36,6 +38,7 @@ struct DateNavigationBar: View {
             Button(action: onForward) {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 16, weight: .semibold))
+                    .symbolRenderingMode(.hierarchical)
                     .foregroundStyle(canNavigateForward ? DailyArcTokens.accent : DailyArcTokens.disabled)
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())

@@ -59,6 +59,7 @@ struct CelebrationOverlay: View {
 
 private struct ConfettiCanvasView: View {
     @Binding var isShowing: Bool
+    @Environment(\.colorScheme) private var colorScheme
     @State private var particles: [ConfettiParticle] = []
     @State private var elapsed: TimeInterval = 0
 
@@ -75,6 +76,27 @@ private struct ConfettiCanvasView: View {
         Color(hex: "#8B5CF6")!, // Indigo light
     ]
 
+    /// Seasonal color variants mixed with brand colors
+    private static var seasonalColors: [Color] {
+        let month = Calendar.current.component(.month, from: Date())
+        switch month {
+        case 1: // January — New Year golds
+            return brandColors + [
+                Color(hex: "#FFD700")!, Color(hex: "#FFC107")!, Color(hex: "#FF8F00")!
+            ]
+        case 2: // February — Valentine's pinks & reds
+            return brandColors + [
+                Color(hex: "#FF1493")!, Color(hex: "#FF69B4")!, Color(hex: "#E63946")!
+            ]
+        case 12: // December — Winter whites & silvers
+            return brandColors + [
+                Color.white, Color(hex: "#C0C0C0")!, Color(hex: "#E8E8E8")!
+            ]
+        default:
+            return brandColors
+        }
+    }
+
     private static let emojis = ["🎉", "⭐", "✨", "🎊", "💪"]
 
     var body: some View {
@@ -86,7 +108,8 @@ private struct ConfettiCanvasView: View {
                     guard age >= 0 && age <= Self.duration else { continue }
 
                     let progress = age / Self.duration
-                    let opacity = 1.0 - max(0, (progress - 0.6) / 0.4) // Fade out in last 40%
+                    let baseOpacity = colorScheme == .dark ? 0.85 : 1.0
+                    let opacity = baseOpacity * (1.0 - max(0, (progress - 0.6) / 0.4)) // Fade out in last 40%
 
                     let x = particle.startX * size.width + particle.driftX * CGFloat(progress) * 60
                     let y = particle.startY * size.height + CGFloat(progress) * size.height * particle.speed
@@ -143,7 +166,7 @@ private struct ConfettiCanvasView: View {
                     rotationSpeed: Double.random(in: 0.5...2.0),
                     width: CGFloat.random(in: 8...14),
                     height: CGFloat.random(in: 4...8),
-                    color: Self.brandColors.randomElement()!,
+                    color: Self.seasonalColors.randomElement()!,
                     shape: shape,
                     emoji: Self.emojis.randomElement()!,
                     startTime: now + Double.random(in: 0...0.3)

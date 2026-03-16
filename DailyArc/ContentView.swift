@@ -4,6 +4,12 @@ struct ContentView: View {
     @AppStorage("selectedTab") private var selectedTab = 0
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("isCOPPABlocked") private var isCOPPABlocked = false
+    @AppStorage("lastSeenVersion") private var lastSeenVersion = ""
+    @State private var showWhatsNew = false
+
+    private var currentVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+    }
 
     var body: some View {
         if isCOPPABlocked {
@@ -12,6 +18,15 @@ struct ContentView: View {
             OnboardingView()
         } else {
             mainContent
+                .onAppear {
+                    if !lastSeenVersion.isEmpty && lastSeenVersion != currentVersion {
+                        showWhatsNew = true
+                    }
+                    lastSeenVersion = currentVersion
+                }
+                .sheet(isPresented: $showWhatsNew) {
+                    WhatsNewView()
+                }
         }
     }
 
@@ -46,7 +61,8 @@ struct ContentView: View {
                 TodayView()
             }
             .tabItem {
-                Label("Today", systemImage: "house.fill")
+                Label("Today", systemImage: "circle.dotted.and.circle")
+                    .symbolRenderingMode(.hierarchical)
             }
             .tag(0)
 
@@ -56,6 +72,7 @@ struct ContentView: View {
                         ToolbarItem(placement: .primaryAction) {
                             NavigationLink(value: "badges") {
                                 Image(systemName: "medal.fill")
+                                    .symbolRenderingMode(.hierarchical)
                             }
                             .accessibilityLabel("Badges")
                         }
@@ -68,6 +85,7 @@ struct ContentView: View {
             }
             .tabItem {
                 Label("Stats", systemImage: "chart.line.uptrend.xyaxis")
+                    .symbolRenderingMode(.hierarchical)
             }
             .tag(1)
 

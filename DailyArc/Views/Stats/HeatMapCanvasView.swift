@@ -3,12 +3,16 @@ import SwiftUI
 /// Canvas-rendered 52-week x 7-row heat map grid.
 /// Cell size: 12pt x 12pt, 3pt gap. Horizontal scroll.
 /// Colors: systemGray6 (no data), Sky-to-Indigo gradient based on completion %.
+/// Today's cell pulses gently; selected detail bar animates in with spring.
 struct HeatMapCanvasView: View {
     let snapshots: [DaySnapshot]
     @Binding var selectedSnapshot: DaySnapshot?
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
+
+    /// Drives the pulse animation for today's cell — oscillates opacity.
+    @State private var todayPulse: Bool = false
 
     private let cellSize: CGFloat = 12
     private let cellGap: CGFloat = 3
@@ -26,11 +30,22 @@ struct HeatMapCanvasView: View {
         return f
     }()
 
+    /// The opacity multiplier for today's cell, driven by the pulse state.
+    private var todayOpacity: CGFloat {
+        todayPulse ? 1.0 : 0.7
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
-            Text("Your Arc This Year")
-                .typography(.titleSmall)
-                .foregroundStyle(DailyArcTokens.textPrimary)
+            HStack(spacing: DailyArcSpacing.sm) {
+                RoundedRectangle(cornerRadius: 1.5)
+                    .fill(DailyArcTokens.brandGradient)
+                    .frame(width: 3, height: 20)
+
+                Text("Your Arc This Year")
+                    .typography(.titleSmall)
+                    .foregroundStyle(DailyArcTokens.textPrimary)
+            }
 
             ScrollView(.horizontal, showsIndicators: false) {
                 Canvas { context, size in
@@ -46,9 +61,17 @@ struct HeatMapCanvasView: View {
                 )
             }
 
-            // Detail bar
+            // Detail bar with scale+opacity transition on selection
             if let selected = selectedSnapshot {
                 detailBar(for: selected)
+                    .transition(.scale.combined(with: .opacity))
+                    .animation(.spring(), value: selected.id)
+            }
+        }
+        .onAppear {
+            // Start the continuous pulse animation for today's cell
+            withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
+                todayPulse = true
             }
         }
     }
@@ -73,6 +96,8 @@ struct HeatMapCanvasView: View {
     }
 
     private func drawCells(context: GraphicsContext, size: CGSize) {
+        let today = calendar.startOfDay(for: Date())
+
         for (index, snapshot) in snapshots.enumerated() {
             let col = index / 7
             let row = index % 7
@@ -81,7 +106,14 @@ struct HeatMapCanvasView: View {
             let rect = CGRect(x: x, y: y, width: cellSize, height: cellSize)
             let color = cellColor(for: snapshot)
             let path = RoundedRectangle(cornerRadius: 2).path(in: rect)
-            context.fill(path, with: .color(color))
+
+            // Apply pulse opacity to today's cell via color opacity
+            let isToday = calendar.startOfDay(for: snapshot.date) == today
+            if isToday {
+                context.fill(path, with: .color(color.opacity(todayOpacity)))
+            } else {
+                context.fill(path, with: .color(color))
+            }
 
             // Colorblind patterns when differentiateWithoutColor is enabled
             if differentiateWithoutColor && snapshot.totalHabits > 0 {
@@ -126,7 +158,9 @@ struct HeatMapCanvasView: View {
         guard row >= 0, row < 7 else { return }
         let index = col * 7 + row
         guard index >= 0, index < snapshots.count else { return }
-        selectedSnapshot = snapshots[index]
+        withAnimation(.spring()) {
+            selectedSnapshot = snapshots[index]
+        }
     }
 
     // MARK: - Colors

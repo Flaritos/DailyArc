@@ -14,6 +14,9 @@ struct SettingsView: View {
     @AppStorage("userName") private var userName = ""
     @AppStorage("showStreaks") private var showStreaks = true
 
+    // MARK: - Appearance
+    @AppStorage("accentColorIndex") private var accentColorIndex = 5
+
     // MARK: - Notification State
     @AppStorage("morningReminderEnabled") private var morningReminderEnabled = false
     @AppStorage("eveningReminderEnabled") private var eveningReminderEnabled = false
@@ -91,6 +94,48 @@ struct SettingsView: View {
                     .textContentType(.givenName)
 
                 Toggle("Show Streaks", isOn: $showStreaks)
+            }
+
+            // MARK: - Appearance
+            Section("Appearance") {
+                VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
+                    Text("Accent Color")
+                        .typography(.bodyLarge)
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: DailyArcSpacing.sm) {
+                            ForEach(0..<HabitColorPalette.colors.count, id: \.self) { index in
+                                let entry = HabitColorPalette.colors[index]
+                                let color = Color(
+                                    light: Color(hex: entry.hex)!,
+                                    dark: Color(hex: entry.darkModeHex)!
+                                )
+                                Button {
+                                    accentColorIndex = index
+                                } label: {
+                                    Circle()
+                                        .fill(color)
+                                        .frame(width: 36, height: 36)
+                                        .overlay {
+                                            if accentColorIndex == index {
+                                                Image(systemName: "checkmark")
+                                                    .font(.system(size: 14, weight: .bold))
+                                                    .foregroundStyle(.white)
+                                            }
+                                        }
+                                        .overlay(
+                                            Circle()
+                                                .stroke(accentColorIndex == index ? color : .clear, lineWidth: 2)
+                                                .padding(-3)
+                                        )
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("\(entry.name) accent color")
+                            }
+                        }
+                        .padding(.vertical, DailyArcSpacing.xs)
+                    }
+                }
             }
 
             // MARK: - Notifications
@@ -502,7 +547,8 @@ struct SettingsView: View {
             "emailMarketingConsentDate",
             "hasCompletedFirstHabit", "hasLoggedFirstMood",
             "easterEggDiscoveries", "appOpenCount", "firstLaunchDate",
-            "lastOpenDate", "insightNudgeShown",
+            "lastOpenDate", "insightNudgeShown", "accentColorIndex",
+            "hasSeenDateNavNudge", "lastSeenVersion",
             "moodCorrelationConsentDate", "moodConsentPromptDismissed",
             "earnedBadges",
         ]

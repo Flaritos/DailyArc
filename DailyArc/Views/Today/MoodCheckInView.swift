@@ -2,6 +2,7 @@ import SwiftUI
 
 /// 5 emoji mood buttons in an HStack. Selected state shows accent border ring.
 /// Emoji scale: 1=Pensive, 2=Confused, 3=Neutral, 4=Slightly smiling, 5=Grinning.
+/// Wrapped in a glassmorphic container for elevated visual presence.
 struct MoodCheckInView: View {
     let selectedScore: Int
     let onSelect: (Int) -> Void
@@ -68,6 +69,13 @@ struct MoodCheckInView: View {
             }
         }
         .padding(.vertical, DailyArcSpacing.md)
+        .padding(.horizontal, DailyArcSpacing.md)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusLarge))
+        .overlay(
+            RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusLarge)
+                .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+        )
         .alert("Just so you know", isPresented: $showDisclaimer) {
             Button("Got it") {
                 moodDisclaimerShown = true

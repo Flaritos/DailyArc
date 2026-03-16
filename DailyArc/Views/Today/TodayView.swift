@@ -23,6 +23,16 @@ struct TodayView: View {
     @State private var showCalendarPicker = false
     @State private var calendarPickerDate = Date()
 
+    /// Tracks swipe navigation direction for slide transition.
+    @State private var swipeDirection: Edge = .trailing
+
+    /// Unique ID that changes on date navigation to trigger transition.
+    @State private var contentID = UUID()
+
+    /// Date navigation discovery nudge — shown once during first week
+    @AppStorage("hasSeenDateNavNudge") private var hasSeenDateNavNudge = false
+    @State private var showDateNavNudge = false
+
     // Archive toast
     @State private var archiveToast: ArchiveToastInfo? = nil
     struct ArchiveToastInfo: Identifiable {
@@ -86,6 +96,7 @@ struct TodayView: View {
                     if isConsentWithdrawn {
                         HStack {
                             Image(systemName: "pause.circle.fill")
+                                .symbolRenderingMode(.hierarchical)
                                 .foregroundStyle(DailyArcTokens.warning)
                             Text("Data processing paused. Re-enable in Settings \u{2192} Privacy.")
                                 .typography(.caption)
@@ -128,12 +139,14 @@ struct TodayView: View {
                             dateLabel: viewModel.dateLabel,
                             canNavigateForward: viewModel.canNavigateForward,
                             onBack: {
-                                viewModel.navigateBack()
-                                refreshData()
+                                navigateWithAnimation(direction: .trailing) {
+                                    viewModel.navigateBack()
+                                }
                             },
                             onForward: {
-                                viewModel.navigateForward()
-                                refreshData()
+                                navigateWithAnimation(direction: .leading) {
+                                    viewModel.navigateForward()
+                                }
                             }
                         )
                     }
@@ -141,6 +154,25 @@ struct TodayView: View {
                     .onTapGesture {
                         calendarPickerDate = viewModel.selectedDate
                         showCalendarPicker = true
+                    }
+
+                    // Date navigation discovery nudge
+                    if showDateNavNudge {
+                        HStack(spacing: DailyArcSpacing.xs) {
+                            Image(systemName: "arrow.left")
+                                .font(.caption.weight(.bold))
+                            Text("Missed a day? Tap \u{2190} to go back")
+                                .typography(.caption)
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, DailyArcSpacing.md)
+                        .padding(.vertical, DailyArcSpacing.sm)
+                        .background(DailyArcTokens.accent, in: Capsule())
+                        .transition(.scale.combined(with: .opacity))
+                        .onTapGesture {
+                            withAnimation { showDateNavNudge = false }
+                            hasSeenDateNavNudge = true
+                        }
                     }
 
                     // Streak Recovery Banner
@@ -158,6 +190,7 @@ struct TodayView: View {
                         } label: {
                             HStack(spacing: DailyArcSpacing.sm) {
                                 Image(systemName: "flame.fill")
+                                    .symbolRenderingMode(.hierarchical)
                                     .foregroundStyle(DailyArcTokens.streakFire)
 
                                 VStack(alignment: .leading, spacing: DailyArcSpacing.xxs) {
@@ -255,7 +288,8 @@ struct TodayView: View {
                                 }
                             }
                         }
-                        .padding(.horizontal, DailyArcSpacing.lg)
+                        .cardStyle()
+                        .padding(.horizontal, DailyArcSpacing.sm)
                     }
 
                     Divider()
@@ -283,7 +317,8 @@ struct TodayView: View {
                                 targetCount: totalProgress.total,
                                 size: 28,
                                 lineWidth: 3,
-                                color: DailyArcTokens.accent
+                                color: DailyArcTokens.accent,
+                                useGradient: true
                             )
 
                             Spacer()
@@ -298,9 +333,12 @@ struct TodayView: View {
                         }
                         .padding(.horizontal, DailyArcSpacing.lg)
 
-                        // Habit list
-                        LazyVStack(spacing: DailyArcSpacing.xs) {
-                            ForEach(visibleHabits, id: \.id) { habit in
+                        // Habit list (card container)
+                        LazyVStack(spacing: 0) {
+                            ForEach(Array(visibleHabits.enumerated()), id: \.element.id) { index, habit in
+                                if index > 0 {
+                                    Divider().padding(.horizontal, DailyArcSpacing.lg)
+                                }
                                 HabitRowView(
                                     habit: habit,
                                     count: viewModel.completionCount(for: habit),
@@ -370,6 +408,9 @@ struct TodayView: View {
                                 )
                             }
                         }
+                        .background(DailyArcTokens.backgroundSecondary)
+                        .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
+                        .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
                         .padding(.horizontal, DailyArcSpacing.sm)
 
                         // Free tier hint
@@ -383,9 +424,33 @@ struct TodayView: View {
                     }
                 }
                 .padding(.bottom, DailyArcSpacing.xxl)
+                .id(contentID)
+                .transition(.asymmetric(
+                    insertion: .move(edge: swipeDirection),
+                    removal: .move(edge: swipeDirection == .leading ? .trailing : .leading)
+                ))
             }
             .scrollDismissesKeyboard(.interactively)
             .background(DailyArcTokens.backgroundPrimary)
+            .gesture(
+                DragGesture(minimumDistance: 50)
+                    .onEnded { value in
+                        let horizontalAmount = value.translation.width
+
+                        if horizontalAmount < -50 {
+                            // Swipe left = next day (but not past today)
+                            guard viewModel.canNavigateForward else { return }
+                            navigateWithAnimation(direction: .leading) {
+                                viewModel.navigateForward()
+                            }
+                        } else if horizontalAmount > 50 {
+                            // Swipe right = previous day
+                            navigateWithAnimation(direction: .trailing) {
+                                viewModel.navigateBack()
+                            }
+                        }
+                    }
+            )
 
             // Celebration overlay
             CelebrationOverlay(isShowing: $viewModel.showCelebration)
@@ -483,6 +548,23 @@ struct TodayView: View {
             EasterEggManager.shared.incrementAppOpen()
             UserDefaults.standard.set(Date(), forKey: "lastOpenDate")
 
+            // Date nav nudge: show once during first week
+            if !hasSeenDateNavNudge {
+                if let firstLaunch = UserDefaults.standard.object(forKey: "firstLaunchDate") as? Date,
+                   Date().timeIntervalSince(firstLaunch) < 7 * 24 * 3600 {
+                    withAnimation(.easeOut(duration: 0.4).delay(1.5)) {
+                        showDateNavNudge = true
+                    }
+                    // Auto-dismiss after 5 seconds
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 6.5) {
+                        withAnimation { showDateNavNudge = false }
+                        hasSeenDateNavNudge = true
+                    }
+                } else {
+                    hasSeenDateNavNudge = true
+                }
+            }
+
             // Check motivation milestones
             let totalDays = viewModel.totalDaysLogged(context: context, calendar: calendar)
             let userName = UserDefaults.standard.string(forKey: "userName") ?? ""
@@ -500,6 +582,18 @@ struct TodayView: View {
                 break
             }
         }
+    }
+
+    // MARK: - Navigation with Slide Animation
+
+    /// Navigates to a new date with a directional slide transition.
+    private func navigateWithAnimation(direction: Edge, action: () -> Void) {
+        swipeDirection = direction
+        withAnimation(.easeInOut(duration: 0.25)) {
+            contentID = UUID()
+        }
+        action()
+        refreshData()
     }
 
     private func refreshData() {
