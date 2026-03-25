@@ -10,13 +10,13 @@ struct SkeletonView: View {
 
     var body: some View {
         RoundedRectangle(cornerRadius: cornerRadius)
-            .fill(Color(.systemGray5))
+            .fill(Color(hex: "#E5E5EA")!)
             .frame(width: width, height: height)
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .fill(
                         LinearGradient(
-                            colors: [.clear, Color(.systemGray4).opacity(0.5), .clear],
+                            colors: [.clear, Color(hex: "#D1D1D6")!.opacity(0.5), .clear],
                             startPoint: .leading,
                             endPoint: .trailing
                         )

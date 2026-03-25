@@ -5,6 +5,7 @@ import SwiftData
 struct HabitManagementView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.theme) private var theme
     @Query(sort: \Habit.sortOrder) private var allHabits: [Habit]
 
     @State private var showArchived = false
@@ -89,6 +90,10 @@ struct HabitManagementView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(theme.backgroundPrimary)
+        .themedGridOverlay(theme)
+        .themedScanline(theme)
         .navigationTitle("Manage Habits")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -125,7 +130,8 @@ struct HabitManagementView: View {
             VStack(alignment: .leading, spacing: DailyArcSpacing.xxs) {
                 Text(habit.name)
                     .typography(.bodyLarge)
-                    .foregroundStyle(DailyArcTokens.textPrimary)
+                    .fontDesign(theme.displayFontDesign)
+                    .foregroundStyle(theme.textPrimary)
 
                 HStack(spacing: DailyArcSpacing.xs) {
                     if habit.currentStreak > 0 {
@@ -134,12 +140,12 @@ struct HabitManagementView: View {
                                 .font(.caption2)
                             Text("\(habit.currentStreak)")
                                 .typography(.caption)
-                                .foregroundStyle(DailyArcTokens.streakFire)
+                                .foregroundStyle(theme.streakFire)
                         }
                     }
                     Text(frequencyLabel(for: habit))
                         .typography(.caption)
-                        .foregroundStyle(DailyArcTokens.textTertiary)
+                        .foregroundStyle(theme.textTertiary)
                 }
             }
 
@@ -147,7 +153,7 @@ struct HabitManagementView: View {
 
             if habit.isArchived {
                 Image(systemName: "archivebox.fill")
-                    .foregroundStyle(DailyArcTokens.textTertiary)
+                    .foregroundStyle(theme.textTertiary)
                     .font(.caption)
             }
         }

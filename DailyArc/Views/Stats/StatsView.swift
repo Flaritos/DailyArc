@@ -7,6 +7,7 @@ import SwiftData
 struct StatsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.theme) private var theme
 
     @Query(filter: #Predicate<Habit> { !$0.isArchived }, sort: \Habit.sortOrder)
     private var activeHabits: [Habit]
@@ -20,6 +21,9 @@ struct StatsView: View {
     @State private var viewModel = StatsViewModel()
     @State private var showPaywall = false
     @State private var showMoodConsentPrompt = false
+    @State private var showInsightTheater = false
+    @State private var insightTheaterResult: CorrelationEngine.CorrelationResult?
+    @AppStorage("theateredCorrelationIDs") private var theateredCorrelationIDsJSON = "[]"
     /// Controls staggered appearance animations for "Your Arc" content (A5).
     @State private var hasAppeared = false
     /// Gap #6: Skeleton loading state
@@ -34,25 +38,105 @@ struct StatsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Segmented control
-            Picker("Section", selection: $viewModel.selectedSegment) {
-                ForEach(StatsViewModel.StatsSegment.allCases, id: \.self) { segment in
-                    Text(segment.rawValue).tag(segment)
+            // Custom themed header (replaces hidden navigation bar)
+            HStack {
+                if theme.id == "command" {
+                    Text("> STATS")
+                        .font(.system(size: 22, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(CommandTheme.cyan)
+                        .shadow(color: CommandTheme.glowCyan, radius: 6, x: 0, y: 0)
+                } else {
+                    Text("Stats")
+                        .font(.system(size: 28, weight: .semibold))
+                        .foregroundStyle(theme.textPrimary)
+                }
+                Spacer()
+                if StoreKitManager.shared.isPremium {
+                    NavigationLink {
+                        YearInPixelsView(
+                            moods: Array(allMoods),
+                            habits: Array(activeHabits),
+                            logs: Array(allLogs)
+                        )
+                    } label: {
+                        yearInPixelsLabel
+                    }
+                }
+                NavigationLink(value: "badges") {
+                    Image(systemName: "medal.fill")
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(theme.id == "command" ? CommandTheme.cyan : DailyArcTokens.accent)
+                }
+                .accessibilityLabel("Badges")
+            }
+            .padding(.horizontal, DailyArcSpacing.lg)
+            .padding(.top, DailyArcSpacing.sm)
+            .padding(.bottom, DailyArcSpacing.xs)
+
+            statsMainContent
+        }
+            .background(theme.backgroundPrimary.ignoresSafeArea())
+            .themedGridOverlay(theme)
+            .themedScanline(theme)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar(.hidden, for: .navigationBar)
+            .navigationDestination(for: String.self) { destination in
+                if destination == "badges" {
+                    BadgesView()
                 }
             }
-            .pickerStyle(.segmented)
-            .padding(.horizontal, DailyArcSpacing.lg)
-            .padding(.vertical, DailyArcSpacing.sm)
+            .fullScreenCover(isPresented: $showInsightTheater) {
+                if let result = insightTheaterResult {
+                    InsightTheaterView(result: result)
+                }
+            }
+            .onAppear {
+                viewModel.loadSnapshots(habits: activeHabits, logs: allLogs, moods: allMoods)
+                viewModel.computeCorrelations(habits: activeHabits, logs: allLogs, moods: allMoods)
+                if isLoading {
+                    Task {
+                        try? await Task.sleep(for: .milliseconds(100))
+                        isLoading = false
+                    }
+                }
+            }
+            .onDisappear {
+                viewModel.cancelTasks()
+            }
+            .onChange(of: activeHabits.count) {
+                viewModel.loadSnapshots(habits: activeHabits, logs: allLogs, moods: allMoods)
+                viewModel.computeCorrelations(habits: activeHabits, logs: allLogs, moods: allMoods)
+            }
+            .onChange(of: viewModel.correlationResults) { _, newResults in
+                checkForInsightTheater(results: newResults)
+            }
+    }
+
+    // MARK: - Main Content (extracted to help type checker)
+
+    private var statsMainContent: some View {
+        VStack(spacing: 0) {
+            // Segmented control
+            if theme.id == "command" {
+                commandSegmentedControl
+            } else {
+                Picker("Section", selection: $viewModel.selectedSegment) {
+                    ForEach(StatsViewModel.StatsSegment.allCases, id: \.self) { segment in
+                        Text(segment.rawValue).tag(segment)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, DailyArcSpacing.lg)
+                .padding(.vertical, DailyArcSpacing.sm)
+            }
 
             // Content
             Group {
                 if isLoading {
-                    // Gap #6: Skeleton loading
                     StatsSkeletonView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                         .padding(.top, DailyArcSpacing.lg)
                 } else if viewModel.snapshots.isEmpty && !activeHabits.isEmpty {
-                    // Gap #5: Error state when data fails to load
                     ScrollView {
                         VStack {
                             Spacer(minLength: DailyArcSpacing.xxxl)
@@ -74,25 +158,57 @@ struct StatsView: View {
                 }
             }
         }
-        .background(DailyArcTokens.backgroundPrimary)
-        .navigationTitle("Stats")
-        .onAppear {
-            viewModel.loadSnapshots(habits: activeHabits, logs: allLogs, moods: allMoods)
-            viewModel.computeCorrelations(habits: activeHabits, logs: allLogs, moods: allMoods)
-            // Gap #6: Flip loading off after first data load
-            if isLoading {
-                Task {
-                    try? await Task.sleep(for: .milliseconds(100))
-                    isLoading = false
-                }
-            }
+    }
+
+    // MARK: - Year in Pixels Toolbar
+
+    private var yearInPixelsLabel: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "square.grid.3x3.fill")
+                .font(.caption)
+            Text(theme.id == "command" ? "PIXELS" : "Year")
+                .font(theme.id == "command"
+                    ? .system(size: 11, weight: .semibold, design: .monospaced)
+                    : .system(size: 13, weight: .medium))
         }
-        .onDisappear {
-            viewModel.cancelTasks()
+        .foregroundStyle(theme.id == "command" ? CommandTheme.cyan : theme.textSecondary)
+    }
+
+    // MARK: - Insight Theater Trigger
+
+    /// Check if any strong correlation hasn't been theatered yet and present it.
+    private func checkForInsightTheater(results: [CorrelationEngine.CorrelationResult]) {
+        guard StoreKitManager.shared.isPremium else { return }
+
+        let theateredIDs = loadTheateredIDs()
+
+        // Find the first strong correlation not yet theatered
+        guard let strongResult = results.first(where: {
+            abs($0.coefficient) >= 0.3 && !theateredIDs.contains($0.habitName)
+        }) else { return }
+
+        // Mark as theatered
+        var updated = theateredIDs
+        updated.insert(strongResult.habitName)
+        saveTheateredIDs(updated)
+
+        // Present
+        insightTheaterResult = strongResult
+        showInsightTheater = true
+    }
+
+    private func loadTheateredIDs() -> Set<String> {
+        guard let data = theateredCorrelationIDsJSON.data(using: .utf8),
+              let arr = try? JSONDecoder().decode([String].self, from: data) else {
+            return []
         }
-        .onChange(of: activeHabits.count) {
-            viewModel.loadSnapshots(habits: activeHabits, logs: allLogs, moods: allMoods)
-            viewModel.computeCorrelations(habits: activeHabits, logs: allLogs, moods: allMoods)
+        return Set(arr)
+    }
+
+    private func saveTheateredIDs(_ ids: Set<String>) {
+        if let data = try? JSONEncoder().encode(Array(ids)),
+           let str = String(data: data, encoding: .utf8) {
+            theateredCorrelationIDsJSON = str
         }
     }
 
@@ -144,9 +260,12 @@ struct StatsView: View {
                     emptyHabitsState
                 } else {
                     VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
-                        Text("Per-Habit Stats")
+                        Text(theme.id == "command" ? "> HABIT STATS" : "Per-Habit Stats")
                             .typography(.titleSmall)
-                            .foregroundStyle(DailyArcTokens.textPrimary)
+                            .font(theme.id == "command" ? .system(.subheadline, design: .monospaced).weight(.semibold) : nil)
+                            .foregroundStyle(theme.id == "command" ? CommandTheme.cyan : theme.textPrimary)
+                            .shadow(color: theme.id == "command" ? CommandTheme.glowCyan : .clear, radius: theme.id == "command" ? 8 : 0, x: 0, y: 0)
+                            .tracking(theme.id == "command" ? 0.5 : 0)
                             .padding(.horizontal, DailyArcSpacing.lg)
                             .opacity(hasAppeared ? 1 : 0)
                             .offset(y: hasAppeared ? 0 : 20)
@@ -215,7 +334,7 @@ struct StatsView: View {
             }
             .padding(.vertical, DailyArcSpacing.lg)
         }
-        .background(DailyArcTokens.backgroundPrimary)
+        .background(theme.backgroundPrimary)
         .sheet(isPresented: $showPaywall) {
             PaywallView()
         }
@@ -483,8 +602,8 @@ struct StatsView: View {
                     showPaywall = true
                 } label: {
                     HStack {
-                        Image(systemName: "crown.fill")
-                            .foregroundStyle(DailyArcTokens.premiumGold)
+                        Image(systemName: "sparkles")
+                            .foregroundStyle(DailyArcTokens.accent)
                         Text("See all insights")
                     }
                     .frame(maxWidth: .infinity)
@@ -614,6 +733,46 @@ struct StatsView: View {
 
     private static func emojiForActivity(_ name: String) -> String {
         activityEmojiMap[name] ?? ""
+    }
+
+    // MARK: - Command Segmented Control
+
+    private var commandSegmentedControl: some View {
+        HStack(spacing: 0) {
+            ForEach(StatsViewModel.StatsSegment.allCases, id: \.self) { segment in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        viewModel.selectedSegment = segment
+                    }
+                } label: {
+                    VStack(spacing: 4) {
+                        Text(segment.rawValue.uppercased())
+                            .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                            .foregroundStyle(viewModel.selectedSegment == segment ? CommandTheme.cyan : Color.white.opacity(0.4))
+                            .tracking(0.5)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, DailyArcSpacing.sm)
+
+                        // Cyan bottom border for active segment
+                        Rectangle()
+                            .fill(viewModel.selectedSegment == segment ? CommandTheme.cyan : Color.clear)
+                            .frame(height: 2)
+                            .shadow(color: viewModel.selectedSegment == segment ? CommandTheme.glowCyan : .clear, radius: 6, x: 0, y: 0)
+                    }
+                    .background(viewModel.selectedSegment == segment ? CommandTheme.cyan.opacity(0.06) : Color.clear)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .background(CommandTheme.panel)
+        .overlay(
+            Rectangle()
+                .fill(Color(hex: "#6366F1")!.opacity(0.12))
+                .frame(height: 1),
+            alignment: .bottom
+        )
+        .padding(.horizontal, DailyArcSpacing.lg)
+        .padding(.vertical, DailyArcSpacing.xs)
     }
 
     // MARK: - Empty State

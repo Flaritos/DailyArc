@@ -11,41 +11,65 @@ struct ContentView: View {
     @AppStorage("lastSeenVersion") private var lastSeenVersion = ""
     @State private var showWhatsNew = false
     @State private var pendingDeepLink: URL?
+    @AppStorage("selectedThemeID") private var selectedThemeID = "tactile"
+    @Environment(\.theme) private var theme
+    @State private var isTransitioning = false
+    @State private var transitionGlowColor: Color = .clear
+    @State private var previousThemeID = "tactile"
 
     private var currentVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
 
     var body: some View {
-        if isCOPPABlocked {
-            coppaBlockScreen
-        } else if !hasCompletedOnboarding {
-            OnboardingView()
-                .onOpenURL { url in
-                    pendingDeepLink = url
-                }
-                .onChange(of: hasCompletedOnboarding) { _, completed in
-                    if completed, let url = pendingDeepLink {
-                        handleDeepLink(url)
-                        pendingDeepLink = nil
+        Group {
+            if isCOPPABlocked {
+                coppaBlockScreen
+            } else if !hasCompletedOnboarding {
+                OnboardingView()
+                    .onOpenURL { url in
+                        pendingDeepLink = url
                     }
-                }
-        } else {
-            mainContent
-                .onAppear {
-                    if !lastSeenVersion.isEmpty && lastSeenVersion != currentVersion {
-                        showWhatsNew = true
+                    .onChange(of: hasCompletedOnboarding) { _, completed in
+                        if completed, let url = pendingDeepLink {
+                            handleDeepLink(url)
+                            pendingDeepLink = nil
+                        }
                     }
-                    lastSeenVersion = currentVersion
-                    // Process any pending deep link from before onboarding completed
-                    if let url = pendingDeepLink {
-                        handleDeepLink(url)
-                        pendingDeepLink = nil
+            } else {
+                mainContent
+                    .onAppear {
+                        if !lastSeenVersion.isEmpty && lastSeenVersion != currentVersion {
+                            showWhatsNew = true
+                        }
+                        lastSeenVersion = currentVersion
+                        // Process any pending deep link from before onboarding completed
+                        if let url = pendingDeepLink {
+                            handleDeepLink(url)
+                            pendingDeepLink = nil
+                        }
                     }
+                    .sheet(isPresented: $showWhatsNew) {
+                        WhatsNewView()
+                    }
+            }
+        }
+        .id(hasCompletedOnboarding ? selectedThemeID : "onboarding") // Only force re-render after onboarding — during onboarding, theme changes should NOT reset the flow
+        .preferredColorScheme(hasCompletedOnboarding ? ThemeManager.shared.currentTheme.forcedColorScheme : nil)
+        .overlay(themeTransitionOverlay)
+        .onChange(of: selectedThemeID) { oldValue, newValue in
+            previousThemeID = oldValue
+            transitionGlowColor = newValue == "command"
+                ? Color(hex: "#22D3EE")!   // cyan for switching TO Command
+                : Color(hex: "#6366F1")!   // indigo for switching TO Tactile
+            withAnimation(.easeInOut(duration: 0.5)) {
+                isTransitioning = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    isTransitioning = false
                 }
-                .sheet(isPresented: $showWhatsNew) {
-                    WhatsNewView()
-                }
+            }
         }
     }
 
@@ -61,17 +85,17 @@ struct ContentView: View {
 
             Image(systemName: "hand.raised.fill")
                 .font(.system(size: 56))
-                .foregroundStyle(DailyArcTokens.textSecondary)
+                .foregroundStyle(theme.textSecondary)
 
             Text("DailyArc is built for users 13 and older. We want to make sure everyone is safe, and that means following important privacy rules.")
                 .multilineTextAlignment(.center)
-                .foregroundStyle(DailyArcTokens.textSecondary)
+                .foregroundStyle(theme.textSecondary)
                 .padding(.horizontal, 32)
 
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(DailyArcTokens.backgroundPrimary)
+        .background(theme.backgroundPrimary)
     }
 
     private var mainContent: some View {
@@ -79,44 +103,23 @@ struct ContentView: View {
             NavigationStack {
                 TodayView()
             }
-            .tabItem {
-                Label("Today", systemImage: "circle.dotted.and.circle")
-                    .symbolRenderingMode(.hierarchical)
-            }
             .tag(0)
 
             NavigationStack {
                 StatsView()
-                    .toolbar {
-                        ToolbarItem(placement: .primaryAction) {
-                            NavigationLink(value: "badges") {
-                                Image(systemName: "medal.fill")
-                                    .symbolRenderingMode(.hierarchical)
-                            }
-                            .accessibilityLabel("Badges")
-                        }
-                    }
-                    .navigationDestination(for: String.self) { destination in
-                        if destination == "badges" {
-                            BadgesView()
-                        }
-                    }
-            }
-            .tabItem {
-                Label("Stats", systemImage: "chart.line.uptrend.xyaxis")
-                    .symbolRenderingMode(.hierarchical)
             }
             .tag(1)
 
             NavigationStack {
                 SettingsView()
             }
-            .tabItem {
-                Label("Settings", systemImage: "gear")
-            }
             .tag(2)
         }
-        .tint(DailyArcTokens.accent)
+        .toolbar(.hidden, for: .tabBar)
+        .safeAreaInset(edge: .bottom) {
+            ThemedTabBar(selectedTab: $selectedTab)
+        }
+        .tint(theme.id == "command" ? CommandTheme.cyan : DailyArcTokens.accent)
         .onAppear {
             checkKeychainCOPPA()
         }
@@ -132,6 +135,30 @@ struct ContentView: View {
         case "stats": selectedTab = 1
         case "settings": selectedTab = 2
         default: selectedTab = 0 // malformed → Today
+        }
+    }
+
+    // MARK: - Theme Transition Overlay
+
+    @ViewBuilder
+    private var themeTransitionOverlay: some View {
+        if isTransitioning {
+            ZStack {
+                // Full-screen fade overlay
+                theme.backgroundPrimary
+                    .opacity(isTransitioning ? 0.85 : 0)
+                    .ignoresSafeArea()
+
+                // Central glowing "crack" line
+                Rectangle()
+                    .fill(transitionGlowColor)
+                    .frame(width: 4, height: UIScreen.main.bounds.height)
+                    .shadow(color: transitionGlowColor.opacity(0.8), radius: 20, x: 0, y: 0)
+                    .shadow(color: transitionGlowColor.opacity(0.4), radius: 40, x: 0, y: 0)
+                    .opacity(isTransitioning ? 1 : 0)
+            }
+            .allowsHitTesting(false)
+            .transition(.opacity)
         }
     }
 }

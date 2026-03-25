@@ -18,11 +18,14 @@ final class StoreKitManager {
     private(set) var purchaseState: PurchaseState = .idle
     private(set) var errorMessage: String?
 
-    /// Cached premium status — optimistic loading from AppStorage on launch.
+    /// Everything free for now — all premium gates bypassed.
+    /// StoreKit infrastructure stays in place for future use.
     var isPremium: Bool {
         get {
             access(keyPath: \.isPremium)
-            return UserDefaults.standard.bool(forKey: "isPremium")
+            // TODO: Restore real entitlement check when enabling premium purchases
+            // return UserDefaults.standard.bool(forKey: "isPremium")
+            return true // Everything free for now
         }
         set {
             withMutation(keyPath: \.isPremium) {
@@ -102,7 +105,7 @@ final class StoreKitManager {
             }
         } catch {
             purchaseState = .error
-            errorMessage = "Something went sideways. Tap to try again."
+            errorMessage = "Purchase couldn't be completed. Please try again."
         }
     }
 

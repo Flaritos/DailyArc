@@ -7,6 +7,7 @@ import WidgetKit
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.requestReview) private var requestReview
+    @Environment(\.theme) private var theme
     @Query private var allHabits: [Habit]
     @Query private var allLogs: [HabitLog]
     @Query private var allMoods: [MoodEntry]
@@ -91,18 +92,85 @@ struct SettingsView: View {
         }
     }
 
+    /// Themed section header text
+    private func themedSectionHeader(_ title: String, commandTitle: String? = nil) -> some View {
+        Group {
+            if theme.id == "command" {
+                Text(commandTitle ?? "> \(title.uppercased())")
+                    .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(CommandTheme.cyan)
+                    .shadow(color: CommandTheme.glowCyan, radius: 6, x: 0, y: 0)
+                    .tracking(0.5)
+            } else {
+                Text(title)
+            }
+        }
+    }
+
     var body: some View {
+        VStack(spacing: 0) {
+            // Custom themed header (replaces hidden navigation bar)
+            HStack {
+                if theme.id == "command" {
+                    Text("> SETTINGS")
+                        .font(.system(size: 22, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(CommandTheme.cyan)
+                        .shadow(color: CommandTheme.glowCyan, radius: 6, x: 0, y: 0)
+                } else {
+                    Text("Settings")
+                        .font(.system(size: 28, weight: .semibold))
+                        .foregroundStyle(theme.textPrimary)
+                }
+                Spacer()
+            }
+            .padding(.horizontal, DailyArcSpacing.lg)
+            .padding(.top, DailyArcSpacing.sm)
+            .padding(.bottom, DailyArcSpacing.xs)
+
         Form {
             // MARK: - Profile
-            Section("Profile") {
-                TextField("Your name", text: $userName)
-                    .textContentType(.givenName)
+            Section {
+                if theme.id == "command" {
+                    // Command: monogram in hexagonal frame concept (approximated with clipped circle)
+                    HStack(spacing: DailyArcSpacing.md) {
+                        ZStack {
+                            // Hexagonal-ish frame
+                            Circle()
+                                .fill(CommandTheme.panel)
+                                .frame(width: 44, height: 44)
+                                .overlay(
+                                    Circle()
+                                        .stroke(CommandTheme.cyan.opacity(0.3), lineWidth: 1)
+                                )
+                            Text(String(userName.prefix(2)).uppercased())
+                                .font(.system(size: 16, weight: .bold, design: .monospaced))
+                                .foregroundStyle(CommandTheme.cyan)
+                        }
+                        TextField("Your name", text: $userName)
+                            .textContentType(.givenName)
+                            .font(.system(.body, design: .monospaced))
+                    }
+                } else {
+                    TextField("Your name", text: $userName)
+                        .textContentType(.givenName)
+                }
 
                 Toggle("Show Streaks", isOn: $showStreaks)
+                    .toggleStyle(ThemedToggleStyle(theme: theme))
+            } header: {
+                themedSectionHeader("Profile")
             }
 
             // MARK: - Appearance
-            Section("Appearance") {
+            Section {
+                VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
+                    Text("Theme")
+                        .typography(.bodyLarge)
+
+                    ThemePickerView()
+                        .padding(.vertical, DailyArcSpacing.xs)
+                }
+
                 VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
                     Text("Accent Color")
                         .typography(.bodyLarge)
@@ -118,21 +186,40 @@ struct SettingsView: View {
                                 Button {
                                     accentColorIndex = index
                                 } label: {
-                                    Circle()
-                                        .fill(color)
-                                        .frame(width: 36, height: 36)
-                                        .overlay {
-                                            if accentColorIndex == index {
-                                                Image(systemName: "checkmark")
-                                                    .font(.system(size: 14, weight: .bold))
-                                                    .foregroundStyle(.white)
+                                    if theme.id == "command" {
+                                        // Command: small circles, selected has cyan glow
+                                        Circle()
+                                            .fill(color)
+                                            .frame(width: 30, height: 30)
+                                            .overlay {
+                                                if accentColorIndex == index {
+                                                    Circle()
+                                                        .stroke(CommandTheme.cyan, lineWidth: 2)
+                                                }
                                             }
-                                        }
-                                        .overlay(
-                                            Circle()
-                                                .stroke(accentColorIndex == index ? color : .clear, lineWidth: 2)
-                                                .padding(-3)
-                                        )
+                                            .shadow(color: accentColorIndex == index ? CommandTheme.glowCyan : .clear,
+                                                    radius: accentColorIndex == index ? 10 : 0, x: 0, y: 0)
+                                    } else {
+                                        // Tactile: raised neumorphic circles, selected is inset
+                                        Circle()
+                                            .fill(color)
+                                            .frame(width: 36, height: 36)
+                                            .overlay {
+                                                if accentColorIndex == index {
+                                                    Image(systemName: "checkmark")
+                                                        .font(.system(size: 14, weight: .bold))
+                                                        .foregroundStyle(.white)
+                                                }
+                                            }
+                                            .shadow(color: accentColorIndex == index ? Color(hex: "#A3B1C6")!.opacity(0.5) : Color.white.opacity(0.7),
+                                                    radius: accentColorIndex == index ? 3 : 4,
+                                                    x: accentColorIndex == index ? 2 : -3,
+                                                    y: accentColorIndex == index ? 2 : -3)
+                                            .shadow(color: accentColorIndex == index ? Color.white.opacity(0.6) : Color(hex: "#A3B1C6")!.opacity(0.5),
+                                                    radius: accentColorIndex == index ? 3 : 4,
+                                                    x: accentColorIndex == index ? -2 : 3,
+                                                    y: accentColorIndex == index ? -2 : 3)
+                                    }
                                 }
                                 .buttonStyle(.plain)
                                 .accessibilityLabel("\(entry.name) accent color")
@@ -141,11 +228,50 @@ struct SettingsView: View {
                         .padding(.vertical, DailyArcSpacing.xs)
                     }
                 }
+
+                // Terminal Color picker (Premium + Command only)
+                if storeKit.isPremium && theme.id == "command" {
+                    VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
+                        Text("Terminal Color")
+                            .font(.system(.body, design: .monospaced))
+                            .foregroundStyle(theme.textPrimary)
+
+                        HStack(spacing: DailyArcSpacing.md) {
+                            ForEach(commandColorSchemes, id: \.name) { scheme in
+                                Button {
+                                    ThemeManager.shared.commandColorScheme = scheme.name
+                                } label: {
+                                    Circle()
+                                        .fill(scheme.color)
+                                        .frame(width: 30, height: 30)
+                                        .overlay {
+                                            if ThemeManager.shared.commandColorScheme == scheme.name {
+                                                Circle()
+                                                    .stroke(Color.white, lineWidth: 2)
+                                            }
+                                        }
+                                        .shadow(
+                                            color: ThemeManager.shared.commandColorScheme == scheme.name
+                                                ? scheme.color.opacity(0.6) : .clear,
+                                            radius: ThemeManager.shared.commandColorScheme == scheme.name ? 10 : 0,
+                                            x: 0, y: 0
+                                        )
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("\(scheme.name) terminal color")
+                            }
+                        }
+                        .padding(.vertical, DailyArcSpacing.xs)
+                    }
+                }
+            } header: {
+                themedSectionHeader("Appearance")
             }
 
             // MARK: - Notifications
-            Section("Notifications") {
+            Section {
                 Toggle("Morning Reminder", isOn: $morningReminderEnabled)
+                    .toggleStyle(ThemedToggleStyle(theme: theme))
                     .onChange(of: morningReminderEnabled) { _, enabled in
                         handleNotificationToggle(enabled: enabled) {
                             NotificationService.shared.scheduleMorningReminder(hour: morningReminderHour, minute: morningReminderMinute)
@@ -159,6 +285,7 @@ struct SettingsView: View {
                 }
 
                 Toggle("Evening Reminder", isOn: $eveningReminderEnabled)
+                    .toggleStyle(ThemedToggleStyle(theme: theme))
                     .onChange(of: eveningReminderEnabled) { _, enabled in
                         handleNotificationToggle(enabled: enabled) {
                             NotificationService.shared.scheduleEveningReminder(hour: eveningReminderHour, minute: eveningReminderMinute)
@@ -172,6 +299,7 @@ struct SettingsView: View {
                 }
 
                 Toggle("Mood Reminder", isOn: $moodReminderEnabled)
+                    .toggleStyle(ThemedToggleStyle(theme: theme))
                     .onChange(of: moodReminderEnabled) { _, enabled in
                         handleNotificationToggle(enabled: enabled) {
                             NotificationService.shared.scheduleMoodReminder(hour: moodReminderHour, minute: moodReminderMinute)
@@ -185,6 +313,7 @@ struct SettingsView: View {
                 }
 
                 Toggle("Weekly Summary", isOn: $weeklySummaryEnabled)
+                    .toggleStyle(ThemedToggleStyle(theme: theme))
                     .onChange(of: weeklySummaryEnabled) { _, enabled in
                         if enabled {
                             NotificationService.shared.scheduleWeeklySummary(hour: 18, minute: 0)
@@ -214,10 +343,12 @@ struct SettingsView: View {
                         .typography(.caption)
                     }
                 }
+            } header: {
+                themedSectionHeader("Notifications")
             }
 
             // MARK: - Data Management
-            Section("Data Management") {
+            Section {
                 Button {
                     exportJSON()
                 } label: {
@@ -235,6 +366,23 @@ struct SettingsView: View {
                     } label: {
                         Label("Export CSV", systemImage: "tablecells")
                     }
+                } else {
+                    Button {
+                        showPaywall = true
+                    } label: {
+                        HStack {
+                            Label("Export CSV", systemImage: "tablecells")
+                                .foregroundStyle(DailyArcTokens.textTertiary)
+                            Spacer()
+                            HStack(spacing: DailyArcSpacing.xxs) {
+                                Image(systemName: "lock.fill")
+                                    .font(.caption2)
+                                Text("Premium")
+                                    .typography(.caption)
+                            }
+                            .foregroundStyle(DailyArcTokens.accent)
+                        }
+                    }
                 }
 
                 if storeKit.isPremium {
@@ -242,6 +390,23 @@ struct SettingsView: View {
                         showImportPicker = true
                     } label: {
                         Label("Import JSON", systemImage: "square.and.arrow.down")
+                    }
+                } else {
+                    Button {
+                        showPaywall = true
+                    } label: {
+                        HStack {
+                            Label("Import JSON", systemImage: "square.and.arrow.down")
+                                .foregroundStyle(DailyArcTokens.textTertiary)
+                            Spacer()
+                            HStack(spacing: DailyArcSpacing.xxs) {
+                                Image(systemName: "lock.fill")
+                                    .font(.caption2)
+                                Text("Premium")
+                                    .typography(.caption)
+                            }
+                            .foregroundStyle(DailyArcTokens.accent)
+                        }
                     }
                 }
 
@@ -252,49 +417,29 @@ struct SettingsView: View {
                     Label("Delete All Data", systemImage: "trash")
                         .foregroundStyle(DailyArcTokens.error)
                 }
+            } header: {
+                themedSectionHeader("Data Management", commandTitle: "> YOUR DATA")
             }
 
-            // MARK: - Premium
-            Section("Premium") {
-                if storeKit.isPremium {
-                    HStack {
-                        Image(systemName: "crown.fill")
-                            .foregroundStyle(DailyArcTokens.premiumGold)
-                        Text("Premium Active")
-                            .typography(.bodyLarge)
-                            .fontWeight(.semibold)
-                        Spacer()
-                        Text("Lifetime")
-                            .typography(.caption)
-                            .foregroundStyle(DailyArcTokens.textSecondary)
-                    }
-                } else {
-                    Button {
-                        showPaywall = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "crown")
-                                .foregroundStyle(DailyArcTokens.premiumGold)
-                            Text("Upgrade to Premium")
-                                .foregroundStyle(DailyArcTokens.textPrimary)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundStyle(DailyArcTokens.textTertiary)
-                        }
-                    }
-
-                    Button {
-                        Task { await storeKit.restorePurchases() }
-                    } label: {
-                        Text("Restore Purchases")
-                            .typography(.bodySmall)
-                            .foregroundStyle(DailyArcTokens.accent)
-                    }
+            // MARK: - Premium (all features unlocked)
+            Section {
+                HStack {
+                    Image(systemName: "crown.fill")
+                        .foregroundStyle(DailyArcTokens.premiumGold)
+                    Text("All Features Unlocked")
+                        .typography(.bodyLarge)
+                        .fontWeight(.semibold)
+                    Spacer()
+                    Text("Free")
+                        .typography(.caption)
+                        .foregroundStyle(DailyArcTokens.textSecondary)
                 }
+            } header: {
+                themedSectionHeader("Premium", commandTitle: "> PREMIUM")
             }
 
             // MARK: - Privacy
-            Section("Privacy") {
+            Section {
                 HStack {
                     Text("Data Storage")
                     Spacer()
@@ -315,7 +460,7 @@ struct SettingsView: View {
                     get: { !gdprConsentWithdrawn },
                     set: { gdprConsentWithdrawn = !$0 }
                 ))
-                .tint(DailyArcTokens.accent)
+                .toggleStyle(ThemedToggleStyle(theme: theme))
 
                 if gdprConsentWithdrawn {
                     Text("Data processing paused. Your data is safe but no new data will be recorded.")
@@ -334,10 +479,12 @@ struct SettingsView: View {
                 Text("DailyArc is not a medical device. If you are experiencing mental health concerns, please consult a healthcare professional.")
                     .font(.footnote)
                     .foregroundStyle(DailyArcTokens.textTertiary)
+            } header: {
+                themedSectionHeader("Privacy", commandTitle: "> PRIVACY")
             }
 
             // MARK: - Help & Support
-            Section("Help & Support") {
+            Section {
                 Button {
                     UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
                 } label: {
@@ -367,32 +514,54 @@ struct SettingsView: View {
                 } label: {
                     Label("Rate on App Store", systemImage: "star")
                 }
+            } header: {
+                themedSectionHeader("Help & Support", commandTitle: "> SUPPORT")
             }
 
             // MARK: - About
-            Section("About") {
-                HStack {
-                    Text("Version")
-                    Spacer()
-                    Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
-                        .foregroundStyle(.secondary)
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    versionTapCount += 1
-                    if versionTapCount >= 5 && !devEasterEggFound {
-                        devEasterEggFound = true
-                        EasterEggManager.shared.recordDiscovery("devmode")
+            Section {
+                if theme.id == "command" {
+                    // Command: "DAILYARC v1.0 // BUILD 47" in dim monospace
+                    let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+                    let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+                    Text("DAILYARC v\(version) // BUILD \(build)")
+                        .font(.system(size: 11, weight: .regular, design: .monospaced))
+                        .foregroundStyle(Color.white.opacity(0.3))
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            versionTapCount += 1
+                            if versionTapCount >= 5 && !devEasterEggFound {
+                                devEasterEggFound = true
+                                EasterEggManager.shared.recordDiscovery("devmode")
+                            }
+                        }
+                } else {
+                    HStack {
+                        Text("Version")
+                        Spacer()
+                        Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
+                            .foregroundStyle(.secondary)
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        versionTapCount += 1
+                        if versionTapCount >= 5 && !devEasterEggFound {
+                            devEasterEggFound = true
+                            EasterEggManager.shared.recordDiscovery("devmode")
+                        }
                     }
                 }
 
                 if devEasterEggFound {
                     HStack {
-                        Text("Built with \u{2764}\u{FE0F} and too much coffee.")
-                            .font(.caption)
-                            .foregroundStyle(DailyArcTokens.textTertiary)
+                        Text(theme.id == "command" ? "// SYSTEM INITIALIZED BY CAFFEINE" : "Built with \u{2764}\u{FE0F} and too much coffee.")
+                            .font(theme.id == "command" ? .system(.caption, design: .monospaced) : .caption)
+                            .foregroundStyle(theme.id == "command" ? CommandTheme.cyan.opacity(0.5) : DailyArcTokens.textTertiary)
                     }
                 }
+            } header: {
+                themedSectionHeader("About", commandTitle: "> ABOUT")
             }
 
             #if DEBUG
@@ -412,7 +581,13 @@ struct SettingsView: View {
             }
             #endif
         }
-        .navigationTitle("Settings")
+        .scrollContentBackground(.hidden)
+        } // end VStack
+        .background(theme.backgroundPrimary.ignoresSafeArea())
+        .themedGridOverlay(theme)
+        .themedScanline(theme)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showPaywall) {
             PaywallView()
         }
@@ -630,6 +805,17 @@ struct SettingsView: View {
         defaults.set(false, forKey: "hasCompletedOnboarding")
     }
 
+    // MARK: - Command Color Schemes
+
+    private var commandColorSchemes: [(name: String, color: Color)] {
+        [
+            ("cyan", Color(hex: "#22D3EE")!),
+            ("amber", Color(hex: "#F59E0B")!),
+            ("green", Color(hex: "#22C55E")!),
+            ("blue", Color(hex: "#3B82F6")!),
+        ]
+    }
+
     // MARK: - Feedback Email
 
     private func openFeedbackEmail() {
@@ -652,6 +838,8 @@ struct SettingsView: View {
 // MARK: - Help View
 
 struct HelpView: View {
+    @Environment(\.theme) private var theme
+
     var body: some View {
         List {
             Section("Getting Started") {
@@ -683,7 +871,7 @@ struct HelpView: View {
 
             Section("Premium & Billing") {
                 faqItem("What's included in Premium?",
-                        "Unlimited habits (free is 3), mood-habit correlation insights, full smart suggestions, CSV export, and medium/large widgets.")
+                        "Unlimited habits (free is 5), mood-habit correlation insights, full smart suggestions, CSV export, and medium/large widgets.")
                 faqItem("How do I restore purchases?",
                         "Go to Settings \u{2192} Premium \u{2192} Restore Purchases. Make sure you're signed into the same Apple ID.")
             }
@@ -697,6 +885,8 @@ struct HelpView: View {
                         "Use an encrypted backup via iTunes/Finder. This preserves all your data including settings. We also recommend exporting your data as a safety net.")
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(theme.backgroundPrimary)
         .navigationTitle("Help & FAQ")
     }
 

@@ -32,7 +32,7 @@ enum CorrelationEngine {
 
     // MARK: - Sendable Output
 
-    struct CorrelationResult: Identifiable, Sendable {
+    struct CorrelationResult: Identifiable, Sendable, Equatable {
         let id: UUID
         let habitName: String
         let emoji: String

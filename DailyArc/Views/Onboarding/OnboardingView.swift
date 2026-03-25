@@ -19,6 +19,9 @@ struct OnboardingView: View {
     @State private var consentProcessing = false
     @State private var dobYear = 2000
 
+    // Page 0 (Intro) state
+    @State private var showProps = false
+
     // Page 2 (Habits) state
     @State private var selectedTemplates: Set<String> = []
     @State private var templateTimes: [String: String] = [:]
@@ -70,95 +73,123 @@ struct OnboardingView: View {
             introPage.tag(0)
             welcomePage.tag(1)
             habitPickerPage.tag(2)
-            previewPage.tag(3)
+            themePickerPage.tag(3)
+            previewPage.tag(4)
         }
         .tabViewStyle(.page(indexDisplayMode: .always))
         .indexViewStyle(.page(backgroundDisplayMode: .always))
         .interactiveDismissDisabled()
     }
 
-    // MARK: - Page 0: Philosophy Intro
+    // MARK: - Page 0: Warm Welcome
 
     private var introPage: some View {
-        VStack(spacing: DailyArcSpacing.xxl) {
+        let props: [(icon: String, color: Color, text: String)] = [
+            ("checkmark.circle.fill", .blue, "Track what matters to you"),
+            ("chart.line.uptrend.xyaxis", .green, "Understand your patterns"),
+            ("arrow.up.right.circle.fill", .purple, "Watch your arc grow")
+        ]
+
+        return VStack(spacing: DailyArcSpacing.xxl) {
             Spacer()
 
-            Image(systemName: "circle.hexagongrid.fill")
-                .font(.system(size: 100))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [
-                            Color(hex: "#2563EB") ?? .blue,
-                            Color(hex: "#5F27CD") ?? .purple
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+            DailyArcLogo(size: 140, animated: true)
 
-            Text("DailyArc")
-                .typography(.displayLarge)
+            VStack(spacing: DailyArcSpacing.sm) {
+                Text("DailyArc")
+                    .typography(.displayLarge)
 
-            Text("Every day adds to your arc.")
-                .typography(.titleSmall)
-                .foregroundStyle(DailyArcTokens.textSecondary)
-
-            VStack(spacing: DailyArcSpacing.lg) {
-                Text("We believe self-knowledge is the foundation of well-being.")
-                    .multilineTextAlignment(.center)
-
-                Text("DailyArc helps you understand yourself better through the simple act of showing up each day \u{2014} connecting what you do to how you feel.")
-                    .multilineTextAlignment(.center)
+                Text("Every day adds to your arc.")
+                    .typography(.titleSmall)
                     .foregroundStyle(DailyArcTokens.textSecondary)
-
-                Text("No accounts. No cloud. Your data stays on your device, always.")
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(DailyArcTokens.textTertiary)
-                    .font(.subheadline)
             }
-            .padding(.horizontal, DailyArcSpacing.xl)
+
+            VStack(alignment: .leading, spacing: DailyArcSpacing.lg) {
+                ForEach(Array(props.enumerated()), id: \.offset) { index, prop in
+                    HStack(spacing: DailyArcSpacing.md) {
+                        Image(systemName: prop.icon)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 32, height: 32)
+                            .background(prop.color)
+                            .clipShape(Circle())
+
+                        Text(prop.text)
+                            .font(.body)
+                            .foregroundStyle(DailyArcTokens.textPrimary)
+                    }
+                    .opacity(showProps ? 1 : 0)
+                    .offset(y: showProps ? 0 : 10)
+                    .animation(.easeOut(duration: 0.5).delay(Double(index) * 0.3), value: showProps)
+                }
+            }
+            .padding(.horizontal, DailyArcSpacing.xxl)
 
             Spacer()
 
             Button {
                 withAnimation { currentPage = 1 }
             } label: {
-                Text("Let\u{2019}s begin")
+                Text("Let\u{2019}s begin \u{2192}")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
+            .tint(.blue)
             .padding(.horizontal, DailyArcSpacing.xl)
             .padding(.bottom, DailyArcSpacing.jumbo)
         }
+        .background(Color(uiColor: .systemBackground))
+        .onAppear { showProps = true }
     }
 
-    // MARK: - Page 1: Welcome + Age + Consent (Two-Step Progressive Disclosure)
+    // MARK: - Page 1: Card Stack Welcome
 
     private var welcomePage: some View {
-        ScrollView {
-            VStack(spacing: DailyArcSpacing.xl) {
-                VStack(spacing: DailyArcSpacing.md) {
-                    Text("Before we start")
-                        .typography(.titleLarge)
-                    Text("A few quick things to set up.")
-                        .typography(.bodySmall)
-                        .foregroundStyle(DailyArcTokens.textSecondary)
-                }
-                .padding(.top, DailyArcSpacing.xxxl)
+        let cardData: [(icon: String, color: Color, text: String)] = [
+            ("lock.fill", .blue, "Your data stays on your device"),
+            ("iphone", .green, "No accounts, no cloud"),
+            ("heart.fill", .pink, "Built with care for your wellbeing")
+        ]
 
-                // Step 1: Value props (always visible)
-                VStack(alignment: .leading, spacing: DailyArcSpacing.md) {
-                    valuePropRow(icon: "arrow.up.right.circle.fill", text: "Your daily habits shape an arc of growth")
-                    valuePropRow(icon: "link.circle.fill", text: "Discover the connection between what you do and how you feel")
-                    valuePropRow(icon: "lock.shield.fill", text: "Your arc lives on your device. Only yours.")
+        return ScrollView {
+            VStack(spacing: DailyArcSpacing.xl) {
+                Text("Welcome")
+                    .font(.system(size: 24, weight: .bold))
+                    .padding(.top, DailyArcSpacing.xxxl)
+
+                // Card stack / dealt cards
+                VStack(spacing: showConsent ? DailyArcSpacing.md : 0) {
+                    ForEach(Array(cardData.enumerated()), id: \.offset) { index, card in
+                        HStack(spacing: DailyArcSpacing.md) {
+                            Image(systemName: card.icon)
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .frame(width: 36, height: 36)
+                                .background(card.color)
+                                .clipShape(Circle())
+
+                            Text(card.text)
+                                .font(.body.weight(.medium))
+                                .foregroundStyle(DailyArcTokens.textPrimary)
+
+                            Spacer()
+                        }
+                        .padding(DailyArcSpacing.lg)
+                        .background(DailyArcTokens.backgroundSecondary)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
+                        .offset(y: showConsent ? 0 : CGFloat(index) * 8)
+                        .zIndex(Double(cardData.count - index))
+                    }
                 }
-                .padding(.horizontal, DailyArcSpacing.lg)
+                .padding(.horizontal)
+                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: showConsent)
 
                 // "Continue" button (Step 1 -> Step 2)
                 if !showConsent {
                     Button {
-                        withAnimation(.easeInOut(duration: 0.3)) {
+                        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                             showConsent = true
                         }
                     } label: {
@@ -172,24 +203,52 @@ struct OnboardingView: View {
 
                 // Step 2: Age + consent (revealed after Continue)
                 VStack(alignment: .leading, spacing: DailyArcSpacing.lg) {
-                    HStack {
+                    // Birth year — prominent display
+                    VStack(spacing: DailyArcSpacing.sm) {
                         Text("Birth year")
+                            .font(.subheadline)
                             .foregroundStyle(DailyArcTokens.textSecondary)
-                        Spacer()
-                        Picker("Year", selection: $dobYear) {
-                            ForEach((1920...2020).reversed(), id: \.self) { year in
-                                Text(String(year)).tag(year)
+
+                        HStack {
+                            Spacer()
+                            Button {
+                                if dobYear > 1920 { dobYear -= 1 }
+                            } label: {
+                                Image(systemName: "minus.circle.fill")
+                                    .font(.title2)
+                                    .foregroundStyle(DailyArcTokens.textSecondary)
                             }
+                            .buttonStyle(.plain)
+
+                            Text(String(dobYear))
+                                .font(.system(size: 24, weight: .bold))
+                                .monospacedDigit()
+                                .frame(width: 80)
+                                .multilineTextAlignment(.center)
+
+                            Button {
+                                if dobYear < 2020 { dobYear += 1 }
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.title2)
+                                    .foregroundStyle(DailyArcTokens.textSecondary)
+                            }
+                            .buttonStyle(.plain)
+                            Spacer()
                         }
-                        .pickerStyle(.menu)
                     }
 
                     Toggle("I consent to on-device data processing", isOn: $consentProcessing)
                         .tint(DailyArcTokens.accent)
 
-                    Text("Your data is stored on your device only and retained until you delete it.")
-                        .font(.footnote)
-                        .foregroundStyle(DailyArcTokens.textTertiary)
+                    HStack(spacing: DailyArcSpacing.xs) {
+                        Image(systemName: "lock.shield.fill")
+                            .font(.footnote)
+                            .foregroundStyle(DailyArcTokens.textTertiary)
+                        Text("Your data never leaves this device.")
+                            .font(.footnote)
+                            .foregroundStyle(DailyArcTokens.textTertiary)
+                    }
 
                     Text("Data controller: DailyArc. Contact: privacy@dailyarc.app")
                         .font(.caption2)
@@ -201,6 +260,7 @@ struct OnboardingView: View {
                 .padding(.horizontal)
                 .opacity(showConsent ? 1 : 0)
                 .offset(y: showConsent ? 0 : 20)
+                .animation(.easeOut(duration: 0.3), value: showConsent)
 
                 if isUnderAge && showConsent {
                     VStack(spacing: DailyArcSpacing.md) {
@@ -231,7 +291,7 @@ struct OnboardingView: View {
                         gdprConsentScope = "processing"
                         withAnimation { currentPage = 2 }
                     } label: {
-                        Text("Get Started")
+                        Text("Get Started \u{2192}")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
@@ -246,79 +306,125 @@ struct OnboardingView: View {
                 isCOPPABlocked = isUnderAge
             }
         }
+        .background(Color(uiColor: .systemBackground))
     }
 
-    // MARK: - Page 2: Habit Templates
+    // MARK: - Page 2: Checklist Habits
+
+    private let templateDescriptions: [String: String] = [
+        "Exercise": "Build a daily movement habit",
+        "Reading": "Expand your mind each day",
+        "Meditate": "Find your calm center",
+        "Sleep 8hrs": "Prioritize rest and recovery",
+        "Drink Water": "Stay hydrated throughout the day",
+        "Journal": "Reflect on your thoughts",
+        "Walk": "Step outside and explore",
+        "Creative Time": "Express yourself daily"
+    ]
 
     private var habitPickerPage: some View {
         ScrollView {
-            VStack(spacing: DailyArcSpacing.xl) {
-                Text("Choose your habits")
-                    .typography(.titleLarge)
-                    .padding(.top, DailyArcSpacing.xxxl)
+            VStack(spacing: DailyArcSpacing.lg) {
+                VStack(spacing: DailyArcSpacing.sm) {
+                    Text("Pick 3\u{2013}5 habits to start")
+                        .font(.system(size: 24, weight: .bold))
 
-                Text("Pick 1\u{2013}3 to start. You can always add more later.")
-                    .typography(.bodySmall)
-                    .foregroundStyle(DailyArcTokens.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-
-                // Goal picker
-                VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
-                    Text("What\u{2019}s your main goal?")
-                        .typography(.bodySmall)
+                    Text("You can always add more later")
+                        .font(.subheadline)
                         .foregroundStyle(DailyArcTokens.textSecondary)
-
-                    Picker("Goal", selection: $userGoal) {
-                        Text("Select a goal...").tag("")
-                        Text("Get healthier").tag("Get healthier")
-                        Text("Be more productive").tag("Be more productive")
-                        Text("Build mindfulness").tag("Build mindfulness")
-                        Text("Just trying it out").tag("Just trying it out")
-                    }
-                    .pickerStyle(.menu)
-                    .tint(DailyArcTokens.accent)
                 }
+                .padding(.top, DailyArcSpacing.xxxl)
+
+                // Goal filter as segmented control
+                Picker("Goal", selection: $userGoal) {
+                    Text("All").tag("")
+                    Text("Health").tag("Get healthier")
+                    Text("Productive").tag("Be more productive")
+                    Text("Mindful").tag("Build mindfulness")
+                }
+                .pickerStyle(.segmented)
                 .padding(.horizontal)
 
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: DailyArcSpacing.md) {
+                // Clean vertical list of habits
+                VStack(spacing: 0) {
                     ForEach(orderedTemplates, id: \.name) { template in
-                        templateCard(template)
-                    }
-                }
-                .padding(.horizontal)
+                        let isSelected = selectedTemplates.contains(template.name)
 
-                if !selectedTemplates.isEmpty {
-                    VStack(alignment: .leading, spacing: DailyArcSpacing.md) {
-                        Text("When will you do these?")
-                            .typography(.bodySmall)
-                            .foregroundStyle(DailyArcTokens.textSecondary)
-
-                        ForEach(Array(selectedTemplates.sorted()), id: \.self) { name in
-                            let emoji = templates.first(where: { $0.name == name })?.emoji ?? ""
-                            VStack(alignment: .leading, spacing: DailyArcSpacing.xs) {
-                                Text("\(emoji) \(name)")
-                                    .font(.subheadline.weight(.medium))
-                                Picker("Time of day", selection: binding(for: name)) {
-                                    Text("Morning").tag("Morning")
-                                    Text("Afternoon").tag("Afternoon")
-                                    Text("Evening").tag("Evening")
+                        Button {
+                            withAnimation(.spring(response: 0.25)) {
+                                if isSelected {
+                                    selectedTemplates.remove(template.name)
+                                    templateTimes.removeValue(forKey: template.name)
+                                } else {
+                                    selectedTemplates.insert(template.name)
+                                    templateTimes[template.name] = "Morning"
                                 }
-                                .pickerStyle(.segmented)
                             }
+                        } label: {
+                            HStack(spacing: DailyArcSpacing.md) {
+                                Text(template.emoji)
+                                    .font(.system(size: 36))
+                                    .frame(width: 44)
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(template.name)
+                                        .font(.body.weight(.semibold))
+                                        .foregroundStyle(DailyArcTokens.textPrimary)
+                                    Text(templateDescriptions[template.name] ?? "")
+                                        .font(.subheadline)
+                                        .foregroundStyle(DailyArcTokens.textSecondary)
+                                        .lineLimit(1)
+                                }
+
+                                Spacer()
+
+                                // Circular checkbox
+                                ZStack {
+                                    Circle()
+                                        .stroke(isSelected ? Color.clear : DailyArcTokens.textSecondary.opacity(0.4), lineWidth: 2)
+                                        .frame(width: 28, height: 28)
+
+                                    if isSelected {
+                                        Circle()
+                                            .fill(DailyArcTokens.accent)
+                                            .frame(width: 28, height: 28)
+                                        Image(systemName: "checkmark")
+                                            .font(.system(size: 14, weight: .bold))
+                                            .foregroundStyle(.white)
+                                    }
+                                }
+                            }
+                            .padding(.vertical, DailyArcSpacing.md)
+                            .padding(.horizontal, DailyArcSpacing.lg)
+                            .frame(minHeight: 56)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+
+                        if template.name != orderedTemplates.last?.name {
+                            Divider()
+                                .padding(.leading, 72)
                         }
                     }
-                    .padding()
-                    .background(DailyArcTokens.backgroundSecondary)
-                    .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusLarge))
-                    .padding(.horizontal)
                 }
+                .background(DailyArcTokens.backgroundSecondary)
+                .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusLarge))
+                .padding(.horizontal)
 
-                Text("Start with up to 3 habits free. Upgrade anytime for unlimited.")
-                    .font(.caption)
-                    .foregroundStyle(DailyArcTokens.textTertiary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
+                // Selected count with dot indicators
+                HStack(spacing: DailyArcSpacing.sm) {
+                    Text("\(selectedTemplates.count) of \(templates.count) selected")
+                        .font(.subheadline)
+                        .foregroundStyle(DailyArcTokens.textSecondary)
+
+                    HStack(spacing: 4) {
+                        ForEach(0..<templates.count, id: \.self) { index in
+                            Circle()
+                                .fill(index < selectedTemplates.count ? DailyArcTokens.accent : DailyArcTokens.textTertiary.opacity(0.3))
+                                .frame(width: 6, height: 6)
+                        }
+                    }
+                }
 
                 Button {
                     withAnimation { currentPage = 3 }
@@ -344,135 +450,75 @@ struct OnboardingView: View {
                 Spacer(minLength: DailyArcSpacing.jumbo)
             }
         }
+        .background(Color(uiColor: .systemBackground))
     }
 
-    // MARK: - Page 3: Preview + Launch
+    // MARK: - Page 3: Theater Curtain Theme Picker
+
+    // Read theme selection through ThemeManager so @Observable tracking works
+    private var selectedThemeID: String { ThemeManager.shared.themeID }
+
+    private var themePickerPage: some View {
+        VStack(spacing: DailyArcSpacing.xxl) {
+            Spacer()
+
+            VStack(spacing: DailyArcSpacing.sm) {
+                Text("Choose Your Style")
+                    .font(.system(size: 24, weight: .semibold))
+                    .foregroundStyle(Color(hex: "#334155")!)
+
+                Text("You can change this anytime in Settings")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color(hex: "#64748B")!)
+            }
+
+            // Theme cards
+            HStack(spacing: 14) {
+                ThemePreviewCard(
+                    themeID: "tactile",
+                    isSelected: selectedThemeID == "tactile",
+                    onSelect: { ThemeManager.shared.themeID = "tactile" }
+                )
+
+                ThemePreviewCard(
+                    themeID: "command",
+                    isSelected: selectedThemeID == "command",
+                    onSelect: { ThemeManager.shared.themeID = "command" }
+                )
+            }
+            .padding(.horizontal, DailyArcSpacing.lg)
+
+            // Continue button
+            Button {
+                withAnimation { currentPage = 4 }
+            } label: {
+                Text("Continue")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, DailyArcSpacing.md)
+            }
+            .buttonStyle(.borderedProminent)
+            .padding(.horizontal, DailyArcSpacing.xxl)
+
+            Spacer()
+        }
+        .padding(DailyArcSpacing.xl)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(uiColor: .systemBackground))
+    }
+
+    // MARK: - Page 4: Launch Sequence
 
     private var previewPage: some View {
-        ScrollView {
-            VStack(spacing: DailyArcSpacing.xl) {
-                Text("Your arc starts here")
-                    .typography(.titleLarge)
-                    .padding(.top, DailyArcSpacing.xxxl)
-
-                Text("How are you feeling?")
-                    .typography(.bodySmall)
-                    .foregroundStyle(DailyArcTokens.textSecondary)
-
-                HStack(spacing: DailyArcSpacing.lg) {
-                    ForEach(1...5, id: \.self) { score in
-                        let emojis = ["", "\u{1F614}", "\u{1F615}", "\u{1F610}", "\u{1F642}", "\u{1F604}"]
-                        Button {
-                            withAnimation(.spring(response: 0.3)) {
-                                previewMood = score
-                            }
-                        } label: {
-                            Text(emojis[score])
-                                .font(.system(size: 44))
-                                .scaleEffect(previewMood == score ? 1.2 : 1.0)
-                                .opacity(previewMood == nil || previewMood == score ? 1.0 : 0.4)
-                        }
-                    }
-                }
-
-                // Sample insight card
-                VStack(spacing: DailyArcSpacing.sm) {
-                    Image(systemName: "lightbulb.fill")
-                        .foregroundStyle(.yellow)
-                        .font(.title2)
-                    Text("On exercise days, mood averages 4.2")
-                        .typography(.bodySmall)
-                        .multilineTextAlignment(.center)
-                    Text("This is what you\u{2019}ll discover after 2 weeks of logging.")
-                        .font(.caption)
-                        .foregroundStyle(DailyArcTokens.textTertiary)
-                        .multilineTextAlignment(.center)
-                }
-                .padding()
-                .background(DailyArcTokens.backgroundSecondary)
-                .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
-                .padding(.horizontal)
-
-                // Brief premium preview
-                VStack(spacing: DailyArcSpacing.sm) {
-                    Text("Unlock the full arc")
-                        .typography(.caption)
-                        .foregroundStyle(DailyArcTokens.textSecondary)
-                    Text("Unlimited habits, mood insights, and more")
-                        .typography(.caption)
-                        .foregroundStyle(DailyArcTokens.textTertiary)
-                }
-                .padding(DailyArcSpacing.md)
-                .background(DailyArcTokens.premiumGold.opacity(DailyArcTokens.opacitySubtle))
-                .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
-                .padding(.horizontal)
-
-                // Selected habits preview
-                if !selectedTemplates.isEmpty {
-                    VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
-                        Text("Your habits")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(DailyArcTokens.textSecondary)
-                        ForEach(Array(selectedTemplates.sorted()), id: \.self) { name in
-                            let emoji = templates.first(where: { $0.name == name })?.emoji ?? ""
-                            HStack {
-                                Text("\(emoji) \(name)")
-                                    .font(.body)
-                                Spacer()
-                                Image(systemName: "circle")
-                                    .foregroundStyle(DailyArcTokens.textTertiary)
-                            }
-                        }
-                    }
-                    .padding()
-                    .background(DailyArcTokens.backgroundSecondary)
-                    .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
-                    .padding(.horizontal)
-                }
-
-                // Notification opt-in
-                VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
-                    Toggle("Get a gentle evening reminder?", isOn: $enableReminder)
-                        .tint(DailyArcTokens.accent)
-                }
-                .padding()
-                .background(DailyArcTokens.backgroundSecondary)
-                .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
-                .padding(.horizontal)
-
-                // Email collection (optional)
-                VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
-                    TextField("Your email (optional)", text: $emailInput)
-                        .keyboardType(.emailAddress)
-                        .textContentType(.emailAddress)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
-                        .textFieldStyle(.roundedBorder)
-
-                    if !emailInput.isEmpty {
-                        Toggle("I agree to receive weekly summary emails from DailyArc", isOn: $emailMarketingConsent)
-                            .font(.caption)
-                            .tint(DailyArcTokens.accent)
-                    }
-                }
-                .padding()
-                .background(DailyArcTokens.backgroundSecondary)
-                .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
-                .padding(.horizontal)
-
-                Button {
-                    createHabitsAndFinish()
-                } label: {
-                    Text("Start Your Arc")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .padding(.horizontal, DailyArcSpacing.xl)
-
-                Spacer(minLength: DailyArcSpacing.jumbo)
-            }
-        }
+        LaunchSequenceView(
+            selectedTemplates: selectedTemplates,
+            templates: templates,
+            previewMood: $previewMood,
+            enableReminder: $enableReminder,
+            emailInput: $emailInput,
+            emailMarketingConsent: $emailMarketingConsent,
+            onLaunch: createHabitsAndFinish
+        )
     }
 
     private var isUnderAge: Bool {
@@ -490,42 +536,6 @@ struct OnboardingView: View {
             Text(text)
                 .typography(.bodySmall)
                 .foregroundStyle(DailyArcTokens.textPrimary)
-        }
-    }
-
-    private func templateCard(_ template: (emoji: String, name: String, targetCount: Int)) -> some View {
-        let isSelected = selectedTemplates.contains(template.name)
-        return Button {
-            withAnimation(.spring(response: 0.25)) {
-                if isSelected {
-                    selectedTemplates.remove(template.name)
-                    templateTimes.removeValue(forKey: template.name)
-                } else if selectedTemplates.count < 3 {
-                    selectedTemplates.insert(template.name)
-                    templateTimes[template.name] = "Morning"
-                }
-            }
-        } label: {
-            VStack(spacing: DailyArcSpacing.sm) {
-                Text(template.emoji)
-                    .font(.system(size: 36))
-                Text(template.name)
-                    .font(.subheadline)
-                    .foregroundStyle(DailyArcTokens.textPrimary)
-                if template.targetCount > 1 {
-                    Text("\(template.targetCount)\u{00D7} daily")
-                        .font(.caption2)
-                        .foregroundStyle(DailyArcTokens.textTertiary)
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, DailyArcSpacing.md)
-            .background(isSelected ? DailyArcTokens.accent.opacity(0.1) : DailyArcTokens.backgroundSecondary)
-            .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
-            .overlay(
-                RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium)
-                    .stroke(isSelected ? DailyArcTokens.accent : .clear, lineWidth: 2)
-            )
         }
     }
 

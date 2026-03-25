@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct BadgesView: View {
+    @Environment(\.theme) private var theme
     private var badgeEngine = BadgeEngine.shared
 
     private let columns = [
@@ -27,21 +28,22 @@ struct BadgesView: View {
                 // Summary
                 let earnedCount = badgeEngine.earnedBadges.count
                 let totalCount = BadgeEngine.allBadges.count
-                Text("\(earnedCount) of \(totalCount) earned")
+                Text(theme.uppercaseHeaders ? "\(theme.headerPrefix)\(earnedCount) OF \(totalCount) EARNED" : "\(earnedCount) of \(totalCount) earned")
                     .typography(.bodySmall)
-                    .foregroundStyle(DailyArcTokens.textSecondary)
+                    .fontDesign(theme.displayFontDesign)
+                    .foregroundStyle(theme.textSecondary)
                     .padding(.horizontal, DailyArcSpacing.lg)
 
                 LazyVGrid(columns: columns, spacing: DailyArcSpacing.md) {
                     ForEach(allBadges) { badge in
-                        BadgeCardView(badge: badge)
+                        BadgeCardView(badge: badge, theme: theme)
                     }
                 }
                 .padding(.horizontal, DailyArcSpacing.lg)
             }
             .padding(.vertical, DailyArcSpacing.lg)
         }
-        .background(DailyArcTokens.backgroundPrimary)
+        .background(theme.backgroundPrimary)
         .navigationTitle("Badges")
     }
 }
@@ -50,6 +52,7 @@ struct BadgesView: View {
 
 private struct BadgeCardView: View {
     let badge: Badge
+    let theme: any ThemeDefinition
 
     var body: some View {
         VStack(spacing: DailyArcSpacing.sm) {
@@ -60,28 +63,30 @@ private struct BadgeCardView: View {
                 Text(badge.name)
                     .typography(.bodySmall)
                     .fontWeight(.bold)
-                    .foregroundStyle(DailyArcTokens.textPrimary)
+                    .fontDesign(theme.displayFontDesign)
+                    .foregroundStyle(theme.textPrimary)
                     .lineLimit(1)
 
                 if let date = badge.earnedDate {
                     Text(date, style: .date)
                         .typography(.caption)
-                        .foregroundStyle(DailyArcTokens.textTertiary)
+                        .foregroundStyle(theme.textTertiary)
                 }
             } else {
                 Image(systemName: "lock.fill")
                     .font(.system(size: 32))
-                    .foregroundStyle(DailyArcTokens.textTertiary)
+                    .foregroundStyle(theme.textTertiary)
 
                 Text(badge.name)
                     .typography(.bodySmall)
                     .fontWeight(.semibold)
-                    .foregroundStyle(DailyArcTokens.textTertiary)
+                    .fontDesign(theme.displayFontDesign)
+                    .foregroundStyle(theme.textTertiary)
                     .lineLimit(1)
 
                 Text(badge.description)
                     .typography(.caption)
-                    .foregroundStyle(DailyArcTokens.textTertiary)
+                    .foregroundStyle(theme.textTertiary)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
             }
@@ -90,16 +95,19 @@ private struct BadgeCardView: View {
         .padding(.vertical, DailyArcSpacing.lg)
         .padding(.horizontal, DailyArcSpacing.sm)
         .background(
-            RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium)
-                .fill(DailyArcTokens.backgroundSecondary)
+            RoundedRectangle(cornerRadius: theme.cornerRadiusMedium)
+                .fill(theme.id == "command" ? CommandTheme.panel : theme.backgroundSecondary)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium)
+            RoundedRectangle(cornerRadius: theme.cornerRadiusMedium)
                 .stroke(
-                    badge.isEarned ? DailyArcTokens.accent.opacity(0.3) : DailyArcTokens.separator,
+                    badge.isEarned
+                        ? (theme.id == "command" ? CommandTheme.cyan.opacity(0.5) : DailyArcTokens.accent.opacity(0.3))
+                        : theme.separator,
                     lineWidth: DailyArcTokens.borderThin
                 )
         )
+        .shadow(color: badge.isEarned && theme.id == "command" ? CommandTheme.glowCyan.opacity(0.3) : .clear, radius: 6)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(badge.isEarned
             ? "\(badge.name) badge earned"

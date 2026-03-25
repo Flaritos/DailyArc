@@ -10,6 +10,7 @@ struct PerHabitDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.theme) private var theme
 
     @State private var editingHabit: Habit?
     @State private var showArchiveConfirmation = false
@@ -44,7 +45,7 @@ struct PerHabitDetailView: View {
             .padding(.horizontal, DailyArcSpacing.lg)
             .padding(.vertical, DailyArcSpacing.xl)
         }
-        .background(DailyArcTokens.backgroundPrimary)
+        .background(theme.backgroundPrimary)
         .navigationTitle(habit.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -90,11 +91,12 @@ struct PerHabitDetailView: View {
             VStack(alignment: .leading, spacing: DailyArcSpacing.xxs) {
                 Text(habit.name)
                     .typography(.titleMedium)
-                    .foregroundStyle(DailyArcTokens.textPrimary)
+                    .fontDesign(theme.displayFontDesign)
+                    .foregroundStyle(theme.textPrimary)
 
                 Text(frequencyLabel)
                     .typography(.bodySmall)
-                    .foregroundStyle(DailyArcTokens.textSecondary)
+                    .foregroundStyle(theme.textSecondary)
             }
 
             Spacer()
@@ -123,37 +125,44 @@ struct PerHabitDetailView: View {
             HStack(spacing: DailyArcSpacing.xs) {
                 Image(systemName: icon)
                     .font(.caption)
-                    .foregroundStyle(DailyArcTokens.textTertiary)
+                    .foregroundStyle(theme.textTertiary)
                 Text(title)
                     .typography(.caption)
-                    .foregroundStyle(DailyArcTokens.textSecondary)
+                    .foregroundStyle(theme.textSecondary)
             }
             Text(value)
                 .typography(.titleSmall)
+                .fontDesign(theme.displayFontDesign)
                 .foregroundStyle(valueColor)
                 .contentTransition(.numericText())
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(DailyArcSpacing.md)
-        .background(DailyArcTokens.backgroundSecondary)
-        .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
+        .background(theme.id == "command" ? CommandTheme.panel : theme.backgroundSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: theme.cornerRadiusMedium))
+        .overlay(
+            theme.id == "command"
+                ? RoundedRectangle(cornerRadius: theme.cornerRadiusMedium).stroke(theme.border, lineWidth: DailyArcTokens.borderThin)
+                : nil
+        )
     }
 
     private var thisMonthChart: some View {
         let monthName = Date().formatted(.dateTime.month(.wide))
         return VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
-            Text("This Month")
+            Text(theme.uppercaseHeaders ? "\(theme.headerPrefix)THIS MONTH" : "This Month")
                 .typography(.titleSmall)
-                .foregroundStyle(DailyArcTokens.textPrimary)
+                .fontDesign(theme.displayFontDesign)
+                .foregroundStyle(theme.textPrimary)
 
             Text(monthName)
                 .typography(.caption)
-                .foregroundStyle(DailyArcTokens.textSecondary)
+                .foregroundStyle(theme.textSecondary)
 
             if dailyThisMonthData.isEmpty {
                 Text("No data yet")
                     .typography(.bodySmall)
-                    .foregroundStyle(DailyArcTokens.textTertiary)
+                    .foregroundStyle(theme.textTertiary)
                     .frame(maxWidth: .infinity, minHeight: 150)
             } else {
                 Chart {
@@ -181,13 +190,18 @@ struct PerHabitDetailView: View {
             }
         }
         .padding(DailyArcSpacing.md)
-        .background(DailyArcTokens.backgroundSecondary)
-        .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusLarge))
+        .background(theme.id == "command" ? CommandTheme.panel : theme.backgroundSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: theme.cornerRadiusLarge))
+        .overlay(
+            theme.id == "command"
+                ? RoundedRectangle(cornerRadius: theme.cornerRadiusLarge).stroke(theme.border, lineWidth: DailyArcTokens.borderThin)
+                : nil
+        )
     }
 
     private func barColor(for count: Int) -> Color {
         if count <= 0 {
-            return Color(.systemGray5)
+            return Color(hex: "#E5E5EA")!
         } else if count >= habit.targetCount {
             return habit.color(for: colorScheme)
         } else {
@@ -197,14 +211,15 @@ struct PerHabitDetailView: View {
 
     private var monthlyChart: some View {
         VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
-            Text("Last 12 Months")
+            Text(theme.uppercaseHeaders ? "\(theme.headerPrefix)LAST 12 MONTHS" : "Last 12 Months")
                 .typography(.titleSmall)
-                .foregroundStyle(DailyArcTokens.textPrimary)
+                .fontDesign(theme.displayFontDesign)
+                .foregroundStyle(theme.textPrimary)
 
             if monthlyData.isEmpty {
                 Text("No data yet")
                     .typography(.bodySmall)
-                    .foregroundStyle(DailyArcTokens.textTertiary)
+                    .foregroundStyle(theme.textTertiary)
                     .frame(maxWidth: .infinity, minHeight: 150)
             } else {
                 Chart {
@@ -226,8 +241,13 @@ struct PerHabitDetailView: View {
             }
         }
         .padding(DailyArcSpacing.md)
-        .background(DailyArcTokens.backgroundSecondary)
-        .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusLarge))
+        .background(theme.id == "command" ? CommandTheme.panel : theme.backgroundSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: theme.cornerRadiusLarge))
+        .overlay(
+            theme.id == "command"
+                ? RoundedRectangle(cornerRadius: theme.cornerRadiusLarge).stroke(theme.border, lineWidth: DailyArcTokens.borderThin)
+                : nil
+        )
     }
 
     private var actionButtons: some View {
@@ -241,9 +261,9 @@ struct PerHabitDetailView: View {
                 }
                 .typography(.bodyLarge)
                 .frame(maxWidth: .infinity, minHeight: 50)
-                .background(DailyArcTokens.warning.opacity(0.15))
-                .foregroundStyle(DailyArcTokens.warning)
-                .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
+                .background(theme.warning.opacity(0.15))
+                .foregroundStyle(theme.warning)
+                .clipShape(RoundedRectangle(cornerRadius: theme.cornerRadiusMedium))
             }
 
             Button {
@@ -255,9 +275,9 @@ struct PerHabitDetailView: View {
                 }
                 .typography(.bodyLarge)
                 .frame(maxWidth: .infinity, minHeight: 50)
-                .background(DailyArcTokens.error.opacity(0.15))
-                .foregroundStyle(DailyArcTokens.error)
-                .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
+                .background(theme.error.opacity(0.15))
+                .foregroundStyle(theme.error)
+                .clipShape(RoundedRectangle(cornerRadius: theme.cornerRadiusMedium))
             }
         }
     }
@@ -268,7 +288,7 @@ struct PerHabitDetailView: View {
         let rate = computeRate()
         return ZStack {
             Circle()
-                .stroke(Color(.systemGray5), lineWidth: 4)
+                .stroke(Color(hex: "#E5E5EA")!, lineWidth: 4)
                 .frame(width: 60, height: 60)
             Circle()
                 .trim(from: 0, to: rate)
@@ -282,7 +302,7 @@ struct PerHabitDetailView: View {
             Text("\(Int(rate * 100))%")
                 .typography(.caption)
                 .fontWeight(.bold)
-                .foregroundStyle(DailyArcTokens.textPrimary)
+                .foregroundStyle(theme.textPrimary)
                 .contentTransition(.numericText())
         }
     }

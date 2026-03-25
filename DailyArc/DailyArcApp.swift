@@ -5,8 +5,14 @@ import SwiftData
 struct DailyArcApp: App {
     let container: ModelContainer
     @State private var containerError: String?
+    // Observe ThemeManager so body re-evaluates when themeID changes,
+    // which updates the .environment(\.theme, ...) and .preferredColorScheme().
+    @State private var themeManager = ThemeManager.shared
 
     init() {
+        // Apply UIKit appearance proxies for theme backgrounds on tab bar, nav bar, table views
+        ThemeManager.shared.applyUIKitAppearance()
+
         do {
             let config = ModelConfiguration(isStoredInMemoryOnly: false)
             container = try ModelContainer(
@@ -38,6 +44,8 @@ struct DailyArcApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(\.theme, themeManager.currentTheme)
+                // preferredColorScheme moved to ContentView so onboarding is exempt
                 .alert("Data Error", isPresented: Binding(
                     get: { containerError != nil },
                     set: { if !$0 { containerError = nil } }

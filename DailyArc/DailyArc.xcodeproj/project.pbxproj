@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		IT01010101010101010101B1 /* InsightTheaterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = IT01010101010101010101F1 /* InsightTheaterView.swift */; };
+		WR01010101010101010101B1 /* WeeklyReportCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = WR01010101010101010101F1 /* WeeklyReportCard.swift */; };
+		YP01010101010101010101B1 /* YearInPixelsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = YP01010101010101010101F1 /* YearInPixelsView.swift */; };
+		MB01010101010101010101B1 /* MissionBriefingEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = MB01010101010101010101F1 /* MissionBriefingEngine.swift */; };
+		SA01010101010101010101B1 /* StreakAuroraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SA01010101010101010101F1 /* StreakAuroraView.swift */; };
+		LS01010101010101010101B1 /* LaunchSequenceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = LS01010101010101010101F1 /* LaunchSequenceView.swift */; };
+		DA10000000000000000000B1 /* DailyArcLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10000000000000000000F1 /* DailyArcLogo.swift */; };
+		DA20000000000000000000B2 /* DailyArcWordmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA20000000000000000000F2 /* DailyArcWordmark.swift */; };
 		CC11111111111111111111B1 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC11111111111111111111F1 /* AnalyticsService.swift */; };
 		CC22222222222222222222B2 /* DedupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC22222222222222222222F2 /* DedupService.swift */; };
 		CC33333333333333333333B3 /* DataCompactionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC33333333333333333333F3 /* DataCompactionService.swift */; };
@@ -52,6 +60,7 @@
 		B194A5F00D83DC754A97E4B7 /* CompletionCircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9458E518BEB532283AB0E914 /* CompletionCircleView.swift */; };
 		B194A5F00D83DC754A97E4B8 /* AnnualArcView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9458E518BEB532283AB0E915 /* AnnualArcView.swift */; };
 		B1E691AB5C8C2DA446F89B09 /* UndoToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79561A55F258274B467A5AA7 /* UndoToastView.swift */; };
+		TB0101010101010101010101B1 /* ThemedTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = TB0101010101010101010101F1 /* ThemedTabBar.swift */; };
 		BF31E0DF4A306C7B7A84B284 /* DailyArcApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = "TEMP_54059297-ECA8-46BF-BA6E-A94FEAECEC37" /* DailyArcApp.swift */; };
 		C04E102E3FEC8FAFD1E5FFC7 /* DailyArcSchemaV1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A77ECB5ABC63CFE5434F02F /* DailyArcSchemaV1.swift */; };
 		C4FBE5430BC2F975EB8C09BC /* StreakEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9FA3DA276AF1856FA899A7A /* StreakEngine.swift */; };
@@ -72,6 +81,9 @@
 		FA4F19249920E551133B30BE /* DailyArcTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98893F5E39150983A8494EBB /* DailyArcTokens.swift */; };
 		FB1D635CFF29FE4C7A25CA39 /* DateNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD727D091437B648C8A34E41 /* DateNavigationBar.swift */; };
 		FB76019ECE27375BF4409FEE /* MoodCheckInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B968BFE5D31762CA7D63959 /* MoodCheckInView.swift */; };
+		SS01010101010101010101B1 /* StreakShieldService.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS01010101010101010101F1 /* StreakShieldService.swift */; };
+		TM01010101010101010101B1 /* TimeMachineCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = TM01010101010101010101F1 /* TimeMachineCard.swift */; };
+		TC01010101010101010101B1 /* TimeCapsuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TC01010101010101010101F1 /* TimeCapsuleView.swift */; };
 		AA11111111111111111111B1 /* SkeletonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11111111111111111111F1 /* SkeletonView.swift */; };
 		AA22222222222222222222B2 /* ErrorStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA22222222222222222222F2 /* ErrorStateView.swift */; };
 		AA33333333333333333333B3 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA33333333333333333333F3 /* FlowLayout.swift */; };
@@ -83,9 +95,28 @@
 		W5E5E5E5E5E5E5E5E5E5E5E5 /* DailyArcWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = W2B2B2B2B2B2B2B2B2B2B2B2 /* DailyArcWidgetBundle.swift */; };
 		W6F6F6F6F6F6F6F6F6F6F6F6 /* DailyArcWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = W3C3C3C3C3C3C3C3C3C3C3C3 /* DailyArcWidget.swift */; };
 		WH7H7H7H7H7H7H7H7H7H7H7 /* DailyArcWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = W1A1A1A1A1A1A1A1A1A1A1A1 /* DailyArcWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		TH0101010101010101010101B1 /* ThemeDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = TH0101010101010101010101F1 /* ThemeDefinition.swift */; };
+		TH0202020202020202020202B2 /* TactileTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = TH0202020202020202020202F2 /* TactileTheme.swift */; };
+		TH0303030303030303030303B3 /* CommandTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = TH0303030303030303030303F3 /* CommandTheme.swift */; };
+		TH0404040404040404040404B4 /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = TH0404040404040404040404F4 /* ThemeManager.swift */; };
+		TH0505050505050505050505B5 /* ThemeModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = TH0505050505050505050505F5 /* ThemeModifiers.swift */; };
+		TH0606060606060606060606B6 /* ThemedComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = TH0606060606060606060606F6 /* ThemedComponents.swift */; };
+		TH0707070707070707070707B7 /* ThemePreviewCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = TH0707070707070707070707F7 /* ThemePreviewCard.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		MB01010101010101010101F1 /* MissionBriefingEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissionBriefingEngine.swift; sourceTree = "<group>"; };
+		SA01010101010101010101F1 /* StreakAuroraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakAuroraView.swift; sourceTree = "<group>"; };
+		SS01010101010101010101F1 /* StreakShieldService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakShieldService.swift; sourceTree = "<group>"; };
+		DA10000000000000000000F1 /* DailyArcLogo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyArcLogo.swift; sourceTree = "<group>"; };
+		DA20000000000000000000F2 /* DailyArcWordmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyArcWordmark.swift; sourceTree = "<group>"; };
+		TH0101010101010101010101F1 /* ThemeDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeDefinition.swift; sourceTree = "<group>"; };
+		TH0202020202020202020202F2 /* TactileTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TactileTheme.swift; sourceTree = "<group>"; };
+		TH0303030303030303030303F3 /* CommandTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandTheme.swift; sourceTree = "<group>"; };
+		TH0404040404040404040404F4 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
+		TH0505050505050505050505F5 /* ThemeModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeModifiers.swift; sourceTree = "<group>"; };
+		TH0606060606060606060606F6 /* ThemedComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemedComponents.swift; sourceTree = "<group>"; };
+		TH0707070707070707070707F7 /* ThemePreviewCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemePreviewCard.swift; sourceTree = "<group>"; };
 		00E4C2BA05918DBA309FA6F3 /* HabitColorPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitColorPalette.swift; sourceTree = "<group>"; };
 		CC11111111111111111111F1 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
 		CC22222222222222222222F2 /* DedupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DedupService.swift; sourceTree = "<group>"; };
@@ -112,6 +143,7 @@
 		76393F0777026D7823497C12 /* ShareCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardView.swift; sourceTree = "<group>"; };
 		767B4977F7A6118487C720BA /* MotivationCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationCardView.swift; sourceTree = "<group>"; };
 		79561A55F258274B467A5AA7 /* UndoToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoToastView.swift; sourceTree = "<group>"; };
+		TB0101010101010101010101F1 /* ThemedTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemedTabBar.swift; sourceTree = "<group>"; };
 		80571F8B6983E8F8215A6152 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		84EFD5B662DB2161ACF87A6E /* RuleEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleEngine.swift; sourceTree = "<group>"; };
 		8B52C09743E537F3867D3183 /* MediumTodayWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediumTodayWidget.swift; sourceTree = "<group>"; };
@@ -121,6 +153,7 @@
 		9458E518BEB532283AB0E915 /* AnnualArcView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnualArcView.swift; sourceTree = "<group>"; };
 		95C1932757B71344153F48C9 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		98893F5E39150983A8494EBB /* DailyArcTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyArcTokens.swift; sourceTree = "<group>"; };
+		LS01010101010101010101F1 /* LaunchSequenceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchSequenceView.swift; sourceTree = "<group>"; };
 		9B4ECE583455A6C55F529C0F /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		9B72E52730DFE36876D5445B /* CelebrationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelebrationService.swift; sourceTree = "<group>"; };
 		9B968BFE5D31762CA7D63959 /* MoodCheckInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoodCheckInView.swift; sourceTree = "<group>"; };
@@ -136,6 +169,9 @@
 		D043FF047131241C3172CDF1 /* ArchiveToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchiveToastView.swift; sourceTree = "<group>"; };
 		D491627ADD8A175FC993F8F2 /* MoodTrendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoodTrendView.swift; sourceTree = "<group>"; };
 		D9FA3DA276AF1856FA899A7A /* StreakEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakEngine.swift; sourceTree = "<group>"; };
+		SS01010101010101010101F1 /* StreakShieldService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakShieldService.swift; sourceTree = "<group>"; };
+		TM01010101010101010101F1 /* TimeMachineCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeMachineCard.swift; sourceTree = "<group>"; };
+		TC01010101010101010101F1 /* TimeCapsuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeCapsuleView.swift; sourceTree = "<group>"; };
 		DC0CE08CBDF582CBD5B5FD9D /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
 		DCB69FBC90C37CCBA87D5F79 /* DailyArc.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DailyArc.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E7663B877DFC156E7E400AD6 /* SuggestionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionCardView.swift; sourceTree = "<group>"; };
@@ -166,6 +202,9 @@
 		W3C3C3C3C3C3C3C3C3C3C3C3 /* DailyArcWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyArcWidget.swift; sourceTree = "<group>"; };
 		W4D4D4D4D4D4D4D4D4D4D4D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		WI8I8I8I8I8I8I8I8I8I8I8I /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration.storekit; sourceTree = "<group>"; };
+		IT01010101010101010101F1 /* InsightTheaterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightTheaterView.swift; sourceTree = "<group>"; };
+		WR01010101010101010101F1 /* WeeklyReportCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyReportCard.swift; sourceTree = "<group>"; };
+		YP01010101010101010101F1 /* YearInPixelsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YearInPixelsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXContainerItemProxy section */
@@ -193,6 +232,19 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXGroup section */
+		TH0808080808080808080808G8 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				TH0303030303030303030303F3 /* CommandTheme.swift */,
+				TH0202020202020202020202F2 /* TactileTheme.swift */,
+				TH0101010101010101010101F1 /* ThemeDefinition.swift */,
+				TH0404040404040404040404F4 /* ThemeManager.swift */,
+				TH0505050505050505050505F5 /* ThemeModifiers.swift */,
+				TH0606060606060606060606F6 /* ThemedComponents.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
 		0A6D14F8D9A0ADF2529BCE28 /* Schema */ = {
 			isa = PBXGroup;
 			children = (
@@ -240,7 +292,9 @@
 		3FB34A49437B477406C024CD /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				TH0808080808080808080808G8 /* Theme */,
 				DD11111111111111111111F1 /* AppIconGenerator.swift */,
+				MB01010101010101010101F1 /* MissionBriefingEngine.swift */,
 				EBC3F283BD857C4F79F8CEB1 /* ColorExtensions.swift */,
 				98893F5E39150983A8494EBB /* DailyArcTokens.swift */,
 				90BD50B25908A8A6EE510C3D /* DateHelpers.swift */,
@@ -279,12 +333,18 @@
 				57580F01A5D4747F8AA5FD30 /* BadgeCeremonyView.swift */,
 				9458E518BEB532283AB0E915 /* AnnualArcView.swift */,
 				9458E518BEB532283AB0E914 /* CompletionCircleView.swift */,
+				DA10000000000000000000F1 /* DailyArcLogo.swift */,
+				DA20000000000000000000F2 /* DailyArcWordmark.swift */,
 				95C1932757B71344153F48C9 /* EmptyStateView.swift */,
 				AA22222222222222222222F2 /* ErrorStateView.swift */,
 				AA33333333333333333333F3 /* FlowLayout.swift */,
 				767B4977F7A6118487C720BA /* MotivationCardView.swift */,
 				76393F0777026D7823497C12 /* ShareCardView.swift */,
 				AA11111111111111111111F1 /* SkeletonView.swift */,
+				SA01010101010101010101F1 /* StreakAuroraView.swift */,
+				TB0101010101010101010101F1 /* ThemedTabBar.swift */,
+				TH0707070707070707070707F7 /* ThemePreviewCard.swift */,
+				TC01010101010101010101F1 /* TimeCapsuleView.swift */,
 				79561A55F258274B467A5AA7 /* UndoToastView.swift */,
 				AA55555555555555555555F5 /* WhatsNewView.swift */,
 			);
@@ -298,11 +358,13 @@
 				BAE9B9DB49647538B9B15175 /* CorrelationCardView.swift */,
 				F562D383EF547EB2D26BBD59 /* HeatMapCanvasView.swift */,
 				57A08057FF34110A251A2E4E /* InsightNudgeBannerView.swift */,
+				IT01010101010101010101F1 /* InsightTheaterView.swift */,
 				D491627ADD8A175FC993F8F2 /* MoodTrendView.swift */,
 				2B778F6950FA553DF1C6DBB8 /* PerHabitCardView.swift */,
 				FD9F5F41DC70F13A090D772A /* PerHabitDetailView.swift */,
 				FD781EE9097A44286011CD7D /* StatsView.swift */,
 				E7663B877DFC156E7E400AD6 /* SuggestionCardView.swift */,
+				YP01010101010101010101F1 /* YearInPixelsView.swift */,
 			);
 			path = Stats;
 			sourceTree = "<group>";
@@ -329,6 +391,7 @@
 		C4B5232D3FC9E05BF9E72D79 /* Onboarding */ = {
 			isa = PBXGroup;
 			children = (
+				LS01010101010101010101F1 /* LaunchSequenceView.swift */,
 				9B4ECE583455A6C55F529C0F /* OnboardingView.swift */,
 			);
 			path = Onboarding;
@@ -384,6 +447,7 @@
 				84EFD5B662DB2161ACF87A6E /* RuleEngine.swift */,
 				C9EE3C52F9F4CFC12B60A938 /* StoreKitManager.swift */,
 				D9FA3DA276AF1856FA899A7A /* StreakEngine.swift */,
+				SS01010101010101010101F1 /* StreakShieldService.swift */,
 				F4637BFC3CCB8FD2BBCAC1A6 /* WidgetDataService.swift */,
 			);
 			path = Services;
@@ -398,7 +462,9 @@
 				CA4E66382766912952729375 /* EnergyPickerView.swift */,
 				93DAAF7DD9DD6FD869422D36 /* HabitRowView.swift */,
 				9B968BFE5D31762CA7D63959 /* MoodCheckInView.swift */,
+				TM01010101010101010101F1 /* TimeMachineCard.swift */,
 				572684923F60E35048E058A7 /* TodayView.swift */,
+				WR01010101010101010101F1 /* WeeklyReportCard.swift */,
 			);
 			path = Today;
 			sourceTree = "<group>";
@@ -528,6 +594,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				DD11111111111111111111B1 /* AppIconGenerator.swift in Sources */,
+				DA10000000000000000000B1 /* DailyArcLogo.swift in Sources */,
+				DA20000000000000000000B2 /* DailyArcWordmark.swift in Sources */,
 				C64C95AF9177DB96E77A2347 /* ActivityTagsView.swift in Sources */,
 				CC11111111111111111111B1 /* AnalyticsService.swift in Sources */,
 				AA66666666666666666666B6 /* AnnualArcView.swift in Sources */,
@@ -573,11 +641,13 @@
 				0265023CE281712CD787D9BD /* KeychainDOBService.swift in Sources */,
 				BB77777777777777777777B7 /* LargeStatsWidget.swift in Sources */,
 				59436ADA430C9BF93F915015 /* MediumTodayWidget.swift in Sources */,
+				MB01010101010101010101B1 /* MissionBriefingEngine.swift in Sources */,
 				FB76019ECE27375BF4409FEE /* MoodCheckInView.swift in Sources */,
 				9C7722E04597DF969D422FEA /* MoodTrendView.swift in Sources */,
 				4FDA37DC091B2DE5718FF784 /* MotivationCardView.swift in Sources */,
 				0EAF6AF0791C054D7DF221C4 /* MotivationService.swift in Sources */,
 				814E4B88C3614D3D8A4733BA /* NotificationService.swift in Sources */,
+				LS01010101010101010101B1 /* LaunchSequenceView.swift in Sources */,
 				4D926B344C1C358F7CB5151D /* OnboardingView.swift in Sources */,
 				A3BB065F82BFC0A3F14F2DFE /* PaywallView.swift in Sources */,
 				EC129420023092EA1712E13D /* PerHabitCardView.swift in Sources */,
@@ -589,13 +659,28 @@
 				0B9566CE74816CBDAEA9FEF2 /* SmallStreakWidget.swift in Sources */,
 				53215C819E878881BB3A4B7A /* SoundManager.swift in Sources */,
 				33AA9D4B6B93639B96361465 /* StableHash.swift in Sources */,
+				IT01010101010101010101B1 /* InsightTheaterView.swift in Sources */,
 				A3B7E7BD8A853BD05D328F08 /* StatsView.swift in Sources */,
+				YP01010101010101010101B1 /* YearInPixelsView.swift in Sources */,
 				9E0CCC6530860A7159A9D663 /* StatsViewModel.swift in Sources */,
+				SA01010101010101010101B1 /* StreakAuroraView.swift in Sources */,
 				A0C59FDA96E5D6B45C5EB4D7 /* StoreKitManager.swift in Sources */,
 				C4FBE5430BC2F975EB8C09BC /* StreakEngine.swift in Sources */,
+				SS01010101010101010101B1 /* StreakShieldService.swift in Sources */,
 				826FFDB90112DE59349D20C6 /* SuggestionCardView.swift in Sources */,
+				TH0202020202020202020202B2 /* TactileTheme.swift in Sources */,
+				TH0303030303030303030303B3 /* CommandTheme.swift in Sources */,
+				TH0101010101010101010101B1 /* ThemeDefinition.swift in Sources */,
+				TH0404040404040404040404B4 /* ThemeManager.swift in Sources */,
+				TH0505050505050505050505B5 /* ThemeModifiers.swift in Sources */,
+				TH0606060606060606060606B6 /* ThemedComponents.swift in Sources */,
+				TH0707070707070707070707B7 /* ThemePreviewCard.swift in Sources */,
+				TC01010101010101010101B1 /* TimeCapsuleView.swift in Sources */,
+				TM01010101010101010101B1 /* TimeMachineCard.swift in Sources */,
 				C791B40F0C65AF21E7E4E383 /* TodayView.swift in Sources */,
+				WR01010101010101010101B1 /* WeeklyReportCard.swift in Sources */,
 				D19AAF21E9CCC54D04650FEC /* TodayViewModel.swift in Sources */,
+				TB0101010101010101010101B1 /* ThemedTabBar.swift in Sources */,
 				B1E691AB5C8C2DA446F89B09 /* UndoToastView.swift in Sources */,
 				AA55555555555555555555B5 /* WhatsNewView.swift in Sources */,
 				93225FF3A2BECF96CD467DF7 /* WidgetDataService.swift in Sources */,

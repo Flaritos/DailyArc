@@ -8,6 +8,7 @@ struct BadgeCeremonyView: View {
     @State private var emojiScale: CGFloat = 0.3
     @State private var cardOpacity: Double = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.theme) private var theme
 
     var body: some View {
         if let badge = badgeEngine.pendingCeremony {
@@ -28,15 +29,16 @@ struct BadgeCeremonyView: View {
                     VStack(spacing: DailyArcSpacing.sm) {
                         Text(badge.name)
                             .typography(.titleMedium)
-                            .foregroundStyle(DailyArcTokens.textPrimary)
+                            .fontDesign(theme.displayFontDesign)
+                            .foregroundStyle(theme.textPrimary)
 
-                        Text("Badge unlocked!")
+                        Text(theme.uppercaseHeaders ? "\(theme.headerPrefix)BADGE UNLOCKED!" : "Badge unlocked!")
                             .typography(.bodySmall)
-                            .foregroundStyle(DailyArcTokens.textSecondary)
+                            .foregroundStyle(theme.textSecondary)
 
                         Text(badge.description)
                             .typography(.caption)
-                            .foregroundStyle(DailyArcTokens.textTertiary)
+                            .foregroundStyle(theme.textTertiary)
                     }
 
                     Button {
@@ -56,14 +58,14 @@ struct BadgeCeremonyView: View {
                 }
                 .padding(DailyArcSpacing.xl)
                 .background(
-                    RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusLarge)
-                        .fill(DailyArcTokens.backgroundPrimary)
+                    RoundedRectangle(cornerRadius: theme.cornerRadiusLarge)
+                        .fill(theme.backgroundPrimary)
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusLarge)
-                        .stroke(DailyArcTokens.separator, lineWidth: DailyArcTokens.borderThin)
+                    RoundedRectangle(cornerRadius: theme.cornerRadiusLarge)
+                        .stroke(theme.id == "command" ? CommandTheme.cyan.opacity(0.4) : theme.separator, lineWidth: DailyArcTokens.borderThin)
                 )
-                .shadow(color: DailyArcTokens.cardShadow, radius: 20, y: 8)
+                .shadow(color: theme.id == "command" ? CommandTheme.glowCyan : theme.cardShadowColor, radius: 20, y: 8)
                 .padding(.horizontal, DailyArcSpacing.xxl)
                 .opacity(cardOpacity)
             }

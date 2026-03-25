@@ -6,6 +6,7 @@ import Charts
 struct MoodTrendView: View {
     let moodEntries: [MoodEntry]
 
+    @Environment(\.theme) private var theme
     @State private var period: Int = 30
     @State private var selectedDate: Date?
 
@@ -85,11 +86,12 @@ struct MoodTrendView: View {
     private var headerRow: some View {
         HStack(spacing: DailyArcSpacing.sm) {
             RoundedRectangle(cornerRadius: 1.5)
-                .fill(DailyArcTokens.brandGradient)
+                .fill(theme.brandGradient)
                 .frame(width: 3, height: 20)
-            Text("Mood Trend")
+            Text(theme.uppercaseHeaders ? "\(theme.headerPrefix)MOOD TREND" : "Mood Trend")
                 .typography(.titleSmall)
-                .foregroundStyle(DailyArcTokens.textPrimary)
+                .foregroundStyle(theme.textPrimary)
+                .fontDesign(theme.displayFontDesign)
             Spacer()
             periodPicker
         }
@@ -106,7 +108,8 @@ struct MoodTrendView: View {
                 } label: {
                     Text("\(days)d")
                         .typography(.caption)
-                        .foregroundStyle(period == days ? Color.white : DailyArcTokens.textSecondary)
+                        .fontDesign(theme.displayFontDesign)
+                        .foregroundStyle(period == days ? Color.white : theme.textSecondary)
                         .padding(.horizontal, DailyArcSpacing.sm)
                         .padding(.vertical, DailyArcSpacing.xs)
                         .background {
@@ -122,7 +125,7 @@ struct MoodTrendView: View {
         .padding(DailyArcSpacing.xxs)
         .background(
             Capsule()
-                .fill(DailyArcTokens.backgroundSecondary)
+                .fill(theme.backgroundSecondary)
         )
     }
 
@@ -140,8 +143,8 @@ struct MoodTrendView: View {
                 .foregroundStyle(
                     .linearGradient(
                         colors: [
-                            DailyArcTokens.accent.opacity(0.10),
-                            DailyArcTokens.accent.opacity(0.01)
+                            (theme.id == "command" ? CommandTheme.cyan : DailyArcTokens.accent).opacity(0.10),
+                            (theme.id == "command" ? CommandTheme.cyan : DailyArcTokens.accent).opacity(0.01)
                         ],
                         startPoint: .top,
                         endPoint: .bottom
@@ -156,9 +159,10 @@ struct MoodTrendView: View {
                     x: .value("Date", point.date, unit: .day),
                     y: .value("Mood", point.value)
                 )
-                .foregroundStyle(DailyArcTokens.accent)
+                .foregroundStyle(theme.id == "command" ? CommandTheme.cyan : DailyArcTokens.accent)
                 .interpolationMethod(.monotone)
                 .lineStyle(StrokeStyle(lineWidth: 2.5))
+                .shadow(color: theme.id == "command" ? CommandTheme.glowCyan : .clear, radius: 4)
             }
 
             // Smoothed energy dashed overlay
@@ -169,7 +173,7 @@ struct MoodTrendView: View {
                         y: .value("Energy", point.value),
                         series: .value("Series", "Energy")
                     )
-                    .foregroundStyle(DailyArcTokens.accent.opacity(0.25))
+                    .foregroundStyle((theme.id == "command" ? CommandTheme.cyan : DailyArcTokens.accent).opacity(0.25))
                     .interpolationMethod(.monotone)
                     .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
                 }
@@ -178,14 +182,14 @@ struct MoodTrendView: View {
             // Selected point indicator with annotation tooltip
             if let entry = selectedEntry {
                 RuleMark(x: .value("Selected", entry.date, unit: .day))
-                    .foregroundStyle(DailyArcTokens.textTertiary.opacity(0.5))
+                    .foregroundStyle(theme.textTertiary.opacity(0.5))
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
 
                 PointMark(
                     x: .value("Date", entry.date, unit: .day),
                     y: .value("Mood", entry.moodScore)
                 )
-                .foregroundStyle(DailyArcTokens.accent)
+                .foregroundStyle(theme.id == "command" ? CommandTheme.cyan : DailyArcTokens.accent)
                 .symbolSize(50)
                 .annotation(position: .top, spacing: 6) {
                     tooltipView(for: entry)
@@ -196,12 +200,13 @@ struct MoodTrendView: View {
         .chartYAxis {
             AxisMarks(values: [1, 2, 3, 4, 5]) { value in
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5))
-                    .foregroundStyle(DailyArcTokens.separator.opacity(0.5))
+                    .foregroundStyle(theme.separator.opacity(0.5))
                 AxisValueLabel {
                     if let score = value.as(Int.self) {
                         Text("\(score)")
                             .font(.caption2)
-                            .foregroundStyle(DailyArcTokens.textTertiary)
+                            .fontDesign(theme.displayFontDesign)
+                            .foregroundStyle(theme.textTertiary)
                     }
                 }
             }
@@ -209,9 +214,10 @@ struct MoodTrendView: View {
         .chartXAxis {
             AxisMarks(values: .stride(by: .day, count: xAxisStride)) { _ in
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5))
-                    .foregroundStyle(DailyArcTokens.separator.opacity(0.3))
+                    .foregroundStyle(theme.separator.opacity(0.3))
                 AxisValueLabel(format: .dateTime.month(.abbreviated).day())
-                    .foregroundStyle(DailyArcTokens.textTertiary)
+                    .font(.caption2.monospaced())
+                    .foregroundStyle(theme.textTertiary)
             }
         }
         .frame(height: 200)
@@ -260,23 +266,23 @@ struct MoodTrendView: View {
         VStack(spacing: DailyArcSpacing.xxs) {
             Text(entry.date, format: .dateTime.month(.abbreviated).day())
                 .typography(.caption2)
-                .foregroundStyle(DailyArcTokens.textSecondary)
+                .foregroundStyle(theme.textSecondary)
             HStack(spacing: DailyArcSpacing.xs) {
                 Text(entry.moodEmoji)
                     .font(.caption)
                 if entry.energyScore > 0 {
                     Text("\u{26A1}\(entry.energyScore)")
                         .typography(.caption2)
-                        .foregroundStyle(DailyArcTokens.textSecondary)
+                        .foregroundStyle(theme.textSecondary)
                 }
             }
         }
         .padding(.horizontal, DailyArcSpacing.sm)
         .padding(.vertical, DailyArcSpacing.xs)
         .background(
-            RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusSmall)
-                .fill(DailyArcTokens.backgroundTertiary)
-                .shadow(color: DailyArcTokens.cardShadow, radius: 4, y: 2)
+            RoundedRectangle(cornerRadius: theme.cornerRadiusSmall)
+                .fill(theme.backgroundTertiary)
+                .shadow(color: theme.cardShadowColor, radius: 4, y: 2)
         )
     }
 
@@ -290,7 +296,8 @@ struct MoodTrendView: View {
                         .font(.caption)
                     Text("\(index + 1)")
                         .typography(.caption2)
-                        .foregroundStyle(DailyArcTokens.textTertiary)
+                        .fontDesign(theme.displayFontDesign)
+                        .foregroundStyle(theme.textTertiary)
                 }
                 if index < 4 { Spacer() }
             }
@@ -304,19 +311,19 @@ struct MoodTrendView: View {
         HStack(spacing: DailyArcSpacing.lg) {
             HStack(spacing: DailyArcSpacing.xs) {
                 RoundedRectangle(cornerRadius: 1)
-                    .fill(DailyArcTokens.accent)
+                    .fill(theme.id == "command" ? CommandTheme.cyan : DailyArcTokens.accent)
                     .frame(width: 16, height: 2)
                 Text("Mood")
                     .typography(.caption2)
-                    .foregroundStyle(DailyArcTokens.textSecondary)
+                    .foregroundStyle(theme.textSecondary)
             }
             HStack(spacing: DailyArcSpacing.xs) {
                 StrokeLine()
-                    .stroke(DailyArcTokens.accent.opacity(0.4), style: StrokeStyle(lineWidth: 1.5, dash: [5, 3]))
+                    .stroke((theme.id == "command" ? CommandTheme.cyan : DailyArcTokens.accent).opacity(0.4), style: StrokeStyle(lineWidth: 1.5, dash: [5, 3]))
                     .frame(width: 16, height: 2)
                 Text("Energy")
                     .typography(.caption2)
-                    .foregroundStyle(DailyArcTokens.textSecondary)
+                    .foregroundStyle(theme.textSecondary)
             }
             Spacer()
         }
@@ -329,17 +336,17 @@ struct MoodTrendView: View {
         VStack(spacing: DailyArcSpacing.md) {
             Image(systemName: "chart.line.uptrend.xyaxis")
                 .font(.system(size: 32))
-                .foregroundStyle(DailyArcTokens.textTertiary)
+                .foregroundStyle(theme.textTertiary)
 
             Text("Log your mood for 3+ days to see trends")
                 .typography(.bodySmall)
-                .foregroundStyle(DailyArcTokens.textSecondary)
+                .foregroundStyle(theme.textSecondary)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
         .frame(height: 150)
-        .background(DailyArcTokens.backgroundSecondary)
-        .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusLarge))
+        .background(theme.backgroundSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: theme.cornerRadiusLarge))
     }
 }
 

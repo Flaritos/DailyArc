@@ -19,13 +19,21 @@ final class StreakEngine {
     ///   - isFirstCallToday: REQUIRED — prevents double-increment on multi-count habits.
     ///   - calendar: Caller must pass Calendar.current captured on @MainActor.
     func recalculateStreaks(for habit: Habit, logs: [HabitLog], isDeletion: Bool = false, isFirstCallToday: Bool, calendar: Calendar) {
+        // Auto-apply streak shields for premium users before calculating
+        if StoreKitManager.shared.isPremium && !isDeletion {
+            StreakShieldService.shared.autoApplyShields(for: habit, logs: logs, calendar: calendar)
+        }
+
         let today = calendar.startOfDay(for: Date())
         // Include isRecovered logs in streak calculation — that's the whole point of recovery.
-        let completedDates = Set(
+        let logCompletedDates = Set(
             logs
                 .filter { $0.count >= habit.targetCount }
                 .map { calendar.startOfDay(for: $0.date) }
         )
+        // Merge shielded dates into completed dates for streak continuity
+        let shieldedDates = StreakShieldService.shared.shieldedDates(for: habit.id)
+        let completedDates = logCompletedDates.union(shieldedDates)
 
         let todayCompleted = completedDates.contains(today)
         var checkDate = todayCompleted ? today : calendar.date(byAdding: .day, value: -1, to: today)!

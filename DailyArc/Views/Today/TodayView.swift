@@ -5,6 +5,7 @@ struct TodayView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.theme) private var theme
 
     @Query(filter: #Predicate<Habit> { !$0.isArchived }, sort: \Habit.sortOrder)
     private var habits: [Habit]
@@ -42,6 +43,10 @@ struct TodayView: View {
     @State private var weekSummary: TodayViewModel.WeekSummaryData?
     @State private var showWeekSummary = false
 
+    // MARK: - Weekly Momentum Report
+    @AppStorage("lastWeeklyReportDate") private var lastWeeklyReportDate = ""
+    @State private var showWeeklyReport = false
+
     // MARK: - Scroll Anchoring (Gap #9)
     @State private var scrollAnchorID: String? = nil
 
@@ -57,6 +62,9 @@ struct TodayView: View {
 
     // Accessibility
     @Environment(\.accessibilityVoiceOverEnabled) private var isVoiceOverEnabled
+
+    // Cached streak recovery (avoids expensive recomputation on every body evaluation)
+    @State private var cachedRecoverableHabit: (habit: Habit, missedDays: Int, dates: [Date])? = nil
 
     // Archive toast
     @State private var archiveToast: ArchiveToastInfo? = nil
@@ -103,7 +111,28 @@ struct TodayView: View {
         return visible.allSatisfy { viewModel.completionCount(for: $0) >= $0.targetCount }
     }
 
-    private var recoverableHabit: (habit: Habit, missedDays: Int, dates: [Date])? {
+    // MARK: - Mission Briefing (Premium + Command)
+
+    /// Returns the command theme header text, using mission briefing language for premium users.
+    private var missionBriefingHeader: String {
+        if StoreKitManager.shared.isPremium && theme.id == "command" {
+            return "> " + MissionBriefingEngine.dailyBriefingHeader(
+                habitCount: totalProgress.total,
+                completedCount: totalProgress.completed
+            )
+        }
+        return "> YOUR HABITS"
+    }
+
+    // MARK: - Streak Aurora (Premium)
+
+    /// The longest current streak across all visible habits, for aurora effect.
+    private var maxStreakLength: Int {
+        habits.map(\.currentStreak).max() ?? 0
+    }
+
+    /// Recomputes the cached recoverable habit. Call in .onAppear / .onChange, not on every body.
+    private func refreshRecoverableHabit() {
         for habit in habits {
             let habitID = habit.id
             let descriptor = FetchDescriptor<HabitLog>(
@@ -112,10 +141,11 @@ struct TodayView: View {
             let logs = (try? context.fetch(descriptor)) ?? []
             let result = streakEngine.streakRecoveryAvailable(for: habit, logs: logs, calendar: calendar)
             if result.available {
-                return (habit, result.missedDates.count, result.missedDates)
+                cachedRecoverableHabit = (habit, result.missedDates.count, result.missedDates)
+                return
             }
         }
-        return nil
+        cachedRecoverableHabit = nil
     }
 
     /// Whether GDPR consent is withdrawn (read-only mode)
@@ -125,7 +155,7 @@ struct TodayView: View {
 
     /// Whether free tier limit hint should show
     private var showFreeTierHint: Bool {
-        habits.count >= 3 && !StoreKitManager.shared.isPremium
+        habits.count >= 5 && !StoreKitManager.shared.isPremium
     }
 
     // MARK: - Banner Priority System (Gap #7)
@@ -155,7 +185,7 @@ struct TodayView: View {
     /// Recomputes which banners should be visible based on priority + deferral.
     private func recomputeVisibleBanners() {
         var qualifying: [BannerType] = []
-        if recoverableHabit != nil { qualifying.append(.streakRecovery) }
+        if cachedRecoverableHabit != nil { qualifying.append(.streakRecovery) }
         if MotivationService.shared.activeCard != nil { qualifying.append(.motivationCard) }
         if showDateNavNudge { qualifying.append(.dateNavNudge) }
         if showFreeTierHint { qualifying.append(.freeTierHint) }
@@ -212,6 +242,40 @@ struct TodayView: View {
     }
 
     // MARK: - Extracted Sub-views (breaks up body for type checker)
+
+    /// Command theme greeting: "CMDR [NAME] // 2026.03.24 // SOL [day count]"
+    @ViewBuilder
+    private var commandGreeting: some View {
+        let name = UserDefaults.standard.string(forKey: "userName") ?? "PILOT"
+        let displayName = name.isEmpty ? "PILOT" : name.uppercased()
+        let dateFormatter: DateFormatter = {
+            let f = DateFormatter()
+            f.dateFormat = "yyyy.MM.dd"
+            return f
+        }()
+        let dateString = dateFormatter.string(from: viewModel.selectedDate)
+
+        // SOL count: days since first habit's createdAt, or since app install
+        let solCount: Int = {
+            if let firstHabit = habits.min(by: { $0.createdAt < $1.createdAt }) {
+                return max(1, Calendar.current.dateComponents([.day], from: firstHabit.createdAt, to: Date()).day ?? 1)
+            }
+            return 1
+        }()
+
+        let monthFormatter: DateFormatter = {
+            let f = DateFormatter()
+            f.dateFormat = "MMM d"
+            return f
+        }()
+        let friendlyDate = monthFormatter.string(from: viewModel.selectedDate).uppercased()
+
+        Text("\(displayName) // \(friendlyDate) // DAY \(solCount)")
+            .font(.system(size: 14, weight: .bold, design: .monospaced))
+            .foregroundStyle(CommandTheme.cyan)
+            .shadow(color: CommandTheme.glowCyan, radius: 12, x: 0, y: 0)
+            .tracking(1)
+    }
 
     @ViewBuilder
     private var moodCheckInSection: some View {
@@ -293,29 +357,49 @@ struct TodayView: View {
             }
             .padding(.vertical, DailyArcSpacing.xxxl)
         } else {
-            // Habits header with arc progress + Manage link
-            HStack {
-                Text("Habits")
-                    .typography(.titleSmall)
-                    .foregroundStyle(DailyArcTokens.textPrimary)
+            // Hero progress indicator (theme-forked)
+            if totalProgress.total > 0 {
+                let progress = Double(totalProgress.completed) / Double(totalProgress.total)
+                let habitRingData: [(color: Color, progress: Double)] = visibleHabits.prefix(3).map { habit in
+                    let count = Double(viewModel.completionCount(for: habit))
+                    let target = Double(max(habit.targetCount, 1))
+                    return (color: habit.color(for: colorScheme), progress: min(count / target, 1.0))
+                }
+                ThemedProgressRing(progress: progress, size: 120, theme: theme, habitProgresses: habitRingData)
+                    .padding(.bottom, DailyArcSpacing.sm)
+            }
 
-                CompletionCircleView(
-                    count: totalProgress.completed,
-                    targetCount: totalProgress.total,
-                    size: 28,
-                    lineWidth: 3,
-                    color: DailyArcTokens.accent,
-                    useGradient: true
-                )
+            // Habits section header (theme-forked)
+            HStack {
+                if theme.id == "command" {
+                    Text(missionBriefingHeader)
+                        .font(.system(.caption, design: .monospaced).weight(.semibold))
+                        .foregroundStyle(CommandTheme.cyan)
+                        .tracking(1.5)
+                } else {
+                    Text("Habits")
+                        .typography(.titleSmall)
+                        .foregroundStyle(theme.textPrimary)
+
+                    CompletionCircleView(
+                        count: totalProgress.completed,
+                        targetCount: totalProgress.total,
+                        size: 28,
+                        lineWidth: 3,
+                        color: DailyArcTokens.accent,
+                        useGradient: true
+                    )
+                }
 
                 Spacer()
 
                 NavigationLink {
                     HabitManagementView()
                 } label: {
-                    Text("Manage")
+                    Text(theme.id == "command" ? "MANAGE" : "Manage")
                         .typography(.caption)
-                        .foregroundStyle(DailyArcTokens.accent)
+                        .font(theme.id == "command" ? .system(.caption, design: .monospaced) : nil)
+                        .foregroundStyle(theme.id == "command" ? CommandTheme.cyan : DailyArcTokens.accent)
                 }
             }
             .padding(.horizontal, DailyArcSpacing.lg)
@@ -335,10 +419,11 @@ struct TodayView: View {
     }
 
     private var habitListCard: some View {
-        LazyVStack(spacing: 0) {
+        LazyVStack(spacing: theme.id == "command" ? 0 : DailyArcSpacing.md) {
             ForEach(Array(visibleHabits.enumerated()), id: \.element.id) { index, habit in
-                if index > 0 {
-                    Divider().padding(.horizontal, DailyArcSpacing.lg)
+                if index > 0 && theme.id == "command" {
+                    ThemedDivider(theme: theme)
+                        .padding(.horizontal, DailyArcSpacing.lg)
                 }
                 HabitRowView(
                     habit: habit,
@@ -428,16 +513,42 @@ struct TodayView: View {
                         Spacer(minLength: DailyArcSpacing.xxxl)
                     }
                 }
-                .background(DailyArcTokens.backgroundPrimary)
+                .background(theme.backgroundPrimary.ignoresSafeArea())
             } else if isLoading {
                 // Gap #6: Skeleton loading
                 TodaySkeletonView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                    .background(DailyArcTokens.backgroundPrimary)
+                    .background(theme.backgroundPrimary.ignoresSafeArea())
             } else {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(spacing: DailyArcSpacing.xl) {
+                        // Custom themed header (replaces hidden navigation bar)
+                        HStack {
+                            if theme.id == "command" {
+                                Text("> TODAY")
+                                    .font(.system(size: 22, weight: .semibold, design: .monospaced))
+                                    .foregroundStyle(CommandTheme.cyan)
+                                    .shadow(color: CommandTheme.glowCyan, radius: 6, x: 0, y: 0)
+                            } else {
+                                Text("Today")
+                                    .font(.system(size: 28, weight: .semibold))
+                                    .foregroundStyle(theme.textPrimary)
+                            }
+                            Spacer()
+                            Button {
+                                showAddHabitSheet = true
+                            } label: {
+                                Image(systemName: "plus")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundStyle(theme.id == "command" ? CommandTheme.cyan : DailyArcTokens.accent)
+                            }
+                            .accessibilityLabel("Add new habit")
+                            .disabled(isConsentWithdrawn)
+                        }
+                        .padding(.horizontal, DailyArcSpacing.lg)
+                        .padding(.top, DailyArcSpacing.sm)
+
                         // Consent withdrawn banner (always shown, not part of priority system)
                         if isConsentWithdrawn {
                             HStack {
@@ -454,13 +565,20 @@ struct TodayView: View {
                             .padding(.horizontal, DailyArcSpacing.lg)
                         }
 
-                        // Greeting
-                        Text(viewModel.greetingText(habits: habits))
-                            .typography(.titleLarge)
-                            .foregroundStyle(DailyArcTokens.textPrimary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, DailyArcSpacing.lg)
-                            .padding(.top, DailyArcSpacing.sm)
+                        // Greeting (theme-forked)
+                        if theme.id == "command" {
+                            commandGreeting
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, DailyArcSpacing.lg)
+                                .padding(.top, DailyArcSpacing.sm)
+                        } else {
+                            Text(viewModel.greetingText(habits: habits))
+                                .typography(.titleLarge)
+                                .foregroundStyle(theme.textPrimary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, DailyArcSpacing.lg)
+                                .padding(.top, DailyArcSpacing.sm)
+                        }
 
                         // A6: "Your Week" mini-summary (shown on Mondays, once per week)
                         if showWeekSummary, let summary = weekSummary {
@@ -541,7 +659,7 @@ struct TodayView: View {
                         }
 
                         // Streak Recovery Banner (priority-managed)
-                        if isBannerVisible(.streakRecovery), let recovery = recoverableHabit {
+                        if isBannerVisible(.streakRecovery), let recovery = cachedRecoverableHabit {
                             Button {
                                 streakEngine.applyRecovery(
                                     for: recovery.habit,
@@ -590,10 +708,38 @@ struct TodayView: View {
                             .accessibilityLabel("Streak recovery available")
                         }
 
+                        // Weekly Momentum Report (premium, Sundays or > 6 days)
+                        if showWeeklyReport, StoreKitManager.shared.isPremium {
+                            WeeklyReportCard(
+                                habits: habits,
+                                logs: allLogs,
+                                moods: allMoods,
+                                onDismiss: {
+                                    withAnimation(.easeOut(duration: 0.3)) {
+                                        showWeeklyReport = false
+                                    }
+                                    lastWeeklyReportDate = ISO8601DateFormatter().string(from: Date())
+                                }
+                            )
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
+
                         // Mood Check-In Section
                         moodCheckInSection
 
-                        Divider()
+                        // Premium features: Time Machine + Streak Shields + Time Capsule
+                        if StoreKitManager.shared.isPremium {
+                            // Streak Shield status
+                            streakShieldBadge
+
+                            // Time Machine card
+                            TimeMachineCard()
+
+                            // Time Capsule
+                            timeCapsuleSection
+                        }
+
+                        ThemedDivider(theme: theme)
                             .padding(.horizontal, DailyArcSpacing.lg)
 
                         // Habit Section (Gap #9: anchor ID for scroll restoration)
@@ -608,7 +754,15 @@ struct TodayView: View {
                     ))
                 }
                 .scrollDismissesKeyboard(.interactively)
-                .background(DailyArcTokens.backgroundPrimary)
+                .background(theme.backgroundPrimary.ignoresSafeArea())
+                .overlay(alignment: .top) {
+                    // Streak Aurora: premium overlay for 30+ day streaks
+                    if StoreKitManager.shared.isPremium, maxStreakLength >= 30 {
+                        StreakAuroraView(streakLength: maxStreakLength, theme: theme)
+                    }
+                }
+                .themedGridOverlay(theme)
+                .themedScanline(theme)
                 .gesture(
                     DragGesture(minimumDistance: 50)
                         .onEnded { value in
@@ -686,18 +840,8 @@ struct TodayView: View {
                 .animation(.spring(response: 0.3), value: archiveToast != nil)
             }
         }
-        .navigationTitle("Today")
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showAddHabitSheet = true
-                } label: {
-                    Image(systemName: "plus")
-                }
-                .accessibilityLabel("Add new habit")
-                .disabled(isConsentWithdrawn)
-            }
-        }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showAddHabitSheet) {
             HabitFormView(mode: .add)
         }
@@ -779,6 +923,17 @@ struct TodayView: View {
                     }
                 }
             }
+
+            // Weekly Momentum Report: show on Sundays or if > 6 days since last
+            if StoreKitManager.shared.isPremium,
+               WeeklyReportCard.shouldShow(lastReportDateString: lastWeeklyReportDate) {
+                withAnimation(.easeOut(duration: 0.4).delay(0.8)) {
+                    showWeeklyReport = true
+                }
+            }
+
+            // Refresh cached recoverable habit before computing banners
+            refreshRecoverableHabit()
 
             // Gap #7: Compute visible banners based on priority
             recomputeVisibleBanners()
@@ -943,12 +1098,52 @@ struct TodayView: View {
             .padding(DailyArcSpacing.xxl)
             .background(
                 RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusLarge)
-                    .fill(DailyArcTokens.backgroundPrimary)
+                    .fill(theme.backgroundPrimary)
                     .shadow(radius: 20)
             )
             .padding(DailyArcSpacing.xxl)
         }
         .transition(.opacity)
+    }
+
+    // MARK: - Streak Shield Badge
+
+    @ViewBuilder
+    private var streakShieldBadge: some View {
+        let remaining = StreakShieldService.shared.shieldsRemaining
+        HStack(spacing: DailyArcSpacing.sm) {
+            if theme.id == "command" {
+                Image(systemName: "shield.fill")
+                    .font(.caption)
+                    .foregroundStyle(CommandTheme.cyan)
+                Text("> SHIELDS: \(remaining)/\(StreakShieldService.maxShieldsPerMonth)")
+                    .font(.system(.caption2, design: .monospaced))
+                    .foregroundStyle(CommandTheme.cyan.opacity(0.7))
+            } else {
+                Image(systemName: "shield.fill")
+                    .font(.caption)
+                    .foregroundStyle(DailyArcTokens.premiumGold)
+                Text("\(remaining) shield\(remaining == 1 ? "" : "s") remaining this month")
+                    .typography(.caption)
+                    .foregroundStyle(theme.textSecondary)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, DailyArcSpacing.lg)
+        .padding(.vertical, DailyArcSpacing.xs)
+    }
+
+    // MARK: - Time Capsule Section
+
+    @ViewBuilder
+    private var timeCapsuleSection: some View {
+        let totalDays = viewModel.totalDaysLogged(context: context, calendar: calendar)
+        if TimeCapsuleView.shouldShow(totalDaysLogged: totalDays) {
+            TimeCapsuleView(totalDaysLogged: totalDays) {
+                // Dismiss — store that user declined for this session
+                UserDefaults.standard.set(true, forKey: "timeCapsuleDismissedThisSession")
+            }
+        }
     }
 }
 

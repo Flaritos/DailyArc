@@ -10,12 +10,13 @@ struct HeatMapCanvasView: View {
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
+    @Environment(\.theme) private var theme
 
     /// Drives the pulse animation for today's cell — oscillates opacity.
     @State private var todayPulse: Bool = false
 
     private let cellSize: CGFloat = 12
-    private let cellGap: CGFloat = 3
+    private let cellGap: CGFloat = 2
     private let topLabelHeight: CGFloat = 20
 
     private var cellStride: CGFloat { cellSize + cellGap }
@@ -38,13 +39,16 @@ struct HeatMapCanvasView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
             HStack(spacing: DailyArcSpacing.sm) {
-                RoundedRectangle(cornerRadius: 1.5)
-                    .fill(DailyArcTokens.brandGradient)
+                RoundedRectangle(cornerRadius: theme.id == "command" ? 0 : 1.5)
+                    .fill(theme.id == "command" ? AnyShapeStyle(CommandTheme.indigo.opacity(0.5)) : AnyShapeStyle(theme.brandGradient))
                     .frame(width: 3, height: 20)
 
-                Text("Your Arc This Year")
+                Text(theme.id == "command" ? "> YOUR YEAR" : "Your Arc This Year")
                     .typography(.titleSmall)
-                    .foregroundStyle(DailyArcTokens.textPrimary)
+                    .font(theme.id == "command" ? .system(.subheadline, design: .monospaced).weight(.semibold) : nil)
+                    .foregroundStyle(theme.id == "command" ? CommandTheme.cyan : theme.textPrimary)
+                    .shadow(color: theme.id == "command" ? CommandTheme.glowCyan : .clear, radius: theme.id == "command" ? 8 : 0, x: 0, y: 0)
+                    .tracking(theme.id == "command" ? 0.5 : 0)
             }
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -117,7 +121,7 @@ struct HeatMapCanvasView: View {
             let y = topLabelHeight + CGFloat(row) * cellStride
             let rect = CGRect(x: x, y: y, width: cellSize, height: cellSize)
             let color = cellColor(for: snapshot)
-            let path = RoundedRectangle(cornerRadius: 2).path(in: rect)
+            let path = RoundedRectangle(cornerRadius: 1).path(in: rect)
 
             // Apply pulse opacity to today's cell via color opacity
             let isToday = calendar.startOfDay(for: snapshot.date) == today
@@ -125,6 +129,22 @@ struct HeatMapCanvasView: View {
                 context.fill(path, with: .color(color.opacity(todayOpacity)))
             } else {
                 context.fill(path, with: .color(color))
+            }
+
+            // Command theme: glow on l3 (51-75%) and l4 (76-100%) cells
+            if theme.id == "command" && snapshot.totalHabits > 0 {
+                let pct = snapshot.completionPercentage
+                if pct > 0.75 {
+                    // l4: 5px glow
+                    let glowRect = rect.insetBy(dx: -5, dy: -5)
+                    let glowPath = RoundedRectangle(cornerRadius: 3).path(in: glowRect)
+                    context.fill(glowPath, with: .color(Color(hex: "#6366F1")!.opacity(0.2)))
+                } else if pct > 0.50 {
+                    // l3: 3px glow
+                    let glowRect = rect.insetBy(dx: -3, dy: -3)
+                    let glowPath = RoundedRectangle(cornerRadius: 2).path(in: glowRect)
+                    context.fill(glowPath, with: .color(Color(hex: "#6366F1")!.opacity(0.15)))
+                }
             }
 
             // Colorblind patterns when differentiateWithoutColor is enabled
@@ -179,19 +199,27 @@ struct HeatMapCanvasView: View {
 
     private func cellColor(for snapshot: DaySnapshot) -> Color {
         if snapshot.totalHabits == 0 {
-            return Color(.systemGray6)
+            return theme.id == "command" ? Color(hex: "#111122")! : Color(hex: "#D1D5DB")!.opacity(0.4)
         }
         let pct = snapshot.completionPercentage
         if pct <= 0 {
-            return Color(.systemGray5)
+            return theme.id == "command" ? Color(hex: "#111122")!.opacity(0.7) : Color(hex: "#C4CCD6")!.opacity(0.5)
         }
-        if colorScheme == .dark {
+
+        if theme.id == "command" {
+            // Command: 4-level cyan/indigo scale matching spec
             if pct <= 0.25 {
-                return Color(hex: "#2A5F8A") ?? .blue
+                // l1: cyan at 15%
+                return Color(hex: "#22D3EE")!.opacity(0.15)
+            } else if pct <= 0.50 {
+                // l2: cyan at 30%
+                return Color(hex: "#22D3EE")!.opacity(0.3)
             } else if pct <= 0.75 {
-                return Color(hex: "#3D7AB8") ?? .blue
+                // l3: indigo at 50%
+                return Color(hex: "#6366F1")!.opacity(0.5)
             } else {
-                return Color(hex: "#7B9FE0") ?? .blue
+                // l4: indigo at 80%
+                return Color(hex: "#6366F1")!.opacity(0.8)
             }
         } else {
             if pct <= 0.25 {
@@ -216,23 +244,27 @@ struct HeatMapCanvasView: View {
         return HStack(spacing: DailyArcSpacing.md) {
             Text(dateFormatter.string(from: snapshot.date))
                 .typography(.caption)
-                .foregroundStyle(DailyArcTokens.textPrimary)
+                .font(theme.id == "command" ? .system(.caption, design: .monospaced) : nil)
+                .foregroundStyle(theme.textPrimary)
 
             Spacer()
 
             if snapshot.totalHabits > 0 {
                 Text("\(Int(snapshot.completionPercentage * 100))%")
                     .typography(.caption)
+                    .font(theme.id == "command" ? .system(.caption, design: .monospaced).weight(.bold) : nil)
                     .fontWeight(.semibold)
-                    .foregroundStyle(DailyArcTokens.accent)
+                    .foregroundStyle(theme.id == "command" ? CommandTheme.cyan : DailyArcTokens.accent)
 
                 Text("\(snapshot.completedHabits)/\(snapshot.totalHabits)")
                     .typography(.caption)
-                    .foregroundStyle(DailyArcTokens.textSecondary)
+                    .font(theme.id == "command" ? .system(.caption, design: .monospaced) : nil)
+                    .foregroundStyle(theme.textSecondary)
             } else {
                 Text("No data")
                     .typography(.caption)
-                    .foregroundStyle(DailyArcTokens.textTertiary)
+                    .font(theme.id == "command" ? .system(.caption, design: .monospaced) : nil)
+                    .foregroundStyle(theme.textTertiary)
             }
 
             if snapshot.moodScore > 0 {
@@ -243,8 +275,22 @@ struct HeatMapCanvasView: View {
         }
         .padding(.horizontal, DailyArcSpacing.md)
         .padding(.vertical, DailyArcSpacing.sm)
-        .background(DailyArcTokens.backgroundSecondary)
-        .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusSmall))
+        .background(
+            Group {
+                if theme.id == "command" {
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(CommandTheme.panel)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 2)
+                                .stroke(Color(hex: "#6366F1")!.opacity(0.12), lineWidth: 1)
+                        )
+                } else {
+                    RoundedRectangle(cornerRadius: theme.cornerRadiusSmall)
+                        .fill(theme.backgroundSecondary)
+                }
+            }
+        )
+        .clipShape(RoundedRectangle(cornerRadius: theme.cornerRadiusSmall))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Selected date: \(dateFormatter.string(from: snapshot.date)), \(Int(snapshot.completionPercentage * 100)) percent complete")
     }

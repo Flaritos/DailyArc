@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DailyArc - Every day adds to your arc</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+            background: #FAFAF8;
+            color: #334155;
+            text-align: center;
+            padding: 80px 24px;
+        }
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 24px;
+        }
+        .logo svg { width: 100%; height: 100%; }
+        h1 { font-size: 36px; font-weight: 700; color: #1A1A2E; margin-bottom: 8px; }
+        .tagline { font-size: 18px; color: #64748B; margin-bottom: 48px; }
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 32px;
+            max-width: 600px;
+            margin: 0 auto 48px;
+        }
+        .feature {
+            flex: 1 1 160px;
+            max-width: 200px;
+        }
+        .feature-icon { font-size: 32px; margin-bottom: 8px; }
+        .feature-title { font-size: 16px; font-weight: 600; color: #1A1A2E; margin-bottom: 4px; }
+        .feature-desc { font-size: 13px; color: #64748B; line-height: 1.5; }
+        .cta {
+            display: inline-block;
+            background: linear-gradient(135deg, #2563EB, #5F27CD);
+            color: white;
+            padding: 14px 36px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            margin-bottom: 16px;
+        }
+        .cta:hover { opacity: 0.9; }
+        .links { margin-top: 48px; }
+        .links a { color: #2563EB; text-decoration: none; font-size: 14px; margin: 0 16px; }
+        .links a:hover { text-decoration: underline; }
+        .footer { margin-top: 64px; color: #94A3B8; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="logo">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#2563EB"/>
+                    <stop offset="100%" style="stop-color:#5F27CD"/>
+                </linearGradient>
+            </defs>
+            <circle cx="100" cy="100" r="70" fill="none" stroke="url(#arcGrad)" stroke-width="14" stroke-linecap="round"
+                stroke-dasharray="330" stroke-dashoffset="110" transform="rotate(-90 100 100)"/>
+            <circle cx="149" cy="51" r="13" fill="#5F27CD"/>
+        </svg>
+    </div>
+
+    <h1>DailyArc</h1>
+    <p class="tagline">Every day adds to your arc.</p>
+
+    <div class="features">
+        <div class="feature">
+            <div class="feature-icon">&#x1F3AF;</div>
+            <div class="feature-title">Track Habits</div>
+            <div class="feature-desc">Build routines that matter to you</div>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">&#x1F4CA;</div>
+            <div class="feature-title">Mood Insights</div>
+            <div class="feature-desc">See how your habits shape how you feel</div>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">&#x1F512;</div>
+            <div class="feature-title">Private by Design</div>
+            <div class="feature-desc">All data stays on your device. Always.</div>
+        </div>
+    </div>
+
+    <a class="cta" href="#">Download on the App Store</a>
+
+    <div class="links">
+        <a href="privacy.html">Privacy Policy</a>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2026 DailyArc. All rights reserved.</p>
+    </div>
+</body>
+</html>

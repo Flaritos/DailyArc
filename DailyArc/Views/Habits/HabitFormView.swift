@@ -21,6 +21,7 @@ struct HabitFormView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.theme) private var theme
     @Query(filter: #Predicate<Habit> { !$0.isArchived }) private var activeHabits: [Habit]
     @State private var showPaywall = false
 
@@ -91,19 +92,100 @@ struct HabitFormView: View {
         return nameMatch || emojiMatch
     }
 
-    /// Whether the free tier limit is hit (3 active habits, adding a new one, not premium).
-    private var shouldShowPaywall: Bool {
+    /// Whether the free tier limit is hit (5 active habits, adding a new one, not premium).
+    private var isAtFreeLimit: Bool {
         if case .add = mode {
-            return activeHabits.count >= 3 && !StoreKitManager.shared.isPremium
+            return activeHabits.count >= 5 && !StoreKitManager.shared.isPremium
         }
         return false
     }
 
     var body: some View {
-        if shouldShowPaywall && !showPaywall {
-            PaywallView()
+        if isAtFreeLimit {
+            habitLimitView
+                .sheet(isPresented: $showPaywall) {
+                    PaywallView()
+                }
         } else {
             formContent
+        }
+    }
+
+    // MARK: - Habit Limit Reached
+
+    private var habitLimitView: some View {
+        NavigationStack {
+            VStack(spacing: DailyArcSpacing.xl) {
+                Spacer(minLength: DailyArcSpacing.lg)
+
+                Image(systemName: "tray.full")
+                    .font(.system(size: 48))
+                    .foregroundStyle(DailyArcTokens.textTertiary)
+
+                Text("You're using all your free habits")
+                    .font(.system(size: 22, weight: .bold))
+                    .multilineTextAlignment(.center)
+
+                // Show current habits
+                VStack(spacing: DailyArcSpacing.sm) {
+                    ForEach(activeHabits) { habit in
+                        HStack(spacing: DailyArcSpacing.sm) {
+                            Text(habit.emoji)
+                                .font(.title3)
+                            Text(habit.name)
+                                .typography(.bodyLarge)
+                                .foregroundStyle(DailyArcTokens.textPrimary)
+                            Spacer()
+                        }
+                        .padding(.horizontal, DailyArcSpacing.md)
+                        .padding(.vertical, DailyArcSpacing.sm)
+                        .background(DailyArcTokens.backgroundSecondary)
+                        .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusSmall))
+                    }
+                }
+                .padding(.horizontal, DailyArcSpacing.lg)
+
+                Spacer()
+
+                // Archive option
+                NavigationLink {
+                    HabitManagementView()
+                } label: {
+                    Text("Archive a habit to make room")
+                        .typography(.bodyLarge)
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                        .background(DailyArcTokens.accent)
+                        .foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
+                }
+                .padding(.horizontal, DailyArcSpacing.lg)
+
+                // Upgrade option
+                Button {
+                    showPaywall = true
+                } label: {
+                    Text("Upgrade to unlock unlimited")
+                        .typography(.bodyLarge)
+                        .foregroundStyle(DailyArcTokens.accent)
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                        .background(
+                            RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium)
+                                .stroke(DailyArcTokens.accent, lineWidth: 1.5)
+                        )
+                }
+                .padding(.horizontal, DailyArcSpacing.lg)
+
+                Spacer(minLength: DailyArcSpacing.xxl)
+            }
+            .background(DailyArcTokens.backgroundPrimary)
+            .navigationTitle("New Habit")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
         }
     }
 
@@ -154,9 +236,10 @@ struct HabitFormView: View {
                 // Template Quick-Start (Add mode only)
                 if !isEditing {
                     VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
-                        Text("Start from a template")
+                        Text(theme.uppercaseHeaders ? "\(theme.headerPrefix)START FROM A TEMPLATE" : "Start from a template")
                             .typography(.callout)
-                            .foregroundStyle(DailyArcTokens.textSecondary)
+                            .fontDesign(theme.displayFontDesign)
+                            .foregroundStyle(theme.textSecondary)
 
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: DailyArcSpacing.sm) {
@@ -174,16 +257,16 @@ struct HabitFormView: View {
                                                 .font(.system(size: 28))
                                             Text(template.name)
                                                 .font(.caption)
-                                                .foregroundStyle(DailyArcTokens.textPrimary)
+                                                .foregroundStyle(theme.textPrimary)
                                                 .lineLimit(1)
                                         }
                                         .frame(width: 80, height: 80)
                                         .background(
                                             isSelected
                                                 ? DailyArcTokens.accent.opacity(DailyArcTokens.opacityLight)
-                                                : DailyArcTokens.backgroundSecondary
+                                                : theme.backgroundSecondary
                                         )
-                                        .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusSmall))
+                                        .clipShape(RoundedRectangle(cornerRadius: theme.cornerRadiusSmall))
                                         .overlay(
                                             RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusSmall)
                                                 .stroke(isSelected ? DailyArcTokens.accent : .clear, lineWidth: 2)
@@ -199,16 +282,17 @@ struct HabitFormView: View {
                         VStack { Divider() }
                         Text("or create custom")
                             .font(.caption)
-                            .foregroundStyle(DailyArcTokens.textTertiary)
+                            .foregroundStyle(theme.textTertiary)
                         VStack { Divider() }
                     }
                 }
 
                 // Emoji Picker
                 VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
-                    Text("Emoji")
+                    Text(theme.uppercaseHeaders ? "\(theme.headerPrefix)EMOJI" : "Emoji")
                         .typography(.callout)
-                        .foregroundStyle(DailyArcTokens.textSecondary)
+                        .fontDesign(theme.displayFontDesign)
+                        .foregroundStyle(theme.textSecondary)
 
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: DailyArcSpacing.xs), count: 8), spacing: DailyArcSpacing.sm) {
                         ForEach(commonEmojis, id: \.self) { emojiOption in
@@ -237,9 +321,10 @@ struct HabitFormView: View {
 
                 // Color Picker
                 VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
-                    Text("Color")
+                    Text(theme.uppercaseHeaders ? "\(theme.headerPrefix)COLOR" : "Color")
                         .typography(.callout)
-                        .foregroundStyle(DailyArcTokens.textSecondary)
+                        .fontDesign(theme.displayFontDesign)
+                        .foregroundStyle(theme.textSecondary)
 
                     HStack(spacing: DailyArcSpacing.sm) {
                         ForEach(0..<HabitColorPalette.colors.count, id: \.self) { index in
@@ -269,9 +354,10 @@ struct HabitFormView: View {
 
                 // Name TextField
                 VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
-                    Text("Name")
+                    Text(theme.uppercaseHeaders ? "\(theme.headerPrefix)NAME" : "Name")
                         .typography(.callout)
-                        .foregroundStyle(DailyArcTokens.textSecondary)
+                        .fontDesign(theme.displayFontDesign)
+                        .foregroundStyle(theme.textSecondary)
 
                     TextField("e.g., Exercise", text: $name)
                         .focused($nameFieldFocused)
@@ -282,9 +368,10 @@ struct HabitFormView: View {
 
                 // Frequency
                 VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
-                    Text("Frequency")
+                    Text(theme.uppercaseHeaders ? "\(theme.headerPrefix)FREQUENCY" : "Frequency")
                         .typography(.callout)
-                        .foregroundStyle(DailyArcTokens.textSecondary)
+                        .fontDesign(theme.displayFontDesign)
+                        .foregroundStyle(theme.textSecondary)
 
                     Picker("Frequency", selection: $frequencyRaw) {
                         Text("Daily").tag(0)
@@ -311,10 +398,10 @@ struct HabitFormView: View {
                                         .background(
                                             customDays.contains(index)
                                                 ? DailyArcTokens.accent
-                                                : DailyArcTokens.backgroundSecondary
+                                                : theme.backgroundSecondary
                                         )
                                         .foregroundStyle(
-                                            customDays.contains(index) ? .white : DailyArcTokens.textPrimary
+                                            customDays.contains(index) ? .white : theme.textPrimary
                                         )
                                         .clipShape(Circle())
                                 }
@@ -330,16 +417,17 @@ struct HabitFormView: View {
                                 .map { dayNames[$0 - 1] }
                             Text("Selected: \(selectedNames.joined(separator: ", "))")
                                 .typography(.caption)
-                                .foregroundStyle(DailyArcTokens.textSecondary)
+                                .foregroundStyle(theme.textSecondary)
                         }
                     }
                 }
 
                 // Target Count
                 VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
-                    Text("Times per day")
+                    Text(theme.uppercaseHeaders ? "\(theme.headerPrefix)TIMES PER DAY" : "Times per day")
                         .typography(.callout)
-                        .foregroundStyle(DailyArcTokens.textSecondary)
+                        .fontDesign(theme.displayFontDesign)
+                        .foregroundStyle(theme.textSecondary)
 
                     Stepper("\(targetCount)", value: $targetCount, in: 1...10)
                         .typography(.bodyLarge)
@@ -364,7 +452,7 @@ struct HabitFormView: View {
             .padding(.vertical, DailyArcSpacing.xl)
         }
         .scrollDismissesKeyboard(.interactively)
-        .background(DailyArcTokens.backgroundPrimary)
+        .background(theme.backgroundPrimary)
     }
 
     // MARK: - Step 2: Reminders & Save
@@ -379,10 +467,11 @@ struct HabitFormView: View {
                     VStack(alignment: .leading, spacing: DailyArcSpacing.xxs) {
                         Text(name)
                             .typography(.titleSmall)
-                            .foregroundStyle(DailyArcTokens.textPrimary)
+                            .fontDesign(theme.displayFontDesign)
+                            .foregroundStyle(theme.textPrimary)
                         Text(frequencyLabel)
                             .typography(.caption)
-                            .foregroundStyle(DailyArcTokens.textSecondary)
+                            .foregroundStyle(theme.textSecondary)
                     }
                     Spacer()
                     let entry = HabitColorPalette.colors[safe: colorIndex] ?? HabitColorPalette.colors[5]
@@ -391,8 +480,8 @@ struct HabitFormView: View {
                         .frame(width: 24, height: 24)
                 }
                 .padding(DailyArcSpacing.lg)
-                .background(DailyArcTokens.backgroundSecondary)
-                .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusLarge))
+                .background(theme.backgroundSecondary)
+                .clipShape(RoundedRectangle(cornerRadius: theme.cornerRadiusLarge))
 
                 // Reminder
                 VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
@@ -409,15 +498,16 @@ struct HabitFormView: View {
                     }
                 }
                 .padding(DailyArcSpacing.lg)
-                .background(DailyArcTokens.backgroundSecondary)
-                .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusLarge))
+                .background(theme.backgroundSecondary)
+                .clipShape(RoundedRectangle(cornerRadius: theme.cornerRadiusLarge))
 
                 // Health Integration (only for health-related habits)
                 if canAutoLog {
                     VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
-                        Text("Health Integration")
+                        Text(theme.uppercaseHeaders ? "\(theme.headerPrefix)HEALTH INTEGRATION" : "Health Integration")
                             .typography(.callout)
-                            .foregroundStyle(DailyArcTokens.textSecondary)
+                            .fontDesign(theme.displayFontDesign)
+                            .foregroundStyle(theme.textSecondary)
 
                         Toggle("Auto-log from Apple Health", isOn: $autoLogHealth)
                             .typography(.bodyLarge)
@@ -457,7 +547,7 @@ struct HabitFormView: View {
             .padding(.horizontal, DailyArcSpacing.lg)
             .padding(.vertical, DailyArcSpacing.xl)
         }
-        .background(DailyArcTokens.backgroundPrimary)
+        .background(theme.backgroundPrimary)
     }
 
     // MARK: - Helpers

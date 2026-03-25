@@ -3,81 +3,108 @@ import StoreKit
 
 /// Premium purchase sheet.
 /// Shows feature benefits, localized price from StoreKit, purchase & restore actions.
+/// Deep theme fork: Tactile uses neumorphic cards, Command uses dark panels with terminal aesthetics.
 struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.theme) private var theme
     @State private var storeKit = StoreKitManager.shared
-    @State private var showDismissToast = false
+    @State private var showCelebration = false
+
+    private var isCommand: Bool { theme.id == "command" }
+
+    private struct FeatureItem: Identifiable {
+        let id = UUID()
+        let tactileText: String
+        let commandText: String
+    }
+
+    private let features: [FeatureItem] = [
+        FeatureItem(tactileText: "Track as many habits as matter to you", commandText: "Unlimited habit protocols"),
+        FeatureItem(tactileText: "See how your habits and mood connect", commandText: "Mood-habit correlation engine"),
+        FeatureItem(tactileText: "Suggestions that learn your rhythm", commandText: "Adaptive suggestion system"),
+        FeatureItem(tactileText: "Trends across weeks and months", commandText: "Extended trend analysis"),
+        FeatureItem(tactileText: "Export everything, anytime, any format", commandText: "Full-spectrum data export"),
+        FeatureItem(tactileText: "Widgets that keep your arc close", commandText: "Home screen system widgets"),
+    ]
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: DailyArcSpacing.xl) {
-                    Spacer(minLength: DailyArcSpacing.lg)
-
-                    // App Icon
-                    Image(systemName: "circle.dotted.and.circle")
-                        .font(.system(size: 80))
-                        .foregroundStyle(DailyArcTokens.accent)
-                        .accessibilityHidden(true)
-
-                    // Title
-                    Text("Unlock Your Full Arc")
-                        .font(.system(size: 28, weight: .bold))
-                        .multilineTextAlignment(.center)
-
-                    // Subtitle
-                    Text("One payment. Yours forever.")
-                        .font(.system(size: 16))
-                        .foregroundStyle(DailyArcTokens.textSecondary)
-
-                    // Privacy differentiator
-                    Text("Your insights. Your device. Your price.")
-                        .font(.system(size: 16))
-                        .foregroundStyle(DailyArcTokens.textTertiary)
-
-                    // Feature list
-                    VStack(alignment: .leading, spacing: DailyArcSpacing.md) {
-                        featureRow("Track every habit, not just three")
-                        featureRow("See how your habits shape your mood")
-                        featureRow("Get personalized suggestions that grow with you")
-                        featureRow("Explore your trends over weeks and months")
-                        featureRow("Export everything, anytime")
-                        featureRow("Home screen widgets that keep your arc visible")
-                    }
-                    .padding(.horizontal, DailyArcSpacing.lg)
-
-                    // Price
+                    // Price prominently near the top
                     if let product = storeKit.premiumProduct {
-                        VStack(spacing: DailyArcSpacing.xs) {
-                            Text("\(product.displayPrice) one-time")
-                                .font(.system(size: 32, weight: .bold))
-                                .foregroundStyle(DailyArcTokens.accent)
-
-                            // Per-day cost anchoring
-                            let perDay = product.price / 365
-                            Text("That's \(perDay.formatted(.currency(code: product.priceFormatStyle.currencyCode ?? "USD").precision(.fractionLength(0...2)))) a day after your first year.")
-                                .typography(.caption)
-                                .foregroundStyle(DailyArcTokens.textTertiary)
-
-                            Text("No subscriptions. No recurring charges.")
-                                .font(.system(size: 14))
-                                .foregroundStyle(DailyArcTokens.textTertiary)
+                        if isCommand {
+                            commandPriceDisplay(product: product)
+                        } else {
+                            tactilePriceDisplay(product: product)
                         }
                     } else {
                         ProgressView()
                             .padding()
                     }
 
+                    // Title
+                    if isCommand {
+                        Text("> ALL FEATURES")
+                            .font(.system(size: 22, weight: .bold, design: .monospaced))
+                            .foregroundStyle(CommandTheme.cyan)
+                            .tracking(1.5)
+                            .shadow(color: CommandTheme.glowCyan, radius: 8)
+                            .multilineTextAlignment(.center)
+                    } else {
+                        Text("Your Full Arc")
+                            .font(.system(size: 28, weight: .bold))
+                            .multilineTextAlignment(.center)
+                    }
+
+                    // Subtitle
+                    Text(isCommand ? "YOURS FOREVER" : "One payment. Yours forever.")
+                        .font(isCommand ? .system(size: 14, design: .monospaced) : .system(size: 16))
+                        .foregroundStyle(isCommand ? Color.white.opacity(0.5) : DailyArcTokens.textSecondary)
+                        .tracking(isCommand ? 1.0 : 0)
+
+                    // Feature list
+                    if isCommand {
+                        commandFeatureList
+                    } else {
+                        tactileFeatureList
+                    }
+
                     // Purchase Button
                     purchaseButton
+
+                    // Social proof
+                    Text(isCommand ? "> START BUILDING" : "Start building your arc")
+                        .font(isCommand ? .system(size: 11, design: .monospaced) : .system(size: 14))
+                        .foregroundStyle(isCommand ? Color.white.opacity(0.3) : DailyArcTokens.textTertiary)
+                        .tracking(isCommand ? 0.5 : 0)
 
                     // Restore
                     Button {
                         Task { await storeKit.restorePurchases() }
                     } label: {
-                        Text("Restore Purchases")
-                            .typography(.bodySmall)
-                            .foregroundStyle(DailyArcTokens.accent)
+                        if isCommand {
+                            Text("> RESTORE PURCHASE")
+                                .font(.system(size: 13, weight: .medium, design: .monospaced))
+                                .foregroundStyle(CommandTheme.cyan.opacity(0.7))
+                                .padding(.vertical, DailyArcSpacing.sm)
+                                .padding(.horizontal, DailyArcSpacing.lg)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .stroke(CommandTheme.cyan.opacity(0.3), lineWidth: 1)
+                                )
+                        } else {
+                            Text("Restore Previous Purchase")
+                                .typography(.bodySmall)
+                                .fontWeight(.medium)
+                                .foregroundStyle(DailyArcTokens.accent)
+                                .padding(.vertical, DailyArcSpacing.sm)
+                                .padding(.horizontal, DailyArcSpacing.lg)
+                                .background(
+                                    RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium)
+                                        .stroke(DailyArcTokens.accent.opacity(0.3), lineWidth: 1)
+                                )
+                        }
                     }
 
                     // Error
@@ -89,12 +116,9 @@ struct PaywallView: View {
                             .padding(.horizontal, DailyArcSpacing.lg)
                     }
 
-                    // Not Now
+                    // Not Now — dismiss immediately
                     Button {
-                        showDismissToast = true
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                            dismiss()
-                        }
+                        dismiss()
                     } label: {
                         Text("Not now")
                             .typography(.bodySmall)
@@ -104,8 +128,11 @@ struct PaywallView: View {
                     Spacer(minLength: DailyArcSpacing.xxl)
                 }
                 .padding(.horizontal, DailyArcSpacing.lg)
+                .padding(.top, DailyArcSpacing.lg)
             }
-            .background(DailyArcTokens.backgroundPrimary)
+            .background(theme.backgroundPrimary)
+            .themedGridOverlay(theme)
+            .themedScanline(theme)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -117,42 +144,114 @@ struct PaywallView: View {
                     }
                 }
             }
-            .overlay(alignment: .bottom) {
-                if showDismissToast {
-                    Text("No worries — DailyArc is great free too.")
-                        .typography(.bodySmall)
-                        .padding(DailyArcSpacing.md)
-                        .background(DailyArcTokens.backgroundSecondary)
-                        .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
-                        .shadow(color: DailyArcTokens.cardShadow, radius: 8)
-                        .padding(.bottom, DailyArcSpacing.xxl)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                        .animation(.easeInOut, value: showDismissToast)
-                }
-            }
             .onChange(of: storeKit.purchaseState) { _, newValue in
                 if newValue == .success {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                        dismiss()
-                    }
+                    showCelebration = true
+                }
+            }
+            .fullScreenCover(isPresented: $showCelebration) {
+                PurchaseCelebrationView {
+                    showCelebration = false
+                    dismiss()
                 }
             }
         }
     }
 
-    // MARK: - Subviews
+    // MARK: - Tactile Feature List (Neumorphic Cards)
 
-    private func featureRow(_ text: String) -> some View {
-        HStack(alignment: .top, spacing: DailyArcSpacing.sm) {
-            Image(systemName: "checkmark")
-                .font(.body.bold())
-                .foregroundStyle(DailyArcTokens.success)
-                .frame(width: 24)
-            Text(text)
-                .typography(.bodyLarge)
-                .foregroundStyle(DailyArcTokens.textPrimary)
+    private var tactileFeatureList: some View {
+        VStack(spacing: DailyArcSpacing.sm) {
+            ForEach(features) { feature in
+                HStack(alignment: .top, spacing: DailyArcSpacing.sm) {
+                    Image(systemName: "checkmark")
+                        .font(.body.bold())
+                        .foregroundStyle(DailyArcTokens.success)
+                        .frame(width: 24)
+                    Text(feature.tactileText)
+                        .typography(.bodyLarge)
+                        .foregroundStyle(DailyArcTokens.textPrimary)
+                    Spacer()
+                }
+                .padding(DailyArcSpacing.md)
+                .background(Color(hex: "#E8ECF1")!)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .shadow(color: Color.white.opacity(0.8), radius: 6, x: -3, y: -3)
+                .shadow(color: Color(hex: "#A3B1C6")!.opacity(0.5), radius: 6, x: 3, y: 3)
+            }
+        }
+        .padding(.horizontal, DailyArcSpacing.sm)
+    }
+
+    // MARK: - Command Feature List (Terminal Style)
+
+    private var commandFeatureList: some View {
+        VStack(alignment: .leading, spacing: DailyArcSpacing.xs) {
+            ForEach(features) { feature in
+                HStack(alignment: .top, spacing: DailyArcSpacing.sm) {
+                    Text("[READY]")
+                        .font(.system(size: 11, weight: .bold, design: .monospaced))
+                        .foregroundStyle(CommandTheme.cyan)
+                        .frame(width: 72, alignment: .leading)
+                    Text(feature.commandText)
+                        .font(.system(size: 13, design: .monospaced))
+                        .foregroundStyle(Color.white.opacity(0.7))
+                }
+            }
+        }
+        .padding(DailyArcSpacing.md)
+        .background(CommandTheme.panel)
+        .clipShape(RoundedRectangle(cornerRadius: 4))
+        .overlay(
+            RoundedRectangle(cornerRadius: 4)
+                .stroke(CommandTheme.cyan.opacity(0.15), lineWidth: 1)
+        )
+        .overlay(alignment: .leading) {
+            Rectangle()
+                .fill(CommandTheme.cyan.opacity(0.5))
+                .frame(width: 3)
+        }
+        .padding(.horizontal, DailyArcSpacing.sm)
+    }
+
+    // MARK: - Tactile Price Display
+
+    private func tactilePriceDisplay(product: Product) -> some View {
+        VStack(spacing: DailyArcSpacing.xs) {
+            Text("\(product.displayPrice) one-time")
+                .font(.system(size: 32, weight: .bold))
+                .foregroundStyle(DailyArcTokens.accent)
+
+            Text("No subscriptions. No recurring charges.")
+                .font(.system(size: 14))
+                .foregroundStyle(DailyArcTokens.textTertiary)
         }
     }
+
+    // MARK: - Command Price Display (Monospace Terminal)
+
+    private func commandPriceDisplay(product: Product) -> some View {
+        VStack(spacing: DailyArcSpacing.xs) {
+            Text(product.displayPrice)
+                .font(.system(size: 36, weight: .bold, design: .monospaced))
+                .foregroundStyle(CommandTheme.cyan)
+                .shadow(color: CommandTheme.glowCyan, radius: 12)
+
+            Text("YOURS FOREVER")
+                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                .foregroundStyle(Color.white.opacity(0.4))
+                .tracking(1.5)
+        }
+        .padding(DailyArcSpacing.md)
+        .background(CommandTheme.panel)
+        .clipShape(RoundedRectangle(cornerRadius: 4))
+        .overlay(
+            RoundedRectangle(cornerRadius: 4)
+                .stroke(CommandTheme.cyan.opacity(0.2), lineWidth: 1)
+        )
+    }
+
+    // MARK: - Purchase Button
 
     @ViewBuilder
     private var purchaseButton: some View {
@@ -162,23 +261,219 @@ struct PaywallView: View {
             Group {
                 switch storeKit.purchaseState {
                 case .idle, .error:
-                    Text("Unlock Your Arc")
-                        .typography(.bodyLarge)
-                        .fontWeight(.semibold)
+                    if isCommand {
+                        Text("> GET IT")
+                            .font(.system(size: 16, weight: .semibold, design: .monospaced))
+                            .tracking(1.0)
+                    } else {
+                        Text("Continue Your Arc")
+                            .typography(.bodyLarge)
+                            .fontWeight(.semibold)
+                    }
                 case .loading:
                     ProgressView()
                         .tint(.white)
                 case .success:
-                    Image(systemName: "checkmark")
-                        .font(.title2.bold())
+                    if isCommand {
+                        Text("[AUTHORIZED]")
+                            .font(.system(size: 16, weight: .bold, design: .monospaced))
+                    } else {
+                        Image(systemName: "checkmark")
+                            .font(.title2.bold())
+                    }
                 }
             }
             .frame(maxWidth: .infinity, minHeight: 50)
-            .background(DailyArcTokens.accent)
-            .foregroundStyle(.white)
-            .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
+            .background(
+                Group {
+                    if isCommand {
+                        Color.clear
+                    } else {
+                        LinearGradient(
+                            colors: [Color(hex: "#6366F1")!, Color(hex: "#818CF8")!],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    }
+                }
+            )
+            .foregroundStyle(isCommand ? CommandTheme.cyan : .white)
+            .clipShape(RoundedRectangle(cornerRadius: isCommand ? 4 : theme.cornerRadiusMedium))
+            .overlay(
+                Group {
+                    if isCommand {
+                        RoundedRectangle(cornerRadius: 4)
+                            .stroke(CommandTheme.cyan, lineWidth: 1.5)
+                    }
+                }
+            )
+            .shadow(color: isCommand ? CommandTheme.glowCyan : .clear, radius: isCommand ? 15 : 0)
         }
         .disabled(storeKit.purchaseState == .loading || storeKit.purchaseState == .success)
         .padding(.horizontal, DailyArcSpacing.lg)
+    }
+}
+
+// MARK: - Post-Purchase Celebration
+
+/// Full-screen celebration shown after a successful premium purchase.
+/// Tactile: animated logo + confetti + serif heading.
+/// Command: terminal boot sequence with cyan glow.
+struct PurchaseCelebrationView: View {
+    @Environment(\.theme) private var theme
+    @State private var showContent = false
+    @State private var showConfetti = true
+    var onComplete: () -> Void
+
+    private var isCommand: Bool { theme.id == "command" }
+
+    // Command boot lines for staggered animation
+    private let bootLines = [
+        "> AUTHORIZATION CONFIRMED",
+        "> ALL MODULES UNLOCKED",
+        "> SYSTEM EXPANDED",
+    ]
+    @State private var visibleBootLines = 0
+    @State private var cyanPulse = false
+
+    var body: some View {
+        ZStack {
+            // Background
+            theme.backgroundPrimary
+                .ignoresSafeArea()
+
+            if isCommand {
+                commandCelebration
+            } else {
+                tactileCelebration
+            }
+        }
+        .onAppear {
+            HapticManager.habitCompletion()
+            withAnimation(.easeOut(duration: 0.6)) {
+                showContent = true
+            }
+
+            if isCommand {
+                // Stagger boot lines
+                for i in 0..<bootLines.count {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3 * Double(i + 1)) {
+                        withAnimation(.easeOut(duration: 0.3)) {
+                            visibleBootLines = i + 1
+                        }
+                    }
+                }
+                // Start cyan pulse
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
+                        cyanPulse = true
+                    }
+                }
+            }
+
+            // Auto-dismiss after 3 seconds
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                onComplete()
+            }
+        }
+    }
+
+    // MARK: - Tactile Celebration
+
+    private var tactileCelebration: some View {
+        ZStack {
+            // Confetti
+            if showConfetti {
+                CelebrationOverlay(isShowing: $showConfetti)
+                    .allowsHitTesting(false)
+            }
+
+            VStack(spacing: DailyArcSpacing.xl) {
+                Spacer()
+
+                // Animated logo
+                DailyArcLogo(size: 120, animated: true)
+                    .opacity(showContent ? 1 : 0)
+                    .scaleEffect(showContent ? 1 : 0.5)
+
+                Text("Your full arc awaits")
+                    .font(.system(size: 28, weight: .bold, design: .serif))
+                    .foregroundStyle(DailyArcTokens.textPrimary)
+                    .multilineTextAlignment(.center)
+                    .opacity(showContent ? 1 : 0)
+                    .offset(y: showContent ? 0 : 20)
+
+                Spacer()
+
+                // CTA
+                Button {
+                    onComplete()
+                } label: {
+                    Text("Create your next habit")
+                        .typography(.bodyLarge)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                        .background(DailyArcTokens.accent)
+                        .clipShape(RoundedRectangle(cornerRadius: DailyArcTokens.cornerRadiusMedium))
+                }
+                .padding(.horizontal, DailyArcSpacing.xxl)
+                .opacity(showContent ? 1 : 0)
+
+                Spacer()
+                    .frame(height: DailyArcSpacing.xxxl)
+            }
+        }
+    }
+
+    // MARK: - Command Celebration
+
+    private var commandCelebration: some View {
+        VStack(spacing: DailyArcSpacing.lg) {
+            Spacer()
+
+            // Main title with glow
+            Text("[SYSTEM EXPANDED]")
+                .font(.system(size: 24, weight: .bold, design: .monospaced))
+                .foregroundStyle(CommandTheme.cyan)
+                .shadow(color: CommandTheme.glowCyan, radius: cyanPulse ? 20 : 8)
+                .opacity(showContent ? 1 : 0)
+                .tracking(2.0)
+
+            // Boot lines
+            VStack(alignment: .leading, spacing: DailyArcSpacing.sm) {
+                ForEach(0..<bootLines.count, id: \.self) { index in
+                    if index < visibleBootLines {
+                        Text(bootLines[index])
+                            .font(.system(size: 14, design: .monospaced))
+                            .foregroundStyle(CommandTheme.cyan.opacity(0.7))
+                            .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    }
+                }
+            }
+
+            Spacer()
+
+            // Proceed button
+            Button {
+                onComplete()
+            } label: {
+                Text("PROCEED")
+                    .font(.system(size: 16, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(CommandTheme.cyan)
+                    .tracking(1.0)
+                    .frame(maxWidth: .infinity, minHeight: 50)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 4)
+                            .stroke(CommandTheme.cyan, lineWidth: 1.5)
+                    )
+                    .shadow(color: CommandTheme.glowCyan, radius: 10)
+            }
+            .padding(.horizontal, DailyArcSpacing.xxl)
+            .opacity(showContent ? 1 : 0)
+
+            Spacer()
+                .frame(height: DailyArcSpacing.xxxl)
+        }
     }
 }
