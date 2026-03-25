@@ -1,0 +1,31 @@
+# Xcode
+DailyArc/DerivedData/
+*.xcuserdata/
+*.xcworkspace/xcuserdata/
+xcuserdata/
+build/
+DerivedData/
+
+# macOS
+.DS_Store
+*.swp
+*~
+
+# Secrets / credentials
+.env
+.env.*
+*.p8
+*.p12
+*.pem
+*.mobileprovision
+*.cer
+
+# CocoaPods / SPM
+Pods/
+.build/
+
+# Mockup HTML files (development only)
+mockups/*.html
+
+# Claude
+.claude/plans/
